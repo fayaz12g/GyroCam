@@ -11,6 +11,7 @@ struct RecordingButton: View {
     @Binding var isRecording: Bool
     var action: () -> Void
     @State private var animate = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Button(action: {
@@ -20,7 +21,7 @@ struct RecordingButton: View {
             ZStack {
                 // Background circle
                 Circle()
-                    .strokeBorder(Color.white, lineWidth: 5)
+                    .strokeBorder(colorScheme == .dark ? Color.black : Color.white, lineWidth: 5)
                     .background(Circle().fill(isRecording ? Color.clear : Color.red))
                     .frame(width: 70, height: 70)
                     .scaleEffect(animate ? 0.9 : 1)

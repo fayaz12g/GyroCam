@@ -14,20 +14,12 @@ struct ContentView: View {
 //                    }
                 
                 VStack {
+                    // Top Bar
                     HStack {
                         OrientationHeader(currentOrientation: $cameraManager.currentOrientation)
-                        
                         Spacer()
-                        
-                        Text("Clip #\(clipNumber)")
-                            .font(.caption.weight(.bold))
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Capsule())
+                        ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 50)
                     
                     Spacer()
                     

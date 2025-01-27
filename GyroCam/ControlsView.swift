@@ -3,6 +3,7 @@ import SwiftUI
 struct ControlsView: View {
     @ObservedObject var cameraManager: CameraManager
     @State private var showingSettings = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack {
@@ -11,9 +12,9 @@ struct ControlsView: View {
             } label: {
                 Image(systemName: "gear")
                     .font(.system(size: 24))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
                     .padding()
-                    .background(Color.black.opacity(0.5))
+                    .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
                     .clipShape(Circle())
             }
             .sheet(isPresented: $showingSettings) {

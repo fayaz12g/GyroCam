@@ -1,6 +1,7 @@
 import SwiftUI
 
-struct OrientationHeader: View {
+struct ClipNumberBadge: View {
+    let number: Int
     @Binding var currentOrientation: String
     @Environment(\.colorScheme) var colorScheme
     
@@ -28,8 +29,10 @@ struct OrientationHeader: View {
     var body: some View {
         GeometryReader { geometry in
             HStack {
-                Text(currentOrientation)
-                    .font(.title3.weight(.semibold))
+                Spacer()
+                
+                Text("Clip #\(number)")
+                    .font(.caption.weight(.bold))
                     .foregroundColor(colorScheme == .dark ? .white : .black)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
@@ -39,13 +42,11 @@ struct OrientationHeader: View {
                     )
                     .rotationEffect(rotationAngle)
                     .fixedSize()
-                    .frame(width: rotationAngle != .zero ? 100 : nil,
+                    .frame(width: rotationAngle != .zero ? 80 : nil,
                            height: rotationAngle != .zero ? 30 : nil)
-                    .padding(.leading, horizontalPadding)
+                    .padding(.trailing, horizontalPadding)
                     .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
                     .offset(y: verticalOffset)
-                
-                Spacer()
             }
         }
         .animation(.easeInOut(duration: 0.2), value: currentOrientation)
