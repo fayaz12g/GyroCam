@@ -1,11 +1,3 @@
-//
-//  OrientationHelper.swift
-//  GyroCam
-//
-//  Created by Fayaz Shaikh on 1/26/25.
-//
-
-
 import CoreMotion
 import UIKit
 import AVFoundation
@@ -16,8 +8,7 @@ struct OrientationHelper {
         let absX = abs(gravity.x)
         let absY = abs(gravity.y)
         
-        // Only consider orientation changes when tilt exceeds 45 degrees
-        if max(absX, absY) < 0.5 { // ~30 degree threshold
+        if max(absX, absY) < 0.5 {
             return .unknown
         }
         
@@ -44,8 +35,8 @@ extension UIDeviceOrientation {
         switch self {
         case .portrait: return .portrait
         case .portraitUpsideDown: return .portraitUpsideDown
-        case .landscapeLeft: return .landscapeRight // Fix mirroring
-        case .landscapeRight: return .landscapeLeft // Fix mirroring
+        case .landscapeLeft: return .landscapeRight
+        case .landscapeRight: return .landscapeLeft
         default: return .portrait
         }
     }

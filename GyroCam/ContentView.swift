@@ -5,35 +5,39 @@ struct ContentView: View {
     @State private var clipNumber = 1
     
     var body: some View {
-        ZStack {
-            CameraPreview(session: cameraManager.session)
-                .ignoresSafeArea()
-                .onRotate { orientation in
-                    print("📱 System rotation detected: \(orientation)")
-                }
-            
-            VStack {
-                HStack {
-                    OrientationHeader(currentOrientation: $cameraManager.currentOrientation)
+        NavigationView {
+            ZStack {
+                CameraPreview(session: cameraManager.session)
+                    .ignoresSafeArea()
+//                    .onRotate { orientation in
+//                        print("Rotation detected: \(orientation)")
+//                    }
+                
+                VStack {
+                    HStack {
+                        OrientationHeader(currentOrientation: $cameraManager.currentOrientation)
+                        
+                        Spacer()
+                        
+                        Text("Clip #\(clipNumber)")
+                            .font(.caption.weight(.bold))
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Capsule())
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 50)
                     
                     Spacer()
                     
-                    Text("Clip #\(clipNumber)")
-                        .font(.caption.weight(.bold))
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(Color.black.opacity(0.5))
-                        .clipShape(Capsule())
+                    ControlsView(cameraManager: cameraManager)
+                        .padding(.bottom, 50)
                 }
-                .padding(.horizontal)
-                .padding(.top, 50)
-                
-                Spacer()
-                
-                ControlsView(cameraManager: cameraManager)
-                    .padding(.bottom, 50)
             }
+            .navigationBarHidden(true)
         }
+        .navigationViewStyle(.stack)
         .onAppear {
             cameraManager.startOrientationUpdates()
         }
@@ -45,22 +49,5 @@ struct ContentView: View {
         } message: {
             Text(cameraManager.errorMessage)
         }
-    }
-}
-
-struct RotationModifier: ViewModifier {
-    let action: (UIDeviceOrientation) -> Void
-    
-    func body(content: Content) -> some View {
-        content
-            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                action(UIDevice.current.orientation)
-            }
-    }
-}
-
-extension View {
-    func onRotate(perform action: @escaping (UIDeviceOrientation) -> Void) -> some View {
-        self.modifier(RotationModifier(action: action))
     }
 }

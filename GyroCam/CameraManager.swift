@@ -3,6 +3,14 @@ import CoreMotion
 import UIKit
 import Photos
 
+enum FrameRate: Int, CaseIterable, Identifiable {
+    case thirty = 30
+    case sixty = 60
+    
+    var id: Int { rawValue }
+    var description: String { "\(rawValue)fps" }
+}
+
 class CameraManager: NSObject, ObservableObject {
     let session = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
@@ -11,12 +19,16 @@ class CameraManager: NSObject, ObservableObject {
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
     
-    @Published var currentLens: LensType = .wide
-    @Published var currentFormat: VideoFormat = .hdr4K60
-    @Published var isRecording = false
-    @Published var currentOrientation = "Portrait"
-    @Published var errorMessage = ""
-    @Published var currentClipNumber = 1
+    // Main actor isolated properties
+    @MainActor @Published var currentFormat: VideoFormat = .hd4K
+    @MainActor @Published var currentFPS: FrameRate = .thirty
+    @MainActor @Published var cameraPosition: AVCaptureDevice.Position = .back
+    @MainActor @Published var currentLens: LensType = .wide
+    @MainActor @Published var isHDREnabled = false
+    @MainActor @Published var isRecording = false
+    @MainActor @Published var currentOrientation = "Portrait"
+    @MainActor @Published var errorMessage = ""
+    @MainActor @Published var currentClipNumber = 1
     
     // Orientation handling
     private var previousOrientation: UIDeviceOrientation = .portrait
@@ -28,16 +40,17 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     enum VideoFormat: String, CaseIterable {
-        case hdr4K60 = "4K HDR 60fps", hdr4K30 = "4K HDR 30fps", hd1080p60 = "1080p 60fps"
+        case hd4K = "4K"
+        case hd1080p = "1080p"
         
-        var preset: AVCaptureSession.Preset {
+        var resolution: CMVideoDimensions {
             switch self {
-            case .hdr4K60, .hdr4K30: return .hd4K3840x2160
-            case .hd1080p60: return .hd1920x1080
+            case .hd4K: return CMVideoDimensions(width: 3840, height: 2160)
+            case .hd1080p: return CMVideoDimensions(width: 1920, height: 1080)
             }
         }
     }
-    
+
     override init() {
         super.init()
         requestCameraAccess()
@@ -46,7 +59,7 @@ class CameraManager: NSObject, ObservableObject {
     private func requestCameraAccess() {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
             guard granted else {
-                self?.errorMessage = "Camera access denied"
+                self?.setErrorMessage("Camera access denied")
                 return
             }
             
@@ -58,7 +71,12 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    func configureSession() {
+    @MainActor
+    private func setErrorMessage(_ message: String) {
+        errorMessage = message
+    }
+    
+    @MainActor func configureSession() {
         session.beginConfiguration()
         defer {
             session.commitConfiguration()
@@ -70,11 +88,11 @@ class CameraManager: NSObject, ObservableObject {
             try setupOutputs()
             try configureDeviceFormat()
         } catch {
-            errorMessage = "Session error: \(error.localizedDescription)"
+            setErrorMessage("Session error: \(error.localizedDescription)")
         }
     }
     
-    private func setupInputs() throws {
+    @MainActor private func setupInputs() throws {
         session.inputs.forEach { session.removeInput($0) }
         
         guard let device = getCurrentDevice() else {
@@ -103,8 +121,6 @@ class CameraManager: NSObject, ObservableObject {
         if session.canAddOutput(movieOutput) {
             session.addOutput(movieOutput)
         }
-        
-        session.sessionPreset = currentFormat.preset
     }
     
     private func startSession() {
@@ -117,15 +133,21 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func getCurrentDevice() -> AVCaptureDevice? {
+    @MainActor private func getCurrentDevice() -> AVCaptureDevice? {
+        let deviceTypes: [AVCaptureDevice.DeviceType]
+        
         switch currentLens {
-        case .ultraWide: return AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back)
-        case .wide: return AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
-        case .telephoto: return AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: .back)
+        case .ultraWide: deviceTypes = [.builtInUltraWideCamera]
+        case .telephoto: deviceTypes = [.builtInTelephotoCamera]
+        default: deviceTypes = [.builtInWideAngleCamera]
         }
+        
+        return AVCaptureDevice.default(deviceTypes.first!,
+                                     for: .video,
+                                     position: cameraPosition)
     }
     
-    private func configureDeviceFormat() throws {
+    @MainActor private func configureDeviceFormat() throws {
         guard let device = currentDevice else { return }
         
         try device.lockForConfiguration()
@@ -134,32 +156,36 @@ class CameraManager: NSObject, ObservableObject {
         let targetFormat = try findBestFormat(for: device)
         device.activeFormat = targetFormat
         
-        let frameDuration = CMTimeMake(value: 1, timescale: currentFormat == .hdr4K60 ? 60 : 30)
+        let frameDuration = CMTimeMake(value: 1, timescale: Int32(currentFPS.rawValue))
         device.activeVideoMinFrameDuration = frameDuration
         device.activeVideoMaxFrameDuration = frameDuration
     }
     
-    private func findBestFormat(for device: AVCaptureDevice) throws -> AVCaptureDevice.Format {
-        let formats = device.formats
-        guard !formats.isEmpty else {
-            throw NSError(domain: "CameraManager", code: 2, userInfo: [NSLocalizedDescriptionKey: "No valid formats found"])
-        }
+    @MainActor private func findBestFormat(for device: AVCaptureDevice) throws -> AVCaptureDevice.Format {
+        let targetResolution = currentFormat.resolution
+        let targetFPS = currentFPS.rawValue
         
-        switch currentFormat {
-        case .hdr4K60: return formats.first { $0.supportedColorSpaces.contains(.HLG_BT2020) && $0.maxFrameRate >= 60 } ?? device.activeFormat
-        case .hdr4K30: return formats.first { $0.supportedColorSpaces.contains(.HLG_BT2020) && $0.maxFrameRate >= 30 } ?? device.activeFormat
-        case .hd1080p60: return formats.first { $0.maxFrameRate >= 60 } ?? device.activeFormat
-        }
+        return try device.formats
+            .filter { format in
+                let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+                let hasHDR = isHDREnabled ? format.supportedColorSpaces.contains(.HLG_BT2020) : true
+                return dimensions.width == targetResolution.width &&
+                       dimensions.height == targetResolution.height &&
+                       format.maxFrameRate >= Double(targetFPS) &&
+                       hasHDR
+            }
+            .sorted { $0.maxFrameRate > $1.maxFrameRate }
+            .first ?? device.activeFormat
     }
     
-    func switchLens(_ lens: LensType) {
+    @MainActor func switchLens(_ lens: LensType) {
         currentLens = lens
         configureSession()
     }
     
-    func startOrientationUpdates() {
+    @MainActor func startOrientationUpdates() {
         guard motionManager.isDeviceMotionAvailable else {
-            errorMessage = "Motion data unavailable"
+            setErrorMessage("Motion data unavailable")
             return
         }
         
@@ -167,7 +193,7 @@ class CameraManager: NSObject, ObservableObject {
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
             guard let self = self else { return }
             guard let motion = motion, error == nil else {
-                self.errorMessage = error?.localizedDescription ?? "Motion updates failed"
+                self.setErrorMessage(error?.localizedDescription ?? "Motion updates failed")
                 return
             }
             
@@ -185,7 +211,7 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
+    @MainActor private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
         guard isRecording else { return }
         
         recordingQueue.async { [weak self] in
@@ -205,19 +231,29 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
-        recordingQueue.async { [weak self] in
-            guard let self = self else { return }
-            self.session.beginConfiguration()
-            defer { self.session.commitConfiguration() }
-            
-            let videoOrientation = orientation.videoOrientation
-            self.session.outputs.first?.connection(with: .video)?.videoOrientation = videoOrientation
-            self.movieOutput.connection(with: .video)?.videoOrientation = videoOrientation
+    @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+        
+        guard let connection = movieOutput.connection(with: .video) else { return }
+        
+        let videoOrientation: AVCaptureVideoOrientation
+        switch orientation {
+        case .portrait: videoOrientation = .portrait
+        case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
+        case .landscapeLeft: videoOrientation = .landscapeRight
+        case .landscapeRight: videoOrientation = .landscapeLeft
+        default: videoOrientation = .portrait
+        }
+        
+        connection.videoOrientation = videoOrientation
+        
+        if connection.isVideoMirroringSupported {
+            connection.isVideoMirrored = (cameraPosition == .front)
         }
     }
     
-    func startRecording() {
+    @MainActor func startRecording() {
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mov")
@@ -227,25 +263,28 @@ class CameraManager: NSObject, ObservableObject {
         print("▶️ Started recording clip #\(currentClipNumber)")
     }
     
-    func stopRecording(completion: (() -> Void)? = nil) {
+    @MainActor func stopRecording(completion: (() -> Void)? = nil) {
         movieOutput.stopRecording()
         isRecording = false
         print("⏹ Stopped recording clip #\(currentClipNumber)")
-        stopCompletion = completion // Store completion handler
+        stopCompletion = completion
     }
 }
 
 extension CameraManager: AVCaptureFileOutputRecordingDelegate {
-    // Update the fileOutput delegate method
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+    @MainActor func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
-            errorMessage = "Recording failed: \(error.localizedDescription)"
+            setErrorMessage("Recording failed: \(error.localizedDescription)")
+            stopCompletion?()
+            stopCompletion = nil
             return
         }
         
         PHPhotoLibrary.requestAuthorization { [weak self] status in
             guard status == .authorized else {
-                self?.errorMessage = "Photo library access denied"
+                self?.setErrorMessage("Photo library access denied")
+                self?.stopCompletion?()
+                self?.stopCompletion = nil
                 return
             }
             
@@ -256,9 +295,8 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                     if success {
                         print("✅ Saved clip #\(self?.currentClipNumber ?? 0)")
                     } else {
-                        self?.errorMessage = error?.localizedDescription ?? "Save failed"
+                        self?.setErrorMessage(error?.localizedDescription ?? "Save failed")
                     }
-                    // Call completion handler when saving is complete
                     self?.stopCompletion?()
                     self?.stopCompletion = nil
                 }
