@@ -1,10 +1,3 @@
-//
-//  RecordingButton.swift
-//  GyroCam
-//
-//  Created by Fayaz Shaikh on 1/26/25.
-//
-
 import SwiftUI
 
 struct RecordingButton: View {
@@ -19,24 +12,29 @@ struct RecordingButton: View {
             triggerHaptic()
         }) {
             ZStack {
-                // Background circle
+                // White outline circle
                 Circle()
-                    .strokeBorder(colorScheme == .dark ? Color.black : Color.white, lineWidth: 5)
-                    .background(Circle().fill(isRecording ? Color.clear : Color.red))
+                    .stroke(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white, lineWidth: 5)
                     .frame(width: 70, height: 70)
-                    .scaleEffect(animate ? 0.9 : 1)
                 
-                // Stop square
-                if isRecording {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color.red)
-                        .frame(width: 30, height: 30)
-                        .transition(.scale.combined(with: .opacity))
-                }
+                // Animated red shape
+                RoundedRectangle(cornerRadius: isRecording ? 4 : 25)
+                    .fill(Color.red)
+                    .frame(width: isRecording ? 34 : 56, height: isRecording ? 34 : 56)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isRecording)
+                
+                // Scaling pulse effect
+                Circle()
+                    .stroke(Color.red.opacity(0.4), lineWidth: 2)
+                    .frame(width: animate ? 70 : 60, height: animate ? 70 : 60)
+                    .opacity(animate ? 0 : 1)
+                    .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: false), value: animate)
             }
             .contentShape(Circle())
         }
         .buttonStyle(RecordingButtonStyle())
+        .onAppear { animate = true }
+        .onDisappear { animate = false }
     }
     
     private func triggerHaptic() {
@@ -48,7 +46,7 @@ struct RecordingButton: View {
 struct RecordingButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-            .animation(.interactiveSpring(response: 0.3, dampingFraction: 0.5), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.92 : 1)
+            .animation(.interactiveSpring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
