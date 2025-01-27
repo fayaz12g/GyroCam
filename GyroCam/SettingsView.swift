@@ -41,10 +41,16 @@ struct SettingsView: View {
                             Text(lens.rawValue).tag(lens)
                         }
                     }
+                    .onChange(of: cameraManager.currentLens) { _ in
+                        cameraManager.configureSession() // Add this line
+                    }
                     
                     Picker("Position", selection: $cameraManager.cameraPosition) {
                         Text("Back").tag(AVCaptureDevice.Position.back)
                         Text("Front").tag(AVCaptureDevice.Position.front)
+                    }
+                    .onChange(of: cameraManager.cameraPosition) { _ in
+                        cameraManager.configureSession() 
                     }
                 }
             }
