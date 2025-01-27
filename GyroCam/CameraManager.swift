@@ -24,7 +24,7 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor @Published var currentFPS: FrameRate = .sixty
     @MainActor @Published var cameraPosition: AVCaptureDevice.Position = .back
     @MainActor @Published var currentLens: LensType = .wide // this changes the default lens (ultrawide, wide, telephoto)
-    @MainActor @Published var isHDREnabled = false
+    @MainActor @Published var isHDREnabled = true
     @MainActor @Published var isRecording = false
     @MainActor @Published var currentOrientation = "Portrait"
     @MainActor @Published var errorMessage = ""
