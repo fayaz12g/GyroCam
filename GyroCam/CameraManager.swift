@@ -21,7 +21,7 @@ class CameraManager: NSObject, ObservableObject {
     
     // Main actor isolated properties
     @MainActor @Published var currentFormat: VideoFormat = .hd4K
-    @MainActor @Published var currentFPS: FrameRate = .thirty
+    @MainActor @Published var currentFPS: FrameRate = .sixty
     @MainActor @Published var cameraPosition: AVCaptureDevice.Position = .back
     @MainActor @Published var currentLens: LensType = .wide
     @MainActor @Published var isHDREnabled = false
