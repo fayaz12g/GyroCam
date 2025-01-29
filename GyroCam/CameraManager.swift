@@ -371,11 +371,11 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func stopRecording(completion: (() -> Void)? = nil) {
+        stopCompletion = completion
         stopLocationUpdates()
         movieOutput.stopRecording()
         isRecording = false
         print("⏹ Stopped recording clip #\(currentClipNumber)")
-        stopCompletion = completion
         if !isRestarting {
             self.currentClipNumber = 1 // reset
         }
