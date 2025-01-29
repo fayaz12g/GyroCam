@@ -47,6 +47,7 @@ struct ControlsView: View {
                                 // Recording Button (Center)
                                 RecordingButton(
                                     isRecording: $cameraManager.isRecording,
+                                    cameraManager: cameraManager,
                                     action: {
                     if cameraManager.isRecording {
                         triggerHaptic(style: .heavy)

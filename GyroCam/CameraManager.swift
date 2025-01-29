@@ -2,6 +2,7 @@ import AVFoundation
 import CoreMotion
 import UIKit
 import Photos
+import SwiftUI
 
 enum FrameRate: Int, CaseIterable, Identifiable {
     case thirty = 30
@@ -35,6 +36,15 @@ class CameraManager: NSObject, ObservableObject {
     @Published var showZoomBar = false
     @Published var maximizePreview = true
     @Published var currentZoom: CGFloat = 1.0
+
+    @Published var accentColor: Color = .accentColor {
+            didSet {
+                // Optional: Save color to UserDefaults here
+                UserDefaults.standard.set(accentColor.rawValue, forKey: "accentColor")
+            }
+        }
+        
+    
     private var zoomTimer: Timer?
         
     // Add to existing properties
@@ -79,6 +89,10 @@ class CameraManager: NSObject, ObservableObject {
     override init() {
         super.init()
         requestCameraAccess()
+        if let savedColor = UserDefaults.standard.string(forKey: "accentColor"),
+           let color = Color(rawValue: savedColor) {
+            accentColor = color
+        }
     }
     
     private func requestCameraAccess() {

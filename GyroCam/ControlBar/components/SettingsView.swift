@@ -9,10 +9,25 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 Section(header: Text("User Interface")) {
-                                    Toggle("Show Zoom Bar", isOn: $cameraManager.showZoomBar)
-                                    Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
-                                }
-                
+                    Toggle("Show Zoom Bar", isOn: $cameraManager.showZoomBar)
+                        .tint(cameraManager.accentColor)
+                    Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
+                        .tint(cameraManager.accentColor)
+                    
+                    HStack {
+                        Text("Accent Color")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        ColorPicker("Select Accent Color", selection: $cameraManager.accentColor, supportsOpacity: false)
+                            .labelsHidden()
+                            .frame(width: 44, height: 44)
+                            .padding(.trailing, -8)
+                    }
+                    .frame(height: 44)
+                    .contentShape(Rectangle())
+                }
+                                    
+                    
                 Section(header: Text("Video Quality")) {
                     Picker("Resolution", selection: $cameraManager.currentFormat) {
                         ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in
@@ -24,7 +39,7 @@ struct SettingsView: View {
                     }
                     
                     Toggle("Enable HDR", isOn: $cameraManager.isHDREnabled)
-                        .tint(.accentColor)
+                        .tint(cameraManager.accentColor)
                         .onChange(of: cameraManager.isHDREnabled) { _, _ in
                             cameraManager.configureSession()
                         }
@@ -69,6 +84,32 @@ struct SettingsView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+
+extension Color: @retroactive RawRepresentable {
+    public init?(rawValue: String) {
+        guard let data = Data(base64Encoded: rawValue) else {
+            self = .blue
+            return
+        }
+        
+        do {
+            let color = try NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: data) ?? .blue
+            self = Color(color)
+        } catch {
+            self = .blue
+        }
+    }
+
+    public var rawValue: String {
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: UIColor(self), requiringSecureCoding: false)
+            return data.base64EncodedString()
+        } catch {
+            return ""
         }
     }
 }
