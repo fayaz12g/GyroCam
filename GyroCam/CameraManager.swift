@@ -272,13 +272,34 @@ class CameraManager: NSObject, ObservableObject {
 }
 
 extension CameraManager: AVCaptureFileOutputRecordingDelegate {
-    @MainActor func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+    private func getNextClipNumber() -> String {
+        let defaults = UserDefaults.standard
+        let currentNumber = defaults.integer(forKey: "GyroCamClipNumber")
+        defaults.set(currentNumber + 1, forKey: "GyroCamClipNumber")
+        return String(format: "GRC_%02d", currentNumber)
+    }
+    
+    @MainActor
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
             setErrorMessage("Recording failed: \(error.localizedDescription)")
             stopCompletion?()
             stopCompletion = nil
             return
         }
+        
+        // Create metadata (which you can store externally)
+        let metadata = [
+            "CreatedByApp": "GyroCam",
+            "LensType": currentLens.rawValue,
+            "Resolution": currentFormat.rawValue,
+            "FPS": currentFPS.rawValue,
+            "HDREnabled": isHDREnabled,
+            "DeviceModel": UIDevice.current.modelName
+        ] as [String : Any]
+        
+        // Get next clip number
+        let clipName = getNextClipNumber()
         
         PHPhotoLibrary.requestAuthorization { [weak self] status in
             guard status == .authorized else {
@@ -289,11 +310,29 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
             }
             
             PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)
+                guard let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL) else {
+                    self?.setErrorMessage("Failed to create asset request")
+                    return
+                }
+                
+                // Set the location (optional, can be set based on actual coordinates)
+                assetRequest.location = CLLocation(latitude: 0, longitude: 0)
+                
+                // Use the custom filename and move the file
+                let options = PHAssetResourceCreationOptions()
+                options.originalFilename = clipName
+                options.shouldMoveFile = true
+                
+                // Set creation date
+                assetRequest.creationDate = Date()
+                
+                // Handle metadata outside the Photos framework, store it externally
+                print("Metadata for clip \(clipName): \(metadata)")
+                
             }) { success, error in
                 DispatchQueue.main.async {
                     if success {
-                        print("✅ Saved clip #\(self?.currentClipNumber ?? 0)")
+                        print("✅ Saved \(clipName)")
                     } else {
                         self?.setErrorMessage(error?.localizedDescription ?? "Save failed")
                     }
@@ -302,6 +341,20 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                 }
             }
         }
+    }
+}
+
+// Add this extension to get the actual device model
+extension UIDevice {
+    var modelName: String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let machineMirror = Mirror(reflecting: systemInfo.machine)
+        let identifier = machineMirror.children.reduce("") { identifier, element in
+            guard let value = element.value as? Int8, value != 0 else { return identifier }
+            return identifier + String(UnicodeScalar(UInt8(value)))
+        }
+        return identifier
     }
 }
 

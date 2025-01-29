@@ -8,8 +8,15 @@ struct RecordingButton: View {
     
     var body: some View {
         Button(action: {
-            action()
-            triggerHaptic()
+            // Haptic feedback before action
+            let generator = UIImpactFeedbackGenerator(style: isRecording ? .heavy : .medium)
+            generator.prepare()
+            
+            action() // Perform the recording action
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                generator.impactOccurred()
+            }
         }) {
             ZStack {
                 // White outline circle
@@ -36,11 +43,8 @@ struct RecordingButton: View {
         .onAppear { animate = true }
         .onDisappear { animate = false }
     }
+
     
-    private func triggerHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
-    }
 }
 
 struct RecordingButtonStyle: ButtonStyle {
