@@ -151,6 +151,7 @@ class CameraManager: NSObject, ObservableObject {
     override init() {
         super.init()
         requestCameraAccess()
+        requestLocationAccess()
         loadSettings()
         
         locationManager.delegate = self
@@ -357,20 +358,8 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func startRecording() {
-        // Check authorization status first
-            switch locationAuthorizationStatus {
-            case .notDetermined:
-                requestLocationAccess()
-                return
-            case .denied, .restricted:
-                setErrorMessage("Enable location access in Settings")
-                return
-            default:
-                break
-            }
-            
-            // Only start if authorized
-            startLocationUpdates()
+        
+        startLocationUpdates()
         
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
@@ -402,72 +391,67 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
     }
     
     @MainActor
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        if let error = error {
-            setErrorMessage("Recording failed: \(error.localizedDescription)")
-            stopCompletion?()
-            stopCompletion = nil
-            return
-        }
-        
-        // Create metadata (which you can store externally)
-        let metadata = [
-            "CreatedByApp": "GyroCam",
-            "LensType": currentLens.rawValue,
-            "Resolution": currentFormat.rawValue,
-            "FPS": currentFPS.rawValue,
-            "HDREnabled": isHDREnabled,
-            "DeviceModel": UIDevice.current.modelName,
-            "GPSHorizontalAccuracy": lastKnownLocation?.horizontalAccuracy ?? 0,
-            "GPSAltitude": lastKnownLocation?.altitude ?? 0
-        ] as [String : Any]
-        
-        // Get next clip number
-        let clipName = getNextClipNumber()
-        
-        PHPhotoLibrary.requestAuthorization { [weak self] status in
-            guard status == .authorized else {
-                self?.setErrorMessage("Photo library access denied")
-                self?.stopCompletion?()
-                self?.stopCompletion = nil
+        func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+            if let error = error {
+                setErrorMessage("Recording failed: \(error.localizedDescription)")
+                stopCompletion?()
+                stopCompletion = nil
                 return
             }
             
-            PHPhotoLibrary.shared().performChanges({
-                guard let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL) else {
-                    self?.setErrorMessage("Failed to create asset request")
-                    return
-                }
-                
-                // Use the custom filename and move the file
-                let options = PHAssetResourceCreationOptions()
-                options.originalFilename = clipName
-                options.shouldMoveFile = true
-                
-                // Set creation date
-                assetRequest.creationDate = Date()
-                
-                // Handle metadata outside the Photos framework, store it externally
+            // Immediately trigger completion to allow next recording
+            stopCompletion?()
+            stopCompletion = nil
+            
+            // Capture necessary data for background processing
+            let clipName = getNextClipNumber()
+            let metadata = [
+                "CreatedByApp": "GyroCam",
+                "LensType": currentLens.rawValue,
+                "Resolution": currentFormat.rawValue,
+                "FPS": currentFPS.rawValue,
+                "HDREnabled": isHDREnabled,
+                "DeviceModel": UIDevice.current.modelName,
+                "GPSHorizontalAccuracy": lastKnownLocation?.horizontalAccuracy ?? 0,
+                "GPSAltitude": lastKnownLocation?.altitude ?? 0
+            ] as [String : Any]
+            
+            // Move saving to background queue
+            DispatchQueue.global(qos: .background).async { [weak self] in
+                // Store metadata externally if needed
                 print("Metadata for clip \(clipName): \(metadata)")
                 
-            }) { success, error in
+                // Perform photo library operations on main thread
                 DispatchQueue.main.async {
-                    if success {
-                        print("✅ Saved \(clipName)")
-                        // After successful save to Photos:
-                        try? FileManager.default.removeItem(at: outputFileURL)
-                    } else {
-                        self?.setErrorMessage(error?.localizedDescription ?? "Save failed")
+                    PHPhotoLibrary.requestAuthorization { status in
+                        guard status == .authorized else {
+                            self?.setErrorMessage("Photo library access denied")
+                            return
+                        }
+                        
+                        PHPhotoLibrary.shared().performChanges({
+                            let options = PHAssetResourceCreationOptions()
+                            options.originalFilename = clipName
+                            options.shouldMoveFile = true
+                            
+                            _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)?.placeholderForCreatedAsset
+                        }) { success, error in
+                            DispatchQueue.main.async {
+                                if success {
+                                    try? FileManager.default.removeItem(at: outputFileURL)
+                                    print("✅ Saved \(clipName)")
+                                } else {
+                                    self?.setErrorMessage(error?.localizedDescription ?? "Save failed")
+                                }
+                            }
+                        }
                     }
-                    self?.stopCompletion?()
-                    self?.stopCompletion = nil
                 }
             }
         }
     }
-}
 
-// Add this extension to get the actual device model
+
 extension UIDevice {
     var modelName: String {
         var systemInfo = utsname()
@@ -511,7 +495,6 @@ extension CameraManager: CLLocationManagerDelegate {
             setErrorMessage("Location services unavailable")
             return
         }
-        
         locationManager.startUpdatingLocation()
     }
     
