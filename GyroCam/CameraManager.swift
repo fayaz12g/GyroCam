@@ -21,28 +21,62 @@ class CameraManager: NSObject, ObservableObject {
     private var stopCompletion: (() -> Void)?
     
     // Main actor isolated properties
-    @MainActor @Published var currentFormat: VideoFormat = .hd4K
-    @MainActor @Published var currentFPS: FrameRate = .sixty
-    @MainActor @Published var cameraPosition: AVCaptureDevice.Position = .back
-    @MainActor @Published var currentLens: LensType = .wide // this changes the default lens (ultrawide, wide, telephoto)
-    @MainActor @Published var isHDREnabled = true
+    // Main properties
+    @MainActor var currentFormat: CameraManager.VideoFormat {
+        get { settings.currentFormat }
+        set { settings.currentFormat = newValue }
+    }
+    
+    @MainActor var currentFPS: FrameRate {
+        get { settings.currentFPS }
+        set { settings.currentFPS = newValue }
+    }
+    
+    @MainActor var cameraPosition: AVCaptureDevice.Position {
+        get { settings.cameraPosition }
+        set { settings.cameraPosition = newValue }
+    }
+    
+    @MainActor var currentLens: LensType {
+        get { settings.currentLens }
+        set { settings.currentLens = newValue }
+    }
+    
+    @MainActor var isHDREnabled: Bool {
+        get { settings.isHDREnabled }
+        set { settings.isHDREnabled = newValue }
+    }
+    
+    @MainActor var showZoomBar: Bool {
+        get { settings.showZoomBar }
+        set { settings.showZoomBar = newValue }
+    }
+    
+    @MainActor var maximizePreview: Bool {
+        get { settings.maximizePreview }
+        set { settings.maximizePreview = newValue }
+    }
+    
+    @MainActor var accentColor: Color {
+        get { settings.accentColor }
+        set { settings.accentColor = newValue }
+    }
+    
     @MainActor @Published var isRecording = false
     @MainActor @Published var currentOrientation = "Portrait"
     @MainActor @Published var errorMessage = ""
     @MainActor @Published var currentClipNumber = 1
     private var currentCaptureDevice: AVCaptureDevice?
-    
 
-    @Published var showZoomBar = false
-    @Published var maximizePreview = true
+    
     @Published var currentZoom: CGFloat = 1.0
 
-    @Published var accentColor: Color = .accentColor {
-            didSet {
-                // Optional: Save color to UserDefaults here
-                UserDefaults.standard.set(accentColor.rawValue, forKey: "accentColor")
-            }
+    // Published wrapper for settings
+    @Published private var settings = AppSettings() {
+        didSet {
+            saveSettings()
         }
+    }
         
     
     private var zoomTimer: Timer?
@@ -85,14 +119,33 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
     }
+    
+    private func loadSettings() {
+            if let data = UserDefaults.standard.data(forKey: "appSettings") {
+                let decoder = JSONDecoder()
+                if let decoded = try? decoder.decode(AppSettings.self, from: data) {
+                    settings = decoded
+                }
+            }
+        }
+        
+        private func saveSettings() {
+            let encoder = JSONEncoder()
+            if let encoded = try? encoder.encode(settings) {
+                UserDefaults.standard.set(encoded, forKey: "appSettings")
+            }
+        }
+        
+    @MainActor func resetToDefaults() {
+            settings = AppSettings()
+            settings.accentColor = Color(red: 1.0, green: 0.0, blue: 0.05098) // #FF000D
+            configureSession()
+        }
 
     override init() {
         super.init()
         requestCameraAccess()
-        if let savedColor = UserDefaults.standard.string(forKey: "accentColor"),
-           let color = Color(rawValue: savedColor) {
-            accentColor = color
-        }
+        loadSettings()
     }
     
     private func requestCameraAccess() {
@@ -307,6 +360,9 @@ class CameraManager: NSObject, ObservableObject {
         isRecording = false
         print("⏹ Stopped recording clip #\(currentClipNumber)")
         stopCompletion = completion
+        if !isRestarting {
+            self.currentClipNumber = 1 // reset
+        }
     }
 }
 
@@ -407,15 +463,4 @@ extension AVCaptureDevice.Format {
     }
 }
 
-extension CameraManager {
-    @MainActor func resetToDefaults() {
-        accentColor = Color(red: 1.0, green: 0.0, blue: 0.05098) 
-        currentFormat = .hd4K
-        currentFPS = .sixty
-        cameraPosition = .back
-        currentLens = .wide
-        isHDREnabled = true
-        showZoomBar = false
-        maximizePreview = true
-    }
-}
+
