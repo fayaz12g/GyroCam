@@ -14,13 +14,16 @@ struct OrientationHeader: View {
     }
     
     private var horizontalPadding: CGFloat {
-        rotationAngle == .degrees(0) ? 16 : 8
+        switch currentOrientation {
+        case "Landscape Left", "Landscape Right": return 0
+        case "Upside Down": return 32
+        default: return 16
+        }
     }
-    
     private var verticalOffset: CGFloat {
         switch currentOrientation {
         case "Landscape Left", "Landscape Right": return 32
-        case "Upside Down": return 34
+        case "Upside Down": return 12
         default: return 0
         }
     }

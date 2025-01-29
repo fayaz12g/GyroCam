@@ -21,7 +21,7 @@ struct ClipNumberBadge: View {
     private var verticalOffset: CGFloat {
         switch currentOrientation {
         case "Landscape Left", "Landscape Right": return 32
-        case "Upside Down": return 24
+        case "Upside Down": return 12
         default: return 0
         }
     }
