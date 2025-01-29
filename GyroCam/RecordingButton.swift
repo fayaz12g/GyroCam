@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreHaptics
 
 struct RecordingButton: View {
     @Binding var isRecording: Bool
@@ -38,8 +39,23 @@ struct RecordingButton: View {
     }
     
     private func triggerHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        // Check if the device supports haptics
+        guard CHHapticEngine.shared.isAvailable else {
+            print("Haptic feedback is not supported on this device.")
+            return
+        }
+        
+        // Create a simple haptic pattern (customizable)
+        let pattern = try? CHHapticPattern(pattern: """
+            [
+                { duration = 0.5; frequency = 200; amplitude = 1.0 },
+                { duration = 0.5; frequency = 300; amplitude = 0.5 }
+            ]
+            """, options: [])
+        
+        // Play the haptic feedback
+        let player = try? CHHapticPlayer()
+        try? player?.startPattern(pattern!, with: CHHapticStartingOptions())
     }
 }
 
