@@ -358,6 +358,8 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                 DispatchQueue.main.async {
                     if success {
                         print("✅ Saved \(clipName)")
+                        // After successful save to Photos:
+                        try? FileManager.default.removeItem(at: outputFileURL)
                     } else {
                         self?.setErrorMessage(error?.localizedDescription ?? "Save failed")
                     }
