@@ -35,16 +35,6 @@
 			path = GyroCam;
 			sourceTree = "<group>";
 		};
-		F45584DF2D40BF27005461E0 /* GyroCamTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = GyroCamTests;
-			sourceTree = "<group>";
-		};
-		F45584E92D40BF27005461E0 /* GyroCamUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = GyroCamUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,8 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				F45584CE2D40BF26005461E0 /* GyroCam */,
-				F45584DF2D40BF27005461E0 /* GyroCamTests */,
-				F45584E92D40BF27005461E0 /* GyroCamUITests */,
 				F45584CD2D40BF26005461E0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +118,6 @@
 			dependencies = (
 				F45584DE2D40BF27005461E0 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				F45584DF2D40BF27005461E0 /* GyroCamTests */,
-			);
 			name = GyroCamTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +137,6 @@
 			);
 			dependencies = (
 				F45584E82D40BF27005461E0 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				F45584E92D40BF27005461E0 /* GyroCamUITests */,
 			);
 			name = GyroCamUITests;
 			packageProductDependencies = (
