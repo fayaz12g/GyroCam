@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 import Photos
 
+
 struct ControlsView: View {
     @ObservedObject var cameraManager: CameraManager
     @State private var showingSettings = false
@@ -9,14 +10,18 @@ struct ControlsView: View {
     @State private var showingPhotoLibrary = false
     @State private var latestThumbnail: UIImage?
     @Environment(\.colorScheme) var colorScheme
+    @State private var isQuickSettingsVisible = false
+    @Namespace private var animationNamespace
+
     
     var body: some View {
-        HStack {
-            // Photo Library Button (Left)
-            Button {
-                triggerHaptic(style: .light)
-                showingPhotoLibrary = true
-            } label: {
+        ZStack {
+            HStack {
+                // Photo Library Button (Left)
+                Button {
+                    triggerHaptic(style: .light)
+                    showingPhotoLibrary = true
+                } label: {
                 Group {
                     if let thumbnail = latestThumbnail {
                         Image(uiImage: thumbnail)
@@ -33,16 +38,16 @@ struct ControlsView: View {
                 .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .sheet(isPresented: $showingPhotoLibrary) {
-                PhotoLibraryView()
-            }
-            
-            Spacer()
-            
-            // Recording Button (Center)
-            RecordingButton(
-                isRecording: $cameraManager.isRecording,
-                action: {
+                .sheet(isPresented: $showingPhotoLibrary) {
+                                    PhotoLibraryView()
+                                }
+                                
+                                Spacer()
+                                
+                                // Recording Button (Center)
+                                RecordingButton(
+                                    isRecording: $cameraManager.isRecording,
+                                    action: {
                     if cameraManager.isRecording {
                         triggerHaptic(style: .heavy)
                         cameraManager.stopRecording()
@@ -53,40 +58,46 @@ struct ControlsView: View {
                 }
             )
             
-            Spacer()
-            
-            // Settings Button (Right)
-            Button {
-                triggerHaptic(style: .light)
-                showingSettings = true
-            } label: {
-                Image(systemName: "gear")
-                    .font(.system(size: 24))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
-                    .padding()
-                    .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
-                    .clipShape(Circle())
-            }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView(cameraManager: cameraManager)
-            }
-            .simultaneousGesture(LongPressGesture().onEnded { _ in
-                triggerHaptic(style: .medium)
-                showingQuickSettings = true
-            })
-            .popover(isPresented: $showingQuickSettings,
-                     attachmentAnchor: .point(.bottomTrailing),
-                     arrowEdge: .bottom) {
-                QuickSettingsView(cameraManager: cameraManager)
-                    .background(Color.clear)
-            }
-        }
-        .padding(.horizontal, 40)
-        .onAppear(perform: loadLatestThumbnail)
+                Spacer()
+                                
+                                // Settings Button (Right)
+                                Button {
+                                    triggerHaptic(style: .light)
+                                    withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.7)) {
+                                        isQuickSettingsVisible.toggle()
+                                    }
+                                } label: {
+                                    Image(systemName: "gear")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                                        .padding()
+                                        .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
+                                        .clipShape(Circle())
+                                        .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
+                                        .matchedGeometryEffect(id: "gear", in: animationNamespace)
+                                }
+                            }
+                            .padding(.horizontal, 40)
+                            
+                            if isQuickSettingsVisible {
+                                QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)
+                                    .matchedGeometryEffect(id: "quickSettings", in: animationNamespace)
+                                    .transition(.asymmetric(
+                                        insertion: .scale(scale: 0.5, anchor: .topTrailing).combined(with: .opacity),
+                                        removal: .scale(scale: 0.5, anchor: .topTrailing).combined(with: .opacity)
+                                    ))
+                                    .offset(y: -100)
+                                    .zIndex(1)
+                            }
+                        }
+                        .sheet(isPresented: $showingSettings) {
+                            SettingsView(cameraManager: cameraManager)
+                        }
+                        .onAppear(perform: loadLatestThumbnail)
+                    }
 //        .onReceive(NotificationCenter.default.publisher(for: PHPhotoLibrary.didChangeNotification)) { _ in
 //            loadLatestThumbnail()
 //        }
-    }
     
     private func loadLatestThumbnail() {
         PHPhotoLibrary.requestAuthorization { status in

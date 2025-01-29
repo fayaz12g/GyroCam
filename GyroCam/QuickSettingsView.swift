@@ -9,31 +9,66 @@ import SwiftUI
 
 struct QuickSettingsView: View {
     @ObservedObject var cameraManager: CameraManager
+    @Binding var showSettings: Bool
     
     var body: some View {
-        VStack(spacing: 16) {
+        HStack(spacing: 12) {
+            // Lens Picker
             Picker("Lens", selection: $cameraManager.currentLens) {
                 ForEach(CameraManager.LensType.allCases, id: \.self) { lens in
-                    Text(lens.rawValue).tag(lens)
+                    Text(lens.rawValue)
+                        .font(.system(size: 12))
+                        .tag(lens)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
+            .pickerStyle(.menu)
+            .tint(.primary)
+            .fixedSize()
             
-            Picker("Resolution", selection: $cameraManager.currentFormat) {
+            Divider()
+                .frame(height: 20)
+            
+            // Resolution Picker
+            Picker("Res", selection: $cameraManager.currentFormat) {
                 ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in
-                    Text(format.rawValue).tag(format)
+                    Text(format.rawValue)
+                        .font(.system(size: 12))
+                        .tag(format)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
+            .pickerStyle(.menu)
+            .tint(.primary)
+            .fixedSize()
             
+            Divider()
+                .frame(height: 20)
+            
+            // FPS Picker
             Picker("FPS", selection: $cameraManager.currentFPS) {
                 ForEach(FrameRate.allCases) { fps in
-                    Text(fps.description).tag(fps)
+                    Text(fps.description)
+                        .font(.system(size: 12))
+                        .tag(fps)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
+            .pickerStyle(.menu)
+            .tint(.primary)
+            .fixedSize()
+            
+            // More Settings Button
+            Button {
+                showSettings = true
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 14))
+                    .padding(6)
+            }
+            .buttonStyle(.plain)
         }
-        .padding()
-        .frame(width: 300)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Material.ultraThin)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
