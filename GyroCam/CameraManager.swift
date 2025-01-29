@@ -3,6 +3,7 @@ import CoreMotion
 import UIKit
 import Photos
 import SwiftUI
+import CoreLocation
 
 enum FrameRate: Int, CaseIterable, Identifiable {
     case thirty = 30
@@ -19,6 +20,11 @@ class CameraManager: NSObject, ObservableObject {
     private var currentDevice: AVCaptureDevice?
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
+    
+    // location
+    private let locationManager = CLLocationManager()
+    private var lastKnownLocation: CLLocation?
+    @Published var locationAuthorizationStatus: CLAuthorizationStatus = .notDetermined
     
     // Main actor isolated properties
     // Main properties
@@ -146,6 +152,11 @@ class CameraManager: NSObject, ObservableObject {
         super.init()
         requestCameraAccess()
         loadSettings()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 5 // Update every 5 meters
+        
     }
     
     private func requestCameraAccess() {
@@ -346,6 +357,15 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func startRecording() {
+        // Check authorization status
+            guard locationAuthorizationStatus == .authorizedAlways ||
+                  locationAuthorizationStatus == .authorizedWhenInUse else {
+                setErrorMessage("Enable location access for GPS tagging")
+                return
+            }
+            
+            startLocationUpdates()
+        
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mov")
@@ -356,6 +376,7 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func stopRecording(completion: (() -> Void)? = nil) {
+        stopLocationUpdates()
         movieOutput.stopRecording()
         isRecording = false
         print("⏹ Stopped recording clip #\(currentClipNumber)")
@@ -390,7 +411,9 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
             "Resolution": currentFormat.rawValue,
             "FPS": currentFPS.rawValue,
             "HDREnabled": isHDREnabled,
-            "DeviceModel": UIDevice.current.modelName
+            "DeviceModel": UIDevice.current.modelName,
+            "GPSHorizontalAccuracy": lastKnownLocation?.horizontalAccuracy ?? 0,
+            "GPSAltitude": lastKnownLocation?.altitude ?? 0
         ] as [String : Any]
         
         // Get next clip number
@@ -409,9 +432,6 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                     self?.setErrorMessage("Failed to create asset request")
                     return
                 }
-                
-                // Set the location (optional, can be set based on actual coordinates)
-                assetRequest.location = CLLocation(latitude: 0, longitude: 0)
                 
                 // Use the custom filename and move the file
                 let options = PHAssetResourceCreationOptions()
@@ -464,3 +484,32 @@ extension AVCaptureDevice.Format {
 }
 
 
+extension CameraManager: CLLocationManagerDelegate {
+    func requestLocationAccess() {
+        locationManager.requestWhenInUseAuthorization()
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        DispatchQueue.main.async {
+            self.locationAuthorizationStatus = manager.authorizationStatus
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        lastKnownLocation = location
+    }
+    
+    @MainActor func startLocationUpdates() {
+        guard CLLocationManager.locationServicesEnabled() else {
+            setErrorMessage("Location services unavailable")
+            return
+        }
+        
+        locationManager.startUpdatingLocation()
+    }
+    
+    func stopLocationUpdates() {
+        locationManager.stopUpdatingLocation()
+    }
+}
