@@ -357,13 +357,19 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func startRecording() {
-        // Check authorization status
-            guard locationAuthorizationStatus == .authorizedAlways ||
-                  locationAuthorizationStatus == .authorizedWhenInUse else {
-                setErrorMessage("Enable location access for GPS tagging")
+        // Check authorization status first
+            switch locationAuthorizationStatus {
+            case .notDetermined:
+                requestLocationAccess()
                 return
+            case .denied, .restricted:
+                setErrorMessage("Enable location access in Settings")
+                return
+            default:
+                break
             }
             
+            // Only start if authorized
             startLocationUpdates()
         
         let tempURL = FileManager.default.temporaryDirectory
