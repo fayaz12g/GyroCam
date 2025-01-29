@@ -406,3 +406,16 @@ extension AVCaptureDevice.Format {
             .max() ?? 0
     }
 }
+
+extension CameraManager {
+    @MainActor func resetToDefaults() {
+        accentColor = Color(red: 1.0, green: 0.0, blue: 0.05098) 
+        currentFormat = .hd4K
+        currentFPS = .sixty
+        cameraPosition = .back
+        currentLens = .wide
+        isHDREnabled = true
+        showZoomBar = false
+        maximizePreview = true
+    }
+}

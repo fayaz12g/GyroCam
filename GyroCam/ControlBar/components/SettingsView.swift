@@ -98,22 +98,34 @@ struct SettingsView: View {
                                         }
                                     }
                                 }
-                            
-            
-            }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
+                
+                                Section {
+                                    Button(action: resetDefaults) {
+                                        Text("Reset Defaults")
+                                            .foregroundColor(.blue)
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                    }
+                                }
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                            }
+                            .navigationTitle("Settings")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarTrailing) {
+                                    Button("Done") {
+                                        presentationMode.wrappedValue.dismiss()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    private func resetDefaults() {
+                        cameraManager.resetToDefaults()
+                        cameraManager.configureSession()
                     }
                 }
-            }
-        }
-    }
-}
-
 
 extension Color: @retroactive RawRepresentable {
     public init?(rawValue: String) {
