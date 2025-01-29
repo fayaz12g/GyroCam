@@ -1,4 +1,4 @@
 # Welcome to GyroCam
 What is it? TBA!
 
-![Image](GyroCam/Assets.xcassets/AppIcon.appiconset/main.jpg)
+![Image](GyroCam/Assets.xcassets/AppIcon.appiconset/black.png)
