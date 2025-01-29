@@ -17,7 +17,7 @@ struct CameraPreview: UIViewRepresentable {
         let view = UIView(frame: UIScreen.main.bounds)
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = cameraManager.maximizePreview ? .resizeAspectFill : .resizeAspect
-        previewLayer.connection?.videoOrientation = .portrait
+        previewLayer.connection?.videoRotationAngle = 0
         previewLayer.frame = view.bounds
         view.layer.addSublayer(previewLayer)
         

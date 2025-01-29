@@ -28,7 +28,7 @@ struct QuickSettingsView: View {
             Divider()
                 .frame(height: 20)
             
-                .onChange(of: cameraManager.currentLens) { _ in
+                .onChange(of: cameraManager.currentLens) { _, _ in
                     cameraManager.configureSession()
                 }
             
@@ -40,7 +40,7 @@ struct QuickSettingsView: View {
                         .tag(format)
                 }
                 
-                .onChange(of: cameraManager.currentFormat) { _ in
+                .onChange(of: cameraManager.currentFormat) { _, _ in
                     cameraManager.configureSession()
                 }
             }
@@ -58,7 +58,7 @@ struct QuickSettingsView: View {
                         .font(.system(size: 12))
                         .tag(fps)
                 }
-                .onChange(of: cameraManager.currentFPS) { _ in
+                .onChange(of: cameraManager.currentFPS) { _, _ in
                     cameraManager.configureSession()
                 }
             }

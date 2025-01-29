@@ -19,12 +19,13 @@ struct SettingsView: View {
                             Text(format.rawValue).tag(format)
                         }
                     }
-                    .onChange(of: cameraManager.currentFormat) { _ in
+                    .onChange(of: cameraManager.currentFormat) { _, _ in
                         cameraManager.configureSession()
                     }
                     
                     Toggle("Enable HDR", isOn: $cameraManager.isHDREnabled)
-                        .onChange(of: cameraManager.isHDREnabled) { _ in
+                        .tint(.accentColor)
+                        .onChange(of: cameraManager.isHDREnabled) { _, _ in
                             cameraManager.configureSession()
                         }
                 }
@@ -35,7 +36,7 @@ struct SettingsView: View {
                             Text(fps.description).tag(fps)
                         }
                     }
-                    .onChange(of: cameraManager.currentFPS) { _ in
+                    .onChange(of: cameraManager.currentFPS) { _, _ in
                         cameraManager.configureSession()
                     }
                 }
@@ -46,16 +47,16 @@ struct SettingsView: View {
                             Text(lens.rawValue).tag(lens)
                         }
                     }
-                    .onChange(of: cameraManager.currentLens) { _ in
-                        cameraManager.configureSession() // Add this line
+                    .onChange(of: cameraManager.currentLens) { _, _ in
+                        cameraManager.configureSession()
                     }
                     
                     Picker("Position", selection: $cameraManager.cameraPosition) {
                         Text("Back").tag(AVCaptureDevice.Position.back)
                         Text("Front").tag(AVCaptureDevice.Position.front)
                     }
-                    .onChange(of: cameraManager.cameraPosition) { _ in
-                        cameraManager.configureSession() 
+                    .onChange(of: cameraManager.cameraPosition) { _, _ in
+                        cameraManager.configureSession()
                     }
                 }
             }

@@ -37,7 +37,7 @@ struct ContentView: View {
         .onAppear {
             cameraManager.startOrientationUpdates()
         }
-        .onChange(of: cameraManager.currentClipNumber) { newValue in
+        .onChange(of: cameraManager.currentClipNumber) { oldValue, newValue in
             clipNumber = newValue
         }
         .alert("Error", isPresented: .constant(!cameraManager.errorMessage.isEmpty)) {
