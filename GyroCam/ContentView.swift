@@ -7,7 +7,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                CameraPreview(session: cameraManager.session)
+                CameraPreview(session: cameraManager.session, cameraManager: cameraManager)
                     .ignoresSafeArea()
 //                    .onRotate { orientation in
 //                        print("Rotation detected: \(orientation)")
@@ -20,7 +20,11 @@ struct ContentView: View {
                         Spacer()
                         ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation)
                     }
-                    
+                    if cameraManager.showZoomBar {
+                                            ZoomBarView(cameraManager: cameraManager)
+                                                .transition(.opacity)
+                                                .padding(.bottom, 8)
+                                        }
                     Spacer()
                     
                     ControlsView(cameraManager: cameraManager)

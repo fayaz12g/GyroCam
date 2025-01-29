@@ -8,6 +8,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("User Interface")) {
+                                    Toggle("Show Zoom Bar", isOn: $cameraManager.showZoomBar)
+                                    Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
+                                }
+                
                 Section(header: Text("Video Quality")) {
                     Picker("Resolution", selection: $cameraManager.currentFormat) {
                         ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in

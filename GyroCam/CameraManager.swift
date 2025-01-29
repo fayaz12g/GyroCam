@@ -29,6 +29,31 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor @Published var currentOrientation = "Portrait"
     @MainActor @Published var errorMessage = ""
     @MainActor @Published var currentClipNumber = 1
+    private var currentCaptureDevice: AVCaptureDevice?
+    
+
+    @Published var showZoomBar = false
+    @Published var maximizePreview = true
+    @Published var currentZoom: CGFloat = 1.0
+    private var zoomTimer: Timer?
+        
+    // Add to existing properties
+    var captureDevice: AVCaptureDevice? {
+        return currentCaptureDevice
+    }
+    
+    func resetZoomTimer() {
+            zoomTimer?.invalidate()
+            zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+                self?.showZoomBar = self?.showZoomBar ?? true
+            }
+        }
+        
+    @MainActor func switchCamera() {
+        cameraPosition = cameraPosition == .back ? .front : .back
+        currentZoom = 1.0  // Reset zoom when switching cameras
+        configureSession()
+    }
     
     // Orientation handling
     private var previousOrientation: UIDeviceOrientation = .portrait

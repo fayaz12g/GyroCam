@@ -28,12 +28,20 @@ struct QuickSettingsView: View {
             Divider()
                 .frame(height: 20)
             
+                .onChange(of: cameraManager.currentLens) { _ in
+                    cameraManager.configureSession()
+                }
+            
             // Resolution Picker
             Picker("Res", selection: $cameraManager.currentFormat) {
                 ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in
                     Text(format.rawValue)
                         .font(.system(size: 12))
                         .tag(format)
+                }
+                
+                .onChange(of: cameraManager.currentFormat) { _ in
+                    cameraManager.configureSession()
                 }
             }
             .pickerStyle(.menu)
@@ -50,6 +58,9 @@ struct QuickSettingsView: View {
                         .font(.system(size: 12))
                         .tag(fps)
                 }
+                .onChange(of: cameraManager.currentFPS) { _ in
+                    cameraManager.configureSession()
+                }
             }
             .pickerStyle(.menu)
             .tint(.primary)
@@ -58,11 +69,13 @@ struct QuickSettingsView: View {
             // More Settings Button
             Button {
                 showSettings = true
+                print("Settings opened")
             } label: {
-                Image(systemName: "ellipsis")
+                Image(systemName: "gear")
                     .font(.system(size: 14))
                     .padding(6)
             }
+        
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 12)
