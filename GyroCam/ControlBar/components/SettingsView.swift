@@ -74,6 +74,32 @@ struct SettingsView: View {
                         cameraManager.configureSession()
                     }
                 }
+                
+                Section(header: Text("Updates")) {
+                                    NavigationLink {
+                                        ChangelogView()
+                                    } label: {
+                                        HStack {
+                                            Text("Changelog")
+                                                .foregroundColor(.primary)
+                                            Spacer()
+                                            Image(systemName: "clock.badge.checkmark")
+                                        }
+                                    }
+                                    
+                                    NavigationLink {
+                                        UpcomingFeaturesView()
+                                    } label: {
+                                        HStack {
+                                            Text("Upcoming Features")
+                                                .foregroundColor(.primary)
+                                            Spacer()
+                                            Image(systemName: "road.lanes.curved.right")
+                                        }
+                                    }
+                                }
+                            
+            
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
