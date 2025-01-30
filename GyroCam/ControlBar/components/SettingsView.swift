@@ -15,10 +15,10 @@ struct SettingsView: View {
                         .tint(cameraManager.accentColor)
                     
                     HStack {
-                        Text("Accent Color")
+                        Text("App Theme")
                             .foregroundColor(.primary)
                         Spacer()
-                        ColorPicker("Select Accent Color", selection: $cameraManager.accentColor, supportsOpacity: false)
+                        ColorPicker("Select Theme Color", selection: $cameraManager.accentColor, supportsOpacity: false)
                             .labelsHidden()
                             .frame(width: 44, height: 44)
                             .padding(.trailing, -8)

@@ -386,6 +386,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record videos with sound.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "We need access to the gyroscope to record videos with orientation tracking.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need access to the Photo Library to save videos recorded.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to the Photo Library to display videos recorded.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -421,6 +422,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to record videos with sound.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "We need access to the gyroscope to record videos with orientation tracking.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "We need access to the Photo Library to save videos recorded.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to the Photo Library to display videos recorded.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
