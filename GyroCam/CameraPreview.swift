@@ -53,7 +53,7 @@ struct CameraPreview: UIViewRepresentable {
             self.cameraManager = cameraManager
         }
         
-        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        @MainActor @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             guard let device = cameraManager.captureDevice else {
                 print("No capture device available for zoom")
                 return
@@ -84,7 +84,7 @@ struct CameraPreview: UIViewRepresentable {
             }
         }
         
-        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+        @MainActor @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard let device = cameraManager.captureDevice,
                   device.isFocusPointOfInterestSupported else { return }
             
@@ -131,16 +131,23 @@ struct CameraPreview: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        guard let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer else { return }
-        
-        previewLayer.videoGravity = cameraManager.maximizePreview ? .resizeAspectFill : .resizeAspect
-        previewLayer.frame = uiView.bounds
-        
-        // Add blurred background if not maximized
-        if !cameraManager.maximizePreview {
-            let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-            blurView.frame = uiView.bounds
-            uiView.insertSubview(blurView, at: 0)
+        // Always operate on main thread
+        DispatchQueue.main.async {
+            guard let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer else { return }
+            
+            previewLayer.videoGravity = cameraManager.maximizePreview ? .resizeAspectFill : .resizeAspect
+            previewLayer.frame = uiView.bounds
+            
+            // Remove existing blur views
+            uiView.subviews
+                .filter { $0 is UIVisualEffectView }
+                .forEach { $0.removeFromSuperview() }
+            
+            if !cameraManager.maximizePreview {
+                let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+                blurView.frame = uiView.bounds
+                uiView.insertSubview(blurView, at: 0)
+            }
         }
     }
 

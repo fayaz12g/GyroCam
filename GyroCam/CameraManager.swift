@@ -13,6 +13,7 @@ enum FrameRate: Int, CaseIterable, Identifiable {
     var description: String { "\(rawValue)fps" }
 }
 
+@MainActor
 class CameraManager: NSObject, ObservableObject {
     let session = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
@@ -73,32 +74,32 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor @Published var errorMessage = ""
     @MainActor @Published var currentClipNumber = 1
     private var currentCaptureDevice: AVCaptureDevice?
-
+    
     
     @Published var currentZoom: CGFloat = 1.0
-
+    
     // Published wrapper for settings
     @Published private var settings = AppSettings() {
         didSet {
             saveSettings()
         }
     }
-        
+    
     
     private var zoomTimer: Timer?
-        
+    
     // Add to existing properties
     var captureDevice: AVCaptureDevice? {
         return currentCaptureDevice
     }
     
     func resetZoomTimer() {
-            zoomTimer?.invalidate()
-            zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
-                self?.showZoomBar = self?.showZoomBar ?? true
-            }
+        zoomTimer?.invalidate()
+        zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+            self?.showZoomBar = self?.showZoomBar ?? true
         }
-        
+    }
+    
     @MainActor func switchCamera() {
         cameraPosition = cameraPosition == .back ? .front : .back
         currentZoom = 1.0  // Reset zoom when switching cameras
@@ -127,27 +128,27 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     private func loadSettings() {
-            if let data = UserDefaults.standard.data(forKey: "appSettings") {
-                let decoder = JSONDecoder()
-                if let decoded = try? decoder.decode(AppSettings.self, from: data) {
-                    settings = decoded
-                }
+        if let data = UserDefaults.standard.data(forKey: "appSettings") {
+            let decoder = JSONDecoder()
+            if let decoded = try? decoder.decode(AppSettings.self, from: data) {
+                settings = decoded
             }
         }
-        
-        private func saveSettings() {
-            let encoder = JSONEncoder()
-            if let encoded = try? encoder.encode(settings) {
-                UserDefaults.standard.set(encoded, forKey: "appSettings")
-            }
+    }
+    
+    private func saveSettings() {
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(settings) {
+            UserDefaults.standard.set(encoded, forKey: "appSettings")
         }
-        
+    }
+    
     @MainActor func resetToDefaults() {
-            settings = AppSettings()
-            settings.accentColor = Color(red: 1.0, green: 0.0, blue: 0.05098) // #FF000D
-            configureSession()
-        }
-
+        settings = AppSettings()
+        settings.accentColor = Color(red: 1.0, green: 0.0, blue: 0.05098) // #FF000D
+        configureSession()
+    }
+    
     override init() {
         super.init()
         requestCameraAccess()
@@ -162,15 +163,11 @@ class CameraManager: NSObject, ObservableObject {
     
     private func requestCameraAccess() {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-            guard granted else {
-                self?.setErrorMessage("Camera access denied")
-                return
-            }
-            
             DispatchQueue.main.async {
-                self?.configureSession()
-                self?.startSession()
-                self?.startOrientationUpdates()
+                if granted {
+                    self?.configureSession()
+                    self?.startSession()
+                }
             }
         }
     }
@@ -228,12 +225,9 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     private func startSession() {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            if !self.session.isRunning {
-                self.session.startRunning()
-                print("Capture session started")
-            }
+        guard !session.isRunning else { return }
+        DispatchQueue.main.async { [weak self] in
+            self?.session.startRunning()
         }
     }
     
@@ -247,8 +241,8 @@ class CameraManager: NSObject, ObservableObject {
         }
         
         return AVCaptureDevice.default(deviceTypes.first!,
-                                     for: .video,
-                                     position: cameraPosition)
+                                       for: .video,
+                                       position: cameraPosition)
     }
     
     @MainActor private func configureDeviceFormat() throws {
@@ -274,9 +268,9 @@ class CameraManager: NSObject, ObservableObject {
                 let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
                 let hasHDR = isHDREnabled ? format.supportedColorSpaces.contains(.HLG_BT2020) : true
                 return dimensions.width == targetResolution.width &&
-                       dimensions.height == targetResolution.height &&
-                       format.maxFrameRate >= Double(targetFPS) &&
-                       hasHDR
+                dimensions.height == targetResolution.height &&
+                format.maxFrameRate >= Double(targetFPS) &&
+                hasHDR
             }
             .sorted { $0.maxFrameRate > $1.maxFrameRate }
             .first ?? device.activeFormat
@@ -322,10 +316,10 @@ class CameraManager: NSObject, ObservableObject {
             guard let self = self, !self.isRestarting else { return }
             self.isRestarting = true
             
-            self.stopRecording { [weak self] in
-                guard let self = self else { return }
-                
-                DispatchQueue.main.async {
+            DispatchQueue.main.async { // Ensure main thread
+                self.stopRecording { [weak self] in
+                    guard let self = self else { return }
+                    
                     self.currentClipNumber += 1
                     self.startRecording()
                     self.isRestarting = false
@@ -359,14 +353,13 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor func startRecording() {
         
-        startLocationUpdates()
-        
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mov")
         
         movieOutput.startRecording(to: tempURL, recordingDelegate: self)
         isRecording = true
+//        startLocationUpdates()
         print("▶️ Started recording clip #\(currentClipNumber)")
     }
     
@@ -391,13 +384,11 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
     }
     
     @MainActor
-        func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-            if let error = error {
-                setErrorMessage("Recording failed: \(error.localizedDescription)")
-                stopCompletion?()
-                stopCompletion = nil
-                return
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if let error = error {
+                self.errorMessage = "Recording failed: \(error.localizedDescription)"
             }
+        
             
             // Immediately trigger completion to allow next recording
             stopCompletion?()
