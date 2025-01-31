@@ -113,10 +113,14 @@ struct SettingsView: View {
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarTrailing) {
-                                    Button("Done") {
+                                    Button(action: {
                                         presentationMode.wrappedValue.dismiss()
+                                    }) {
+                                        Text("Done")
+                                            .foregroundColor(cameraManager.accentColor)
                                     }
                                 }
+
                             }
                         }
                     }
