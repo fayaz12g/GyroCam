@@ -51,7 +51,7 @@ struct ControlsView: View {
                         .matchedGeometryEffect(id: "gear", in: animationNamespace)
                 }
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 45)
             
             if isQuickSettingsVisible {
                 QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)

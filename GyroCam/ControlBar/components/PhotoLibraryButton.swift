@@ -26,13 +26,13 @@ struct PhotoLibraryButton: View {
     }
     
     private var horizontalPadding: CGFloat {
-        rotationAngle == .degrees(0) ? 8 : 8
+        rotationAngle == .degrees(0) ? 0 : 0
     }
     
     private var verticalOffset: CGFloat {
         switch currentOrientation {
-        case "Landscape Left", "Landscape Right": return 0
-        case "Upside Down": return 12
+        case "Landscape Left", "Landscape Right": return -6
+        case "Upside Down": return 0
         default: return 0
         }
     }

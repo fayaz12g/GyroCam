@@ -20,7 +20,7 @@ extension CameraManager.LensType: Codable {}
 
 
 struct AppSettings: Codable {
-    var accentColor: Color = Color(red: 1.0, green: 0.0, blue: 0.05098) // #FF000D
+    var accentColor: Color = Color(red: 1.0, green: 0.204, blue: 0.169) // #FF000D
     var currentFormat: CameraManager.VideoFormat = .hd4K
     var currentFPS: FrameRate = .sixty
     var cameraPosition: AVCaptureDevice.Position = .back
