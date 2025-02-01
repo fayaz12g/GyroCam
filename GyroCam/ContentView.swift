@@ -27,7 +27,7 @@ struct ContentView: View {
                                         }
                     Spacer()
                     
-                    ControlsView(cameraManager: cameraManager)
+                    ControlsView(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation)
                         .padding(.bottom, 50)
                 }
             }

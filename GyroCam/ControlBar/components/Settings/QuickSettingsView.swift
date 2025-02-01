@@ -69,7 +69,7 @@ struct QuickSettingsView: View {
                 showSettings = true
                 print("Settings opened")
             } label: {
-                Image(systemName: "gear")
+                Image(systemName: "ellipsis")
                     .font(.system(size: 14))
                     .padding(6)
             }
