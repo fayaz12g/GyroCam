@@ -232,17 +232,58 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor private func getCurrentDevice() -> AVCaptureDevice? {
-        let deviceTypes: [AVCaptureDevice.DeviceType]
+        let position = cameraPosition
+        let deviceType: AVCaptureDevice.DeviceType
         
         switch currentLens {
-        case .ultraWide: deviceTypes = [.builtInUltraWideCamera]
-        case .telephoto: deviceTypes = [.builtInTelephotoCamera]
-        default: deviceTypes = [.builtInWideAngleCamera]
+        case .ultraWide:
+            deviceType = .builtInUltraWideCamera
+        case .telephoto:
+            deviceType = .builtInTelephotoCamera
+        default:
+            deviceType = .builtInWideAngleCamera
         }
         
-        return AVCaptureDevice.default(deviceTypes.first!,
-                                       for: .video,
-                                       position: cameraPosition)
+        // Attempt to get the selected lens
+        guard let device = AVCaptureDevice.default(deviceType, for: .video, position: position) else {
+            // Fall back to wide angle if unavailable
+            let wideDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
+            DispatchQueue.main.async {
+                if self.currentLens != .wide {
+                    self.currentLens = .wide
+                }
+            }
+            return wideDevice
+        }
+        return device
+    }
+    
+    @MainActor var availableLenses: [LensType] {
+        let position = cameraPosition
+        var lenses = [LensType]()
+        
+        // Check for ultra wide lens
+        if AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: position) != nil {
+            lenses.append(.ultraWide)
+        }
+        
+        // Wide lens is always available
+        lenses.append(.wide)
+        
+        // Check for telephoto lens
+        if AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: position) != nil {
+            lenses.append(.telephoto)
+        }
+        
+        return lenses
+    }
+    
+    @MainActor var availableFrameRates: [FrameRate] {
+        guard let device = currentDevice else { return [] }
+        let activeFormat = device.activeFormat
+        let supportedRanges = activeFormat.videoSupportedFrameRateRanges
+        let maxFPS = supportedRanges.map { $0.maxFrameRate }.max() ?? 30
+        return FrameRate.allCases.filter { $0.rawValue <= Int(maxFPS) }
     }
     
     @MainActor private func configureDeviceFormat() throws {
@@ -254,7 +295,29 @@ class CameraManager: NSObject, ObservableObject {
         let targetFormat = try findBestFormat(for: device)
         device.activeFormat = targetFormat
         
-        let frameDuration = CMTimeMake(value: 1, timescale: Int32(currentFPS.rawValue))
+        // Get supported frame rate ranges for the active format
+        let supportedRanges = targetFormat.videoSupportedFrameRateRanges
+        let maxSupportedFPS = supportedRanges.map { $0.maxFrameRate }.max() ?? 30
+        let minSupportedFPS = supportedRanges.map { $0.minFrameRate }.min() ?? 30
+        
+        // Determine the actual FPS to set
+        let desiredFPS = currentFPS.rawValue
+        var actualFPS = desiredFPS
+        
+        if Double(desiredFPS) > maxSupportedFPS {
+            actualFPS = Int(maxSupportedFPS)
+        } else if Double(desiredFPS) < minSupportedFPS {
+            actualFPS = Int(minSupportedFPS)
+        }
+        
+        // Update currentFPS if necessary to reflect actual value
+        if actualFPS != desiredFPS {
+            DispatchQueue.main.async {
+                self.currentFPS = FrameRate(rawValue: actualFPS) ?? .thirty
+            }
+        }
+        
+        let frameDuration = CMTimeMake(value: 1, timescale: Int32(actualFPS))
         device.activeVideoMinFrameDuration = frameDuration
         device.activeVideoMaxFrameDuration = frameDuration
     }
@@ -277,6 +340,10 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func switchLens(_ lens: LensType) {
+        guard availableLenses.contains(lens) else {
+            setErrorMessage("Selected lens is unavailable")
+            return
+        }
         currentLens = lens
         configureSession()
     }

@@ -15,7 +15,7 @@ struct QuickSettingsView: View {
         HStack(spacing: 12) {
             // Lens Picker
             Picker("Lens", selection: $cameraManager.currentLens) {
-                ForEach(CameraManager.LensType.allCases, id: \.self) { lens in
+                ForEach(cameraManager.availableLenses, id: \.self) { lens in
                     Text(lens.rawValue)
                         .font(.system(size: 12))
                         .tag(lens)
@@ -24,13 +24,12 @@ struct QuickSettingsView: View {
             .pickerStyle(.menu)
             .tint(.primary)
             .fixedSize()
+            .onChange(of: cameraManager.currentLens) { _, _ in
+                cameraManager.configureSession()
+            }
             
             Divider()
                 .frame(height: 20)
-            
-                .onChange(of: cameraManager.currentLens) { _, _ in
-                    cameraManager.configureSession()
-                }
             
             // Resolution Picker
             Picker("Res", selection: $cameraManager.currentFormat) {
@@ -39,43 +38,41 @@ struct QuickSettingsView: View {
                         .font(.system(size: 12))
                         .tag(format)
                 }
-                
-                .onChange(of: cameraManager.currentFormat) { _, _ in
-                    cameraManager.configureSession()
-                }
             }
             .pickerStyle(.menu)
             .tint(.primary)
             .fixedSize()
+            .onChange(of: cameraManager.currentFormat) { _, _ in
+                cameraManager.configureSession()
+            }
             
             Divider()
                 .frame(height: 20)
             
-            // FPS Picker
+            // FPS Picker - Now uses available frame rates
             Picker("FPS", selection: $cameraManager.currentFPS) {
-                ForEach(FrameRate.allCases) { fps in
+                ForEach(cameraManager.availableFrameRates) { fps in
                     Text(fps.description)
                         .font(.system(size: 12))
                         .tag(fps)
-                }
-                .onChange(of: cameraManager.currentFPS) { _, _ in
-                    cameraManager.configureSession()
                 }
             }
             .pickerStyle(.menu)
             .tint(.primary)
             .fixedSize()
+            .onChange(of: cameraManager.currentFPS) { _, _ in
+                cameraManager.configureSession()
+            }
             
             // More Settings Button
             Button {
                 showSettings = true
                 print("Settings opened")
             } label: {
-                Image(systemName: "gear")
+                Image(systemName: "ellipses")
                     .font(.system(size: 14))
                     .padding(6)
             }
-        
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 12)
