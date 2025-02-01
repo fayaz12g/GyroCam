@@ -70,6 +70,7 @@ struct PhotoLibraryButton: View {
         }
         .onAppear(perform: loadLatestThumbnail)
         .onChange(of: cameraManager.isRecording) { _, _ in
+            // make this more efficient, tie to right after save
             loadLatestThumbnail()
         }
 
