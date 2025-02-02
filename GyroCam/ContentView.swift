@@ -29,6 +29,8 @@ struct ContentView: View {
                     
                     ControlsView(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation)
                         .padding(.bottom, 15)
+                        .padding(.leading, -35)
+                        
                 }
             }
             .navigationBarHidden(true)

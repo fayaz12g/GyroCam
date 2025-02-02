@@ -14,6 +14,7 @@ struct ControlsView: View {
             HStack {
                 // Photo Library Button (Left)
                 PhotoLibraryButton(cameraManager: cameraManager, currentOrientation: $currentOrientation)
+                .padding(.leading, 35)
                 
                 Spacer()
                 
@@ -50,8 +51,10 @@ struct ControlsView: View {
                         .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
                         .matchedGeometryEffect(id: "gear", in: animationNamespace)
                 }
+                .padding(.leading, 35)
             }
-            .padding(.horizontal, 45)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 30)
             
             if isQuickSettingsVisible {
                 QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)

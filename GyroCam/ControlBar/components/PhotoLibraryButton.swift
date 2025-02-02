@@ -62,8 +62,8 @@ struct PhotoLibraryButton: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .rotationEffect(rotationAngle)
         }
-        .padding(.trailing, horizontalPadding)
-        .offset(y: verticalOffset)
+//        .padding(.trailing, horizontalPadding)
+//        .offset(y: verticalOffset)
         .animation(.easeInOut(duration: 0.2), value: currentOrientation)
         .sheet(isPresented: $showingPhotoLibrary) {
             PhotoLibraryView(cameraManager: cameraManager)
