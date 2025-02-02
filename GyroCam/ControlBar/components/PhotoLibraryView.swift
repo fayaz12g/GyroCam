@@ -165,8 +165,11 @@ struct VideoThumbnailView: View {
                 loadVideoInfo()
             }
         }
-        .onChange(of: cameraManager.isProMode) { newValue in
-            if newValue { loadVideoInfo() }
+        .onChange(of: cameraManager.isProMode) {
+            if cameraManager.isProMode {
+                loadVideoInfo()
+                loadVideoBadges()
+            }
         }
         .fullScreenCover(isPresented: $showingVideo) {
             VideoPlayerView(asset: asset)
