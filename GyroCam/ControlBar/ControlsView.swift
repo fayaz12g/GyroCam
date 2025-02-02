@@ -32,6 +32,7 @@ struct ControlsView: View {
                         }
                     }
                 )
+                .padding(.leading, -15)
                 
                 Spacer()
                 
@@ -51,7 +52,7 @@ struct ControlsView: View {
                         .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
                         .matchedGeometryEffect(id: "gear", in: animationNamespace)
                 }
-                .padding(.leading, 35)
+                .padding(.trailing, 15)
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 30)
