@@ -26,7 +26,7 @@ struct PhotoLibraryButton: View {
     }
     
     private var horizontalPadding: CGFloat {
-        rotationAngle == .degrees(0) ? 0 : 0
+        rotationAngle == .degrees(0) ? -30 : -30
     }
     
     private var verticalOffset: CGFloat {
@@ -66,7 +66,7 @@ struct PhotoLibraryButton: View {
         .offset(y: verticalOffset)
         .animation(.easeInOut(duration: 0.2), value: currentOrientation)
         .sheet(isPresented: $showingPhotoLibrary) {
-            PhotoLibraryView()
+            PhotoLibraryView(cameraManager: cameraManager)
         }
         .onAppear(perform: loadLatestThumbnail)
         .onChange(of: cameraManager.isRecording) { _, _ in

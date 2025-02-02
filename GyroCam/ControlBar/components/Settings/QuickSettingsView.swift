@@ -49,7 +49,7 @@ struct QuickSettingsView: View {
             Divider()
                 .frame(height: 20)
             
-            // FPS Picker - Now uses available frame rates
+            // FPS Picker
             Picker("FPS", selection: $cameraManager.currentFPS) {
                 ForEach(cameraManager.availableFrameRates) { fps in
                     Text(fps.description)
@@ -64,14 +64,14 @@ struct QuickSettingsView: View {
                 cameraManager.configureSession()
             }
             
-            // More Settings Button
+            // Improved ellipsis button with larger tap area
             Button {
                 showSettings = true
-                print("Settings opened")
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 14))
-                    .padding(6)
+                    .padding(8) // Increased padding
+                    .contentShape(Rectangle()) // Larger tap area
             }
             .buttonStyle(.plain)
         }
