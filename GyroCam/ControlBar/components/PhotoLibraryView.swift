@@ -329,9 +329,10 @@ enum VideoBadgeType: Identifiable, CaseIterable {
     
     var icon: String {
         switch self {
-        case .hdr, .hdrFallback: return "h.square.fill"
-        case .cinematic: return "movieclapper.fill"
-        case .highFrameRate: return "speedometer"
+        case .hdr: return "mountain.2"
+        case .hdrFallback: return "tv.fill"
+        case .cinematic: return "film"
+        case .highFrameRate: return "timer"
         case .timelapse: return "timelapse"
         case .hevc: return "h.square"
         }
@@ -340,9 +341,9 @@ enum VideoBadgeType: Identifiable, CaseIterable {
     var label: String {
         switch self {
         case .hdr: return "HDR"
-        case .hdrFallback: return "HDR"
+        case .hdrFallback: return "Dolby Vision"
         case .cinematic: return "Cinematic"
-        case .highFrameRate: return "High FPS"
+        case .highFrameRate: return "Slo-Mo"
         case .timelapse: return "Timelapse"
         case .hevc: return "HEVC"
         }
