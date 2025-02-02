@@ -45,20 +45,9 @@ struct SettingsView: View {
                         }
                 }
                 
-                Section(header: Text("Frame Rate")) {
-                    Picker("FPS", selection: $cameraManager.currentFPS) {
-                        ForEach(cameraManager.availableFrameRates) { fps in
-                            Text(fps.description).tag(fps)
-                        }
-                    }
-                    .onChange(of: cameraManager.currentFPS) { _, _ in
-                        cameraManager.configureSession()
-                    }
-                }
-                
                 Section(header: Text("Camera Options")) {
-                    Picker("Lens", selection: $cameraManager.currentLens) {
-                        ForEach(CameraManager.LensType.allCases, id: \.self) { lens in
+                    Picker("Camera Type", selection: $cameraManager.currentLens) {
+                        ForEach(cameraManager.availableLenses, id: \.self) { lens in
                             Text(lens.rawValue).tag(lens)
                         }
                     }
@@ -66,13 +55,16 @@ struct SettingsView: View {
                         cameraManager.configureSession()
                     }
                     
-                    Picker("Position", selection: $cameraManager.cameraPosition) {
-                        Text("Back").tag(AVCaptureDevice.Position.back)
-                        Text("Front").tag(AVCaptureDevice.Position.front)
+                    Picker("Frame Rate", selection: $cameraManager.currentFPS) {
+                        ForEach(cameraManager.availableFrameRates) { fps in
+                            Text(fps.description).tag(fps)
+                        }
                     }
-                    .onChange(of: cameraManager.cameraPosition) { _, _ in
+                    .onChange(of: cameraManager.currentFPS) { _, _ in
                         cameraManager.configureSession()
                     }
+                    
+                    
                 }
                 
                 Section(header: Text("Updates")) {

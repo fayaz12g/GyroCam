@@ -118,14 +118,15 @@ struct VideoThumbnailView: View {
                 .clipped()
                 
                 // Top-left badges
-                VStack(alignment: .leading) {
-                    ForEach(videoBadges) { badge in
-                        VideoBadgeView(type: badge)
+                if cameraManager.isProMode {
+                    VStack(alignment: .leading) {
+                        ForEach(videoBadges) { badge in
+                            VideoBadgeView(type: badge)
+                        }
                     }
+                    .padding(6)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
-                .padding(6)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                
                 
                 // Bottom gradient overlay
                 LinearGradient(
@@ -159,7 +160,10 @@ struct VideoThumbnailView: View {
         }
         .onAppear {
             loadThumbnail()
-            loadVideoBadges()
+            if cameraManager.isProMode {
+                loadVideoBadges()
+                loadVideoInfo()
+            }
         }
         .onChange(of: cameraManager.isProMode) { newValue in
             if newValue { loadVideoInfo() }

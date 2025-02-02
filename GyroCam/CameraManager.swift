@@ -5,12 +5,19 @@ import Photos
 import SwiftUI
 import CoreLocation
 
-enum FrameRate: Int, CaseIterable, Identifiable {
+enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
+    case twenty_four = 24
     case thirty = 30
     case sixty = 60
+    case oneHundredTwenty = 120
+    case twoHundredForty = 240
     
     var id: Int { rawValue }
     var description: String { "\(rawValue)fps" }
+    
+    static func < (lhs: FrameRate, rhs: FrameRate) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
 }
 
 @MainActor
@@ -109,10 +116,17 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func switchCamera() {
-        cameraPosition = cameraPosition == .back ? .front : .back
-        currentZoom = 1.0  // Reset zoom when switching cameras
-        configureSession()
-    }
+            // Update to switch between front and back cameras using LensType
+            if currentLens == .frontWide {
+                // Switch to back camera (prefer wide if available)
+                currentLens = .wide
+            } else {
+                // Switch to front camera
+                currentLens = .frontWide
+            }
+            currentZoom = 1.0  // Reset zoom when switching cameras
+            configureSession()
+        }
     
     // Orientation handling
     private var previousOrientation: UIDeviceOrientation = .portrait
@@ -120,8 +134,33 @@ class CameraManager: NSObject, ObservableObject {
     private var isRestarting = false
     
     enum LensType: String, CaseIterable {
-        case ultraWide = "0.5x", wide = "1x", telephoto = "3x"
-    }
+        case frontWide = "Front"
+        case ultraWide = "0.5x"
+        case wide = "1x"
+        case telephoto = "3x"
+        
+        var deviceType: AVCaptureDevice.DeviceType {
+            switch self {
+            case .frontWide:
+                return .builtInWideAngleCamera
+            case .ultraWide:
+                return .builtInUltraWideCamera
+            case .wide:
+                return .builtInWideAngleCamera
+            case .telephoto:
+                return .builtInTelephotoCamera
+            }
+        }
+        var position: AVCaptureDevice.Position {
+                    switch self {
+                    case .frontWide:
+                        return .front
+                    default:
+                        return .back
+                    }
+                }}
+    
+    
     
     enum VideoFormat: String, CaseIterable {
         case hd4K = "4K"
@@ -240,59 +279,81 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor private func getCurrentDevice() -> AVCaptureDevice? {
-        let position = cameraPosition
-        let deviceType: AVCaptureDevice.DeviceType
-        
-        switch currentLens {
-        case .ultraWide:
-            deviceType = .builtInUltraWideCamera
-        case .telephoto:
-            deviceType = .builtInTelephotoCamera
-        default:
-            deviceType = .builtInWideAngleCamera
-        }
-        
-        // Attempt to get the selected lens
-        guard let device = AVCaptureDevice.default(deviceType, for: .video, position: position) else {
-            // Fall back to wide angle if unavailable
-            let wideDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
-            DispatchQueue.main.async {
-                if self.currentLens != .wide {
-                    self.currentLens = .wide
+            let deviceType = currentLens.deviceType
+            let position = currentLens.position
+            
+            // Attempt to get the selected lens
+            guard let device = AVCaptureDevice.default(deviceType, for: .video, position: position) else {
+                // Fall back to wide angle if unavailable
+                let fallbackLens: LensType = position == .front ? .frontWide : .wide
+                let fallbackDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
+                
+                DispatchQueue.main.async {
+                    if self.currentLens != fallbackLens {
+                        self.currentLens = fallbackLens
+                    }
                 }
+                return fallbackDevice
             }
-            return wideDevice
+            return device
         }
-        return device
-    }
     
     @MainActor var availableLenses: [LensType] {
-        let position = cameraPosition
-        var lenses = [LensType]()
-        
-        // Check for ultra wide lens
-        if AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: position) != nil {
-            lenses.append(.ultraWide)
+            var lenses: [LensType] = []
+            
+            // Check front camera
+            if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil {
+                lenses.append(.frontWide)
+            }
+            
+            // Check back cameras
+            if AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) != nil {
+                lenses.append(.ultraWide)
+            }
+            
+            // Wide angle is typically always available on back
+            if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil {
+                lenses.append(.wide)
+            }
+            
+            // Check telephoto
+            if AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: .back) != nil {
+                lenses.append(.telephoto)
+            }
+            
+            return lenses
         }
-        
-        // Wide lens is always available
-        lenses.append(.wide)
-        
-        // Check for telephoto lens
-        if AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: position) != nil {
-            lenses.append(.telephoto)
-        }
-        
-        return lenses
-    }
     
     @MainActor var availableFrameRates: [FrameRate] {
-        guard let device = currentDevice else { return [] }
-        let activeFormat = device.activeFormat
-        let supportedRanges = activeFormat.videoSupportedFrameRateRanges
-        let maxFPS = supportedRanges.map { $0.maxFrameRate }.max() ?? 30
-        return FrameRate.allCases.filter { $0.rawValue <= Int(maxFPS) }
-    }
+            guard let device = currentDevice else { return [] }
+            
+            var supportedRates: Set<FrameRate> = []
+            
+            // Check each format for supported frame rates
+            for format in device.formats {
+                let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+                let currentDimensions = currentFormat.resolution
+                
+                // Only consider formats matching our current resolution
+                guard dimensions.width == currentDimensions.width &&
+                      dimensions.height == currentDimensions.height else {
+                    continue
+                }
+                
+                // Get the maximum frame rate for this format
+                let maxRate = Int(format.maxFrameRate)
+                
+                // Add all supported frame rates up to the maximum
+                FrameRate.allCases.forEach { frameRate in
+                    if frameRate.rawValue <= maxRate {
+                        supportedRates.insert(frameRate)
+                    }
+                }
+            }
+            
+            // Return sorted array of supported rates
+            return Array(supportedRates).sorted()
+        }
     
     @MainActor private func configureDeviceFormat() throws {
         guard let device = currentDevice else { return }
@@ -405,26 +466,26 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
-        session.beginConfiguration()
-        defer { session.commitConfiguration() }
-        
-        guard let connection = movieOutput.connection(with: .video) else { return }
-        
-        let videoOrientation: AVCaptureVideoOrientation
-        switch orientation {
-        case .portrait: videoOrientation = .portrait
-        case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
-        case .landscapeLeft: videoOrientation = .landscapeRight
-        case .landscapeRight: videoOrientation = .landscapeLeft
-        default: videoOrientation = .portrait
+            session.beginConfiguration()
+            defer { session.commitConfiguration() }
+            
+            guard let connection = movieOutput.connection(with: .video) else { return }
+            
+            let videoOrientation: AVCaptureVideoOrientation
+            switch orientation {
+            case .portrait: videoOrientation = .portrait
+            case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
+            case .landscapeLeft: videoOrientation = .landscapeRight
+            case .landscapeRight: videoOrientation = .landscapeLeft
+            default: videoOrientation = .portrait
+            }
+            
+            connection.videoOrientation = videoOrientation
+            
+            if connection.isVideoMirroringSupported {
+                connection.isVideoMirrored = (currentLens == .frontWide)
+            }
         }
-        
-        connection.videoOrientation = videoOrientation
-        
-        if connection.isVideoMirroringSupported {
-            connection.isVideoMirrored = (cameraPosition == .front)
-        }
-    }
     
     @MainActor func startRecording() {
         
