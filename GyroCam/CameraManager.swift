@@ -5,6 +5,7 @@ import Photos
 import SwiftUI
 import CoreLocation
 
+
 enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
     case twenty_four = 24
     case thirty = 30
@@ -495,6 +496,13 @@ class CameraManager: NSObject, ObservableObject {
         
         movieOutput.startRecording(to: tempURL, recordingDelegate: self)
         isRecording = true
+        if !isRestarting {
+            AudioServicesPlaySystemSound(1117)
+        }
+        else{
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
+        }
 //        startLocationUpdates()
         print("▶️ Started recording clip #\(currentClipNumber)")
     }
@@ -507,6 +515,7 @@ class CameraManager: NSObject, ObservableObject {
         print("⏹ Stopped recording clip #\(currentClipNumber)")
         if !isRestarting {
             self.currentClipNumber = 1 // reset
+            AudioServicesPlaySystemSound(1118)
         }
     }
 }
