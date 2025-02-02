@@ -5,31 +5,42 @@
 //  Created by Fayaz Shaikh on 1/29/25.
 //
 
-
 import SwiftUI
 import Photos
 import AVKit
 
-
 struct PhotoLibraryView: View {
+    @State private var assetGroups = [Date: [PHAsset]]()
+    @State private var sortedDates = [Date]()
     @ObservedObject var cameraManager: CameraManager
-    @State private var assets = [PHAsset]()
-    @State private var isProMode = false
     
     var body: some View {
         NavigationView {
             ScrollView {
-                MasonryView(assets: assets, isProMode: $isProMode)
-                    .padding()
+                LazyVStack(spacing: 20) {
+                    ForEach(sortedDates, id: \.self) { date in
+                        Section {
+                            MasonryView(assets: assetGroups[date] ?? [],
+                                      cameraManager: cameraManager)
+                                .padding(.horizontal)
+                        } header: {
+                            Text(date.formattedDateHeader)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                    }
+                }
+                .padding(.vertical)
             }
             .navigationTitle("Recordings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Toggle("Pro Mode", isOn: $isProMode)
-                        .tint(cameraManager.accentColor)
+                    Toggle("Pro Mode", isOn: $cameraManager.isProMode)
                         .toggleStyle(.switch)
-                        .labelsHidden()
+                        .tint(cameraManager.accentColor)
                 }
             }
             .onAppear(perform: loadAssets)
@@ -45,12 +56,21 @@ struct PhotoLibraryView: View {
             fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
             
             let results = PHAsset.fetchAssets(with: fetchOptions)
-            var loadedAssets = [PHAsset]()
+            var groups = [Date: [PHAsset]]()
+            
             results.enumerateObjects { asset, _, _ in
-                loadedAssets.append(asset)
+                guard let date = asset.creationDate else { return }
+                let normalizedDate = Calendar.current.startOfDay(for: date)
+                
+                if groups[normalizedDate] == nil {
+                    groups[normalizedDate] = [PHAsset]()
+                }
+                groups[normalizedDate]?.append(asset)
             }
+            
             DispatchQueue.main.async {
-                assets = loadedAssets
+                assetGroups = groups
+                sortedDates = groups.keys.sorted(by: >)
             }
         }
     }
@@ -58,13 +78,13 @@ struct PhotoLibraryView: View {
 
 struct MasonryView: View {
     let assets: [PHAsset]
-    @Binding var isProMode: Bool
+    @ObservedObject var cameraManager: CameraManager
     let columns = [GridItem(.adaptive(minimum: 150), spacing: 8)]
     
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
             ForEach(assets, id: \.localIdentifier) { asset in
-                VideoThumbnailView(asset: asset, isProMode: $isProMode)
+                VideoThumbnailView(asset: asset, cameraManager: cameraManager)
                     .aspectRatio(CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .fit)
             }
         }
@@ -73,14 +93,15 @@ struct MasonryView: View {
 
 struct VideoThumbnailView: View {
     let asset: PHAsset
-    @Binding var isProMode: Bool
+    @ObservedObject var cameraManager: CameraManager
     @State private var image: UIImage?
     @State private var showingVideo = false
     @State private var videoInfo: VideoInfo?
     
     var body: some View {
         Button(action: { showingVideo = true }) {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .bottom) {
+                // Thumbnail image
                 Group {
                     if let image = image {
                         Image(uiImage: image)
@@ -95,36 +116,51 @@ struct VideoThumbnailView: View {
                 .cornerRadius(8)
                 .clipped()
                 
-                // Gradient overlay
+                // Top-left HDR badge
+                if cameraManager.isProMode && asset.isHDRVideo {
+                    HDRBadge()
+                        .padding(6)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
+                
+                // Bottom gradient overlay
                 LinearGradient(
                     gradient: Gradient(colors: [.clear, .black.opacity(0.7)]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 40)
+                .frame(height: 48)
                 
                 // Info overlay
-                VStack(alignment: .trailing, spacing: 2) {
-                    if isProMode, let info = videoInfo {
-                        Text(info.resolution)
-                            .font(.system(size: 10, weight: .medium))
-                        Text(info.fps)
-                            .font(.system(size: 10, weight: .medium))
+                HStack(alignment: .bottom) {
+                    if cameraManager.isProMode, let info = videoInfo {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(info.creationTime)
+                                .font(.system(size: 10, weight: .medium))
+                            Text(info.resolution)
+                                .font(.system(size: 8, weight: .medium))
+                            Text(info.fps)
+                                .font(.system(size: 8, weight: .medium))
+                        }
                     }
+                    
+                    Spacer()
+                    
                     Text(asset.duration.formattedDuration)
                         .font(.system(size: 12, weight: .semibold))
                 }
                 .foregroundColor(.white)
-                .padding(6)
+                .padding(8)
             }
         }
         .onAppear(perform: loadThumbnail)
-        .onChange(of: isProMode) { newValue in
+        .onChange(of: cameraManager.isProMode) { newValue in
             if newValue { loadVideoInfo() }
         }
         .fullScreenCover(isPresented: $showingVideo) {
             VideoPlayerView(asset: asset)
         }
+    
     }
     
     private func loadThumbnail() {
@@ -145,24 +181,52 @@ struct VideoThumbnailView: View {
             forVideo: asset,
             options: nil
         ) { avAsset, _, _ in
-            guard let avAsset = avAsset else { return }
+            guard let avAsset = avAsset,
+                  let creationDate = asset.creationDate else { return }
             
             let videoTracks = avAsset.tracks(withMediaType: .video)
             guard let track = videoTracks.first else { return }
             
-            let resolution = "\(Int(track.naturalSize.width))x\(Int(track.naturalSize.height))"
-            let fps = "\(Int(track.nominalFrameRate)) fps"
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
             
             DispatchQueue.main.async {
-                self.videoInfo = VideoInfo(resolution: resolution, fps: fps)
+                self.videoInfo = VideoInfo(
+                    resolution: "\(Int(track.naturalSize.width))x\(Int(track.naturalSize.height))",
+                    fps: "\(Int(track.nominalFrameRate)) fps",
+                    creationTime: formatter.string(from: creationDate)
+                )
             }
         }
+    }
+}
+
+struct HDRBadge: View {
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Image(systemName: "h.square.fill")
+            .symbolRenderingMode(.hierarchical)
+            .foregroundColor(colorScheme == .dark ? .white : .black)
+            .padding(4)
+            .background(.thinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
 
 struct VideoInfo {
     let resolution: String
     let fps: String
+    let creationTime: String
+}
+
+extension Date {
+    var formattedDateHeader: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .none
+        return formatter.string(from: self).uppercased()
+    }
 }
 
 extension TimeInterval {
@@ -174,8 +238,6 @@ extension TimeInterval {
         return formatter.string(from: self) ?? "0:00"
     }
 }
-
-// Keep the existing VideoPlayerView implementation
 
 struct VideoPlayerView: View {
     let asset: PHAsset
@@ -231,3 +293,15 @@ struct VideoPlayerView: View {
     }
 }
 
+extension PHAsset {
+    var isHDRVideo: Bool {
+        if #available(iOS 15.0, *) {
+            return mediaSubtypes.contains(.videoDolbyVision)
+        } 
+    }
+}
+
+@available(iOS 15.0, *)
+extension PHAssetMediaSubtype {
+    static let videoDolbyVision = PHAssetMediaSubtype(rawValue: 1 << 24)
+}

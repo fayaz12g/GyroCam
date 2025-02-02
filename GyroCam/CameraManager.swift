@@ -22,6 +22,7 @@ class CameraManager: NSObject, ObservableObject {
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
     
+
     // location
     private let locationManager = CLLocationManager()
     private var lastKnownLocation: CLLocation?
@@ -29,6 +30,13 @@ class CameraManager: NSObject, ObservableObject {
     
     // Main actor isolated properties
     // Main properties
+    
+    
+    @MainActor var isProMode: Bool {
+        get { settings.isProMode }
+        set { settings.isProMode = newValue }
+    }
+    
     @MainActor var currentFormat: CameraManager.VideoFormat {
         get { settings.currentFormat }
         set { settings.currentFormat = newValue }
