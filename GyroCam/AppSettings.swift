@@ -26,7 +26,7 @@ struct AppSettings: Codable {
     var cameraPosition: AVCaptureDevice.Position = .back
     var currentLens: CameraManager.LensType = .wide
     var isHDREnabled: Bool = true
-    var isProMode: Bool = true
+    var isProMode: Bool = false
     var showZoomBar: Bool = false
     var maximizePreview: Bool = true
 }

@@ -97,6 +97,7 @@ struct VideoThumbnailView: View {
     @State private var image: UIImage?
     @State private var showingVideo = false
     @State private var videoInfo: VideoInfo?
+    @State private var videoBadges: [VideoBadgeType] = []
     
     var body: some View {
         Button(action: { showingVideo = true }) {
@@ -116,12 +117,15 @@ struct VideoThumbnailView: View {
                 .cornerRadius(8)
                 .clipped()
                 
-                // Top-left HDR badge
-                if cameraManager.isProMode && asset.isHDRVideo {
-                    HDRBadge()
-                        .padding(6)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                // Top-left badges
+                VStack(alignment: .leading) {
+                    ForEach(videoBadges) { badge in
+                        VideoBadgeView(type: badge)
+                    }
                 }
+                .padding(6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                
                 
                 // Bottom gradient overlay
                 LinearGradient(
@@ -153,7 +157,10 @@ struct VideoThumbnailView: View {
                 .padding(8)
             }
         }
-        .onAppear(perform: loadThumbnail)
+        .onAppear {
+            loadThumbnail()
+            loadVideoBadges()
+        }
         .onChange(of: cameraManager.isProMode) { newValue in
             if newValue { loadVideoInfo() }
         }
@@ -161,6 +168,15 @@ struct VideoThumbnailView: View {
             VideoPlayerView(asset: asset)
         }
     
+    }
+    
+    private func loadVideoBadges() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let badges = self.asset.videoBadges
+            DispatchQueue.main.async {
+                self.videoBadges = badges
+            }
+        }
     }
     
     private func loadThumbnail() {
@@ -293,15 +309,125 @@ struct VideoPlayerView: View {
     }
 }
 
-extension PHAsset {
-    var isHDRVideo: Bool {
-        if #available(iOS 15.0, *) {
-            return mediaSubtypes.contains(.videoDolbyVision)
-        } 
+// Add this enum to handle different badge types
+enum VideoBadgeType: Identifiable, CaseIterable {
+    case hdr
+    case cinematic
+    case highFrameRate
+    case timelapse
+    case hevc
+    case hdrFallback
+    
+    var id: Self { self }
+    
+    var icon: String {
+        switch self {
+        case .hdr, .hdrFallback: return "h.square.fill"
+        case .cinematic: return "movieclapper.fill"
+        case .highFrameRate: return "speedometer"
+        case .timelapse: return "timelapse"
+        case .hevc: return "h.square"
+        }
+    }
+    
+    var label: String {
+        switch self {
+        case .hdr: return "HDR"
+        case .hdrFallback: return "HDR"
+        case .cinematic: return "Cinematic"
+        case .highFrameRate: return "High FPS"
+        case .timelapse: return "Timelapse"
+        case .hevc: return "HEVC"
+        }
     }
 }
 
-@available(iOS 15.0, *)
-extension PHAssetMediaSubtype {
-    static let videoDolbyVision = PHAssetMediaSubtype(rawValue: 1 << 24)
+extension PHAsset {
+    var videoBadges: [VideoBadgeType] {
+        var badges = [VideoBadgeType]()
+        
+        // Check media subtypes first
+        if mediaSubtypes.contains(.videoCinematic) {
+            badges.append(.cinematic)
+        }
+        if mediaSubtypes.contains(.videoHighFrameRate) {
+            badges.append(.highFrameRate)
+        }
+        if mediaSubtypes.contains(.videoTimelapse) {
+            badges.append(.timelapse)
+        }
+        
+        // Check video format and codec
+        let options = PHVideoRequestOptions()
+        options.version = .original
+        options.isNetworkAccessAllowed = false
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        PHImageManager.default().requestAVAsset(forVideo: self, options: options) { asset, _, _ in
+            guard let asset = asset else {
+                semaphore.signal()
+                return
+            }
+            
+            let videoTracks = asset.tracks(withMediaType: .video)
+            if let firstTrack = videoTracks.first,
+               let formatDescription = firstTrack.formatDescriptions.first {
+                
+//                // Check codec type (added clutter)
+//                let codec = CMFormatDescriptionGetMediaSubType(formatDescription as! CMFormatDescription)
+//                if codec == kCMVideoCodecType_HEVC {
+//                    badges.append(.hevc)
+//                }
+//                
+                // Check HDR characteristics
+                let colorPrimaries = CMFormatDescriptionGetExtension(formatDescription as! CMFormatDescription, extensionKey: kCVImageBufferColorPrimariesKey)
+                let transferFunction = CMFormatDescriptionGetExtension(formatDescription as! CMFormatDescription, extensionKey: kCVImageBufferTransferFunctionKey)
+                
+                if let transferFunction = transferFunction as? String,
+                   (transferFunction == (kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String) ||
+                    transferFunction == (kCVImageBufferTransferFunction_ITU_R_2100_HLG as String)) {
+                    badges.append(.hdr)
+                }
+                else if let colorPrimaries = colorPrimaries as? String,
+                        (colorPrimaries == (kCVImageBufferColorPrimaries_ITU_R_2020 as String) ||
+                         colorPrimaries == (kCVImageBufferColorPrimaries_P3_D65 as String)) {
+                    badges.append(.hdrFallback)
+                }
+            }
+            semaphore.signal()
+        }
+        
+        semaphore.wait()
+        return badges.uniqued()
+    }
 }
+
+extension Sequence where Element: Hashable {
+    func uniqued() -> [Element] {
+        var seen = Set<Element>()
+        return filter { seen.insert($0).inserted }
+    }
+}
+
+// Updated HDRBadge view to handle multiple types
+struct VideoBadgeView: View {
+    let type: VideoBadgeType
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: type.icon)
+                .symbolRenderingMode(.hierarchical)
+            Text(type.label)
+                .font(.system(size: 10, weight: .medium))
+        }
+        .foregroundColor(colorScheme == .dark ? .white : .black)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+

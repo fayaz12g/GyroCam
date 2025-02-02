@@ -47,7 +47,7 @@ struct SettingsView: View {
                 
                 Section(header: Text("Frame Rate")) {
                     Picker("FPS", selection: $cameraManager.currentFPS) {
-                        ForEach(FrameRate.allCases) { fps in
+                        ForEach(cameraManager.availableFrameRates) { fps in
                             Text(fps.description).tag(fps)
                         }
                     }
