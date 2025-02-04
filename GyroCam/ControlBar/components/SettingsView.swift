@@ -68,16 +68,7 @@ struct SettingsView: View {
                 
                 Section(header: Text("Photo Library")) {
                     HStack {
-                        Text("Preserve Aspect Ratios")
-              
-                        Text("Coming Soon")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.purple)
-                            .cornerRadius(10)
-                        Toggle("", isOn: $cameraManager.preserveAspectRatios)
+                        Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
                             .tint(cameraManager.accentColor)
                     }
                         
