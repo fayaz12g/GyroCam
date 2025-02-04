@@ -10,6 +10,7 @@ import Photos
 import AVKit
 
 struct PhotoLibraryView: View {
+    @State private var allAssets = [PHAsset]()
     @State private var assetGroups = [Date: [PHAsset]]()
     @State private var sortedDates = [Date]()
     @ObservedObject var cameraManager: CameraManager
@@ -17,29 +18,38 @@ struct PhotoLibraryView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVStack(spacing: 20) {
-                    ForEach(sortedDates, id: \.self) { date in
-                        Section {
-                            Group {
-                                if cameraManager.preserveAspectRatios {
-                                    MasonryView(assets: assetGroups[date] ?? [],
-                                              cameraManager: cameraManager)
-                                } else {
-                                    GridView(assets: assetGroups[date] ?? [],
-                                           cameraManager: cameraManager)
-                                }
+                if cameraManager.preserveAspectRatios {
+                    // Masonry Layout with Date Grouping
+                    LazyVStack(spacing: 20) {
+                        ForEach(sortedDates, id: \.self) { date in
+                            Section {
+                                MasonryView(
+                                    assets: assetGroups[date] ?? [],
+                                    cameraManager: cameraManager
+                                )
+                                .padding(.horizontal)
+                            } header: {
+                                Text(date.formattedDateHeader)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
                             }
-                            .padding(.horizontal)
-                        } header: {
-                            Text(date.formattedDateHeader)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 8)
                         }
                     }
+                    .padding(.vertical)
+                } else {
+                    // Grid Layout with Fixed-Size Thumbnails
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))], spacing: 8) {
+                        ForEach(allAssets, id: \.localIdentifier) { asset in
+                            VideoThumbnailView(asset: asset, cameraManager: cameraManager)
+                                .frame(width: 120, height: 120)
+                                .clipped()
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding()
                 }
-                .padding(.vertical)
             }
             .navigationTitle("Recordings")
             .navigationBarTitleDisplayMode(.inline)
@@ -56,25 +66,31 @@ struct PhotoLibraryView: View {
             fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
             
             let results = PHAsset.fetchAssets(with: fetchOptions)
+            var loadedAssets = [PHAsset]()
             var groups = [Date: [PHAsset]]()
             
             results.enumerateObjects { asset, _, _ in
-                guard let date = asset.creationDate else { return }
-                let normalizedDate = Calendar.current.startOfDay(for: date)
+                loadedAssets.append(asset)
                 
-                if groups[normalizedDate] == nil {
-                    groups[normalizedDate] = []
+                // Grouping logic for masonry view
+                if let date = asset.creationDate {
+                    let normalizedDate = Calendar.current.startOfDay(for: date)
+                    if groups[normalizedDate] == nil {
+                        groups[normalizedDate] = []
+                    }
+                    groups[normalizedDate]?.append(asset)
                 }
-                groups[normalizedDate]?.append(asset)
             }
             
             DispatchQueue.main.async {
-                assetGroups = groups
-                sortedDates = groups.keys.sorted(by: >)
+                self.allAssets = loadedAssets
+                self.assetGroups = groups
+                self.sortedDates = groups.keys.sorted(by: >)
             }
         }
     }
 }
+
 
 struct MasonryView: View {
     let assets: [PHAsset]
@@ -86,21 +102,6 @@ struct MasonryView: View {
             ForEach(assets, id: \.localIdentifier) { asset in
                 VideoThumbnailView(asset: asset, cameraManager: cameraManager)
                     .aspectRatio(CGSize(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .fit)
-            }
-        }
-    }
-}
-
-struct GridView: View {
-    let assets: [PHAsset]
-    @ObservedObject var cameraManager: CameraManager
-    let columns = [GridItem(.adaptive(minimum: 120), spacing: 8)]
-    
-    var body: some View {
-        LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(assets, id: \.localIdentifier) { asset in
-                VideoThumbnailView(asset: asset, cameraManager: cameraManager)
-                    .aspectRatio(1, contentMode: .fill)
             }
         }
     }
@@ -132,8 +133,8 @@ struct VideoThumbnailView: View {
                 .cornerRadius(8)
                 .clipped()
                 
-                // Badges
-                if cameraManager.isProMode {
+                // Top-left Badges (Only shown in masonry layout)
+                if cameraManager.isProMode && cameraManager.preserveAspectRatios {
                     VStack(alignment: .leading) {
                         ForEach(videoBadges) { badge in
                             VideoBadgeView(type: badge)
@@ -143,23 +144,26 @@ struct VideoThumbnailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
                 
-                // Bottom overlay
-                LinearGradient(
-                    gradient: Gradient(colors: [.clear, .black.opacity(0.7)]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: cameraManager.preserveAspectRatios ? 48 : 32)
+                // Bottom Gradient Overlay
+                if cameraManager.preserveAspectRatios {
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, .black.opacity(0.7)]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 48)
+                }
                 
-                // Info overlay
+                // Info Overlay
                 HStack(alignment: .bottom) {
-                    if cameraManager.isProMode && cameraManager.preserveAspectRatios {
+                    if cameraManager.isProMode && cameraManager.preserveAspectRatios,
+                       let info = videoInfo {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(videoInfo?.creationTime ?? "")
+                            Text(info.creationTime)
                                 .font(.system(size: 10, weight: .medium))
-                            Text(videoInfo?.resolution ?? "")
+                            Text(info.resolution)
                                 .font(.system(size: 8, weight: .medium))
-                            Text(videoInfo?.fps ?? "")
+                            Text(info.fps)
                                 .font(.system(size: 8, weight: .medium))
                         }
                     }
@@ -167,30 +171,23 @@ struct VideoThumbnailView: View {
                     Spacer()
                     
                     Text(asset.duration.formattedDuration)
-                        .font(.system(
-                            size: cameraManager.preserveAspectRatios ? 12 : 10,
-                            weight: .semibold
-                        ))
+                        .font(.system(size: 12, weight: .semibold))
                 }
                 .foregroundColor(.white)
-                .padding(cameraManager.preserveAspectRatios ? 8 : 6)
+                .padding(8)
             }
         }
         .onAppear {
             loadThumbnail()
-            if cameraManager.isProMode {
+            if cameraManager.isProMode && cameraManager.preserveAspectRatios {
                 loadVideoBadges()
-                if cameraManager.preserveAspectRatios {
-                    loadVideoInfo()
-                }
+                loadVideoInfo()
             }
         }
         .onChange(of: cameraManager.isProMode) { newValue in
-            if newValue {
+            if newValue && cameraManager.preserveAspectRatios {
                 loadVideoBadges()
-                if cameraManager.preserveAspectRatios {
-                    loadVideoInfo()
-                }
+                loadVideoInfo()
             }
         }
         .fullScreenCover(isPresented: $showingVideo) {
