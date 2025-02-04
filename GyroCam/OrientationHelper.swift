@@ -7,11 +7,19 @@ struct OrientationHelper {
         let gravity = motion.gravity
         let absX = abs(gravity.x)
         let absY = abs(gravity.y)
+        let absZ = abs(gravity.z)
         
-        if max(absX, absY) < 0.5 {
+        // First check for face up/down using z-axis
+        if absZ > max(absX, absY) {
+            if gravity.z > 0.8 {
+                return .faceUp
+            } else if gravity.z < -0.8 {
+                return .faceDown
+            }
             return .unknown
         }
         
+        // Then check for other orientations
         if absX > absY {
             return gravity.x > 0 ? .landscapeRight : .landscapeLeft
         } else {
@@ -27,6 +35,8 @@ extension UIDeviceOrientation {
         case .portraitUpsideDown: return "Upside Down"
         case .landscapeLeft: return "Landscape Left"
         case .landscapeRight: return "Landscape Right"
+        case .faceUp: return "Face Up"
+        case .faceDown: return "Face Down"
         default: return "Unknown"
         }
     }

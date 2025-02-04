@@ -20,9 +20,16 @@ struct PhotoLibraryView: View {
                 LazyVStack(spacing: 20) {
                     ForEach(sortedDates, id: \.self) { date in
                         Section {
-                            MasonryView(assets: assetGroups[date] ?? [],
-                                      cameraManager: cameraManager)
-                                .padding(.horizontal)
+                            Group {
+                                if cameraManager.preserveAspectRatios {
+                                    MasonryView(assets: assetGroups[date] ?? [],
+                                              cameraManager: cameraManager)
+                                } else {
+                                    GridView(assets: assetGroups[date] ?? [],
+                                           cameraManager: cameraManager)
+                                }
+                            }
+                            .padding(.horizontal)
                         } header: {
                             Text(date.formattedDateHeader)
                                 .font(.subheadline)
@@ -36,13 +43,6 @@ struct PhotoLibraryView: View {
             }
             .navigationTitle("Recordings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Toggle("Pro Mode", isOn: $cameraManager.isProMode)
-                        .toggleStyle(.switch)
-                        .tint(cameraManager.accentColor)
-                }
-            }
             .onAppear(perform: loadAssets)
         }
     }
@@ -63,7 +63,7 @@ struct PhotoLibraryView: View {
                 let normalizedDate = Calendar.current.startOfDay(for: date)
                 
                 if groups[normalizedDate] == nil {
-                    groups[normalizedDate] = [PHAsset]()
+                    groups[normalizedDate] = []
                 }
                 groups[normalizedDate]?.append(asset)
             }
@@ -91,6 +91,21 @@ struct MasonryView: View {
     }
 }
 
+struct GridView: View {
+    let assets: [PHAsset]
+    @ObservedObject var cameraManager: CameraManager
+    let columns = [GridItem(.adaptive(minimum: 120), spacing: 8)]
+    
+    var body: some View {
+        LazyVGrid(columns: columns, spacing: 8) {
+            ForEach(assets, id: \.localIdentifier) { asset in
+                VideoThumbnailView(asset: asset, cameraManager: cameraManager)
+                    .aspectRatio(1, contentMode: .fill)
+            }
+        }
+    }
+}
+
 struct VideoThumbnailView: View {
     let asset: PHAsset
     @ObservedObject var cameraManager: CameraManager
@@ -102,7 +117,7 @@ struct VideoThumbnailView: View {
     var body: some View {
         Button(action: { showingVideo = true }) {
             ZStack(alignment: .bottom) {
-                // Thumbnail image
+                // Thumbnail Image
                 Group {
                     if let image = image {
                         Image(uiImage: image)
@@ -117,7 +132,7 @@ struct VideoThumbnailView: View {
                 .cornerRadius(8)
                 .clipped()
                 
-                // Top-left badges
+                // Badges
                 if cameraManager.isProMode {
                     VStack(alignment: .leading) {
                         ForEach(videoBadges) { badge in
@@ -128,23 +143,23 @@ struct VideoThumbnailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
                 
-                // Bottom gradient overlay
+                // Bottom overlay
                 LinearGradient(
                     gradient: Gradient(colors: [.clear, .black.opacity(0.7)]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 48)
+                .frame(height: cameraManager.preserveAspectRatios ? 48 : 32)
                 
                 // Info overlay
                 HStack(alignment: .bottom) {
-                    if cameraManager.isProMode, let info = videoInfo {
+                    if cameraManager.isProMode && cameraManager.preserveAspectRatios {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(info.creationTime)
+                            Text(videoInfo?.creationTime ?? "")
                                 .font(.system(size: 10, weight: .medium))
-                            Text(info.resolution)
+                            Text(videoInfo?.resolution ?? "")
                                 .font(.system(size: 8, weight: .medium))
-                            Text(info.fps)
+                            Text(videoInfo?.fps ?? "")
                                 .font(.system(size: 8, weight: .medium))
                         }
                     }
@@ -152,29 +167,35 @@ struct VideoThumbnailView: View {
                     Spacer()
                     
                     Text(asset.duration.formattedDuration)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(
+                            size: cameraManager.preserveAspectRatios ? 12 : 10,
+                            weight: .semibold
+                        ))
                 }
                 .foregroundColor(.white)
-                .padding(8)
+                .padding(cameraManager.preserveAspectRatios ? 8 : 6)
             }
         }
         .onAppear {
             loadThumbnail()
             if cameraManager.isProMode {
                 loadVideoBadges()
-                loadVideoInfo()
+                if cameraManager.preserveAspectRatios {
+                    loadVideoInfo()
+                }
             }
         }
-        .onChange(of: cameraManager.isProMode) {
-            if cameraManager.isProMode {
-                loadVideoInfo()
+        .onChange(of: cameraManager.isProMode) { newValue in
+            if newValue {
                 loadVideoBadges()
+                if cameraManager.preserveAspectRatios {
+                    loadVideoInfo()
+                }
             }
         }
         .fullScreenCover(isPresented: $showingVideo) {
             VideoPlayerView(asset: asset)
         }
-    
     }
     
     private func loadVideoBadges() {

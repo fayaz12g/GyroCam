@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct ChangelogView: View {
+    @ObservedObject var cameraManager: CameraManager
+    
     var body: some View {
         Form {
             Section(header: header("Current Features")) {
-                VersionEntry(version: "Alpha 005", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 005", changes: [
                     "Custom accent color theming system",
                     "Preview maximize/minimize toggle",
                     "Zoom slider controls",
@@ -19,7 +21,7 @@ struct ChangelogView: View {
                     "Redesigned vibrant record button"
                 ])
                 
-                VersionEntry(version: "Alpha 004", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 004", changes: [
                     "Complete quick settings panel",
                     "Photo library preview integration",
                     "Geotagging support",
@@ -29,21 +31,21 @@ struct ChangelogView: View {
             }
             
             Section(header: header("Core Development")) {
-                VersionEntry(version: "Alpha 003", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 003", changes: [
                     "Double-tap lens switching",
                     "Dynamic UI color schemes",
                     "Enhanced recording indicators",
                     "Basic quick settings foundation"
                 ])
                 
-                VersionEntry(version: "Alpha 002", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 002", changes: [
                     "iOS-style animated record button",
                     "System-wide dark/light mode",
                     "Persistent orientation headers",
                     "First app icon design"
                 ])
                 
-                VersionEntry(version: "Alpha 001", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 001", changes: [
                     "4K/1080p resolution support",
                     "Front camera implementation",
                     "Clip counter badge",
@@ -51,7 +53,7 @@ struct ChangelogView: View {
                     "Fixed 144p encoding bug"
                 ])
                 
-                VersionEntry(version: "Alpha 00", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 00", changes: [
                     "Gyroscopic clip splitting",
                     "720p HDR recording",
                     "30/60FPS toggle",

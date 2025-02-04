@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F4A0FC4A2D5006E4000DCC1A /* GyroCamCaptureExtension.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = F4A0FC412D5006E4000DCC1A /* GyroCamCaptureExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		F45584DD2D40BF27005461E0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,18 +25,58 @@
 			remoteGlobalIDString = F45584CB2D40BF26005461E0;
 			remoteInfo = GyroCam;
 		};
+		F4A0FC482D5006E4000DCC1A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F45584C42D40BF26005461E0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F4A0FC402D5006E4000DCC1A;
+			remoteInfo = GyroCamCaptureExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F4A0FC4F2D5006E4000DCC1A /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				F4A0FC4A2D5006E4000DCC1A /* GyroCamCaptureExtension.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F45584CC2D40BF26005461E0 /* GyroCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GyroCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45584DC2D40BF27005461E0 /* GyroCamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GyroCamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45584E62D40BF27005461E0 /* GyroCamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GyroCamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4A0FC412D5006E4000DCC1A /* GyroCamCaptureExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = GyroCamCaptureExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F4A0FC4B2D5006E4000DCC1A /* Exceptions for "GyroCamCaptureExtension" folder in "GyroCamCaptureExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F4A0FC402D5006E4000DCC1A /* GyroCamCaptureExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F45584CE2D40BF26005461E0 /* GyroCam */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = GyroCam;
+			sourceTree = "<group>";
+		};
+		F4A0FC422D5006E4000DCC1A /* GyroCamCaptureExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F4A0FC4B2D5006E4000DCC1A /* Exceptions for "GyroCamCaptureExtension" folder in "GyroCamCaptureExtension" target */,
+			);
+			path = GyroCamCaptureExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -59,6 +103,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F4A0FC3E2D5006E4000DCC1A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -66,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				F45584CE2D40BF26005461E0 /* GyroCam */,
+				F4A0FC422D5006E4000DCC1A /* GyroCamCaptureExtension */,
 				F45584CD2D40BF26005461E0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -76,6 +128,7 @@
 				F45584CC2D40BF26005461E0 /* GyroCam.app */,
 				F45584DC2D40BF27005461E0 /* GyroCamTests.xctest */,
 				F45584E62D40BF27005461E0 /* GyroCamUITests.xctest */,
+				F4A0FC412D5006E4000DCC1A /* GyroCamCaptureExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -90,10 +143,12 @@
 				F45584C82D40BF26005461E0 /* Sources */,
 				F45584C92D40BF26005461E0 /* Frameworks */,
 				F45584CA2D40BF26005461E0 /* Resources */,
+				F4A0FC4F2D5006E4000DCC1A /* Embed ExtensionKit Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F4A0FC492D5006E4000DCC1A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F45584CE2D40BF26005461E0 /* GyroCam */,
@@ -145,6 +200,28 @@
 			productReference = F45584E62D40BF27005461E0 /* GyroCamUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		F4A0FC402D5006E4000DCC1A /* GyroCamCaptureExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F4A0FC4C2D5006E4000DCC1A /* Build configuration list for PBXNativeTarget "GyroCamCaptureExtension" */;
+			buildPhases = (
+				F4A0FC3D2D5006E4000DCC1A /* Sources */,
+				F4A0FC3E2D5006E4000DCC1A /* Frameworks */,
+				F4A0FC3F2D5006E4000DCC1A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F4A0FC422D5006E4000DCC1A /* GyroCamCaptureExtension */,
+			);
+			name = GyroCamCaptureExtension;
+			packageProductDependencies = (
+			);
+			productName = GyroCamCaptureExtension;
+			productReference = F4A0FC412D5006E4000DCC1A /* GyroCamCaptureExtension.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -166,6 +243,9 @@
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = F45584CB2D40BF26005461E0;
 					};
+					F4A0FC402D5006E4000DCC1A = {
+						CreatedOnToolsVersion = 16.2;
+					};
 				};
 			};
 			buildConfigurationList = F45584C72D40BF26005461E0 /* Build configuration list for PBXProject "GyroCam" */;
@@ -185,6 +265,7 @@
 				F45584CB2D40BF26005461E0 /* GyroCam */,
 				F45584DB2D40BF27005461E0 /* GyroCamTests */,
 				F45584E52D40BF27005461E0 /* GyroCamUITests */,
+				F4A0FC402D5006E4000DCC1A /* GyroCamCaptureExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -205,6 +286,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F45584E42D40BF27005461E0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4A0FC3F2D5006E4000DCC1A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -235,6 +323,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F4A0FC3D2D5006E4000DCC1A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -247,6 +342,11 @@
 			isa = PBXTargetDependency;
 			target = F45584CB2D40BF26005461E0 /* GyroCam */;
 			targetProxy = F45584E72D40BF27005461E0 /* PBXContainerItemProxy */;
+		};
+		F4A0FC492D5006E4000DCC1A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F4A0FC402D5006E4000DCC1A /* GyroCamCaptureExtension */;
+			targetProxy = F4A0FC482D5006E4000DCC1A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -518,6 +618,56 @@
 			};
 			name = Release;
 		};
+		F4A0FC4D2D5006E4000DCC1A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V4662QC35T;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GyroCamCaptureExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GyroCamCaptureExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCam.GyroCamCaptureExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F4A0FC4E2D5006E4000DCC1A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V4662QC35T;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GyroCamCaptureExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GyroCamCaptureExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCam.GyroCamCaptureExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -553,6 +703,15 @@
 			buildConfigurations = (
 				F45584F72D40BF27005461E0 /* Debug */,
 				F45584F82D40BF27005461E0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4A0FC4C2D5006E4000DCC1A /* Build configuration list for PBXNativeTarget "GyroCamCaptureExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4A0FC4D2D5006E4000DCC1A /* Debug */,
+				F4A0FC4E2D5006E4000DCC1A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

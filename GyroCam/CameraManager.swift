@@ -70,6 +70,32 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.isHDREnabled = newValue }
     }
     
+    @MainActor var preserveAspectRatios: Bool {
+        get { settings.preserveAspectRatios }
+        set { settings.preserveAspectRatios = newValue }
+    }
+    
+    // Header
+    @MainActor var showClipBadge: Bool {
+        get { settings.showClipBadge }
+        set { settings.showClipBadge = newValue }
+    }
+    
+    @MainActor var showOrientationBadge: Bool {
+        get { settings.showOrientationBadge }
+        set { settings.showOrientationBadge = newValue }
+    }
+    
+    @MainActor var minimalOrientationBadge: Bool {
+        get { settings.minimalOrientationBadge }
+        set { settings.minimalOrientationBadge = newValue }
+    }
+    
+    @MainActor var showRecordingTimer: Bool {
+        get { settings.showRecordingTimer }
+        set { settings.showRecordingTimer = newValue }
+    }
+    
     @MainActor var showZoomBar: Bool {
         get { settings.showZoomBar }
         set { settings.showZoomBar = newValue }
@@ -132,7 +158,7 @@ class CameraManager: NSObject, ObservableObject {
     // Orientation handling
     private var previousOrientation: UIDeviceOrientation = .portrait
     private let recordingQueue = DispatchQueue(label: "recording.queue")
-    private var isRestarting = false
+    public var isRestarting = false
     
     enum LensType: String, CaseIterable {
         case frontWide = "Front"

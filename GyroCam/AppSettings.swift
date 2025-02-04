@@ -26,9 +26,20 @@ struct AppSettings: Codable {
     var cameraPosition: AVCaptureDevice.Position = .back
     var currentLens: CameraManager.LensType = .wide
     var isHDREnabled: Bool = true
-    var isProMode: Bool = false
     var showZoomBar: Bool = false
     var maximizePreview: Bool = true
+    
+    // Header
+    var showRecordingTimer: Bool = true
+    var showOrientationBadge: Bool = true
+    var showClipBadge: Bool = true
+    var minimalOrientationBadge: Bool = false
+    
+    // Photo Library
+    var isProMode: Bool = true
+    var preserveAspectRatios: Bool = true
+    
+
 }
 
  extension Color: Codable {

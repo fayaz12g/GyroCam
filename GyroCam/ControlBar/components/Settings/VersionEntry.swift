@@ -10,6 +10,7 @@ import SwiftUI
 
 
 struct VersionEntry: View {
+    @ObservedObject var cameraManager: CameraManager
     let version: String
     let changes: [String]
     
@@ -17,7 +18,7 @@ struct VersionEntry: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(version)
                 .font(.headline)
-                .foregroundColor(.accentColor)
+                .foregroundColor(cameraManager.accentColor)
             
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(changes, id: \.self) { change in

@@ -3,6 +3,7 @@ import SwiftUI
 struct ClipNumberBadge: View {
     let number: Int
     @Binding var currentOrientation: String
+    @Binding var showClipBadge: Bool
     @Environment(\.colorScheme) var colorScheme
     
     private var rotationAngle: Angle {
@@ -47,6 +48,14 @@ struct ClipNumberBadge: View {
                     .padding(.trailing, horizontalPadding)
                     .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
                     .offset(y: verticalOffset)
+                    .contextMenu {
+                        Button {
+                            showClipBadge.toggle()
+                        } label: {
+                            Label(showClipBadge ? "Hide Badge" : "Show Badge",
+                                  systemImage: showClipBadge ? "eye.slash" : "eye")
+                        }
+                    }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: currentOrientation)

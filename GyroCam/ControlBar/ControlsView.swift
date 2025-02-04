@@ -12,9 +12,12 @@ struct ControlsView: View {
     var body: some View {
         ZStack {
             HStack {
-                // Photo Library Button (Left)
-                PhotoLibraryButton(cameraManager: cameraManager, currentOrientation: $currentOrientation)
-                .padding(.leading, 35)
+                if !cameraManager.isRecording && !cameraManager.isRestarting {
+                    
+                    // Photo Library Button (Left)
+                    PhotoLibraryButton(cameraManager: cameraManager, currentOrientation: $currentOrientation)
+                        .padding(.leading, 35)
+                }
                 
                 Spacer()
                 
@@ -33,31 +36,35 @@ struct ControlsView: View {
                     }
                 )
                 .padding(.leading, -15)
+
                 
                 Spacer()
                 
-                // Settings Button (Right)
-                Button {
-                    triggerHaptic(style: .light)
-                    withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.7)) {
-                        isQuickSettingsVisible.toggle()
+                if !cameraManager.isRecording && !cameraManager.isRestarting {
+                    
+                    // Settings Button (Right)
+                    Button {
+                        triggerHaptic(style: .light)
+                        withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.7)) {
+                            showingSettings.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "gear")
+                            .font(.system(size: 24))
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .padding()
+                            .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
+                            .clipShape(Circle())
+                            .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
+                            .matchedGeometryEffect(id: "gear", in: animationNamespace)
                     }
-                } label: {
-                    Image(systemName: "gear")
-                        .font(.system(size: 24))
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .padding()
-                        .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
-                        .clipShape(Circle())
-                        .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
-                        .matchedGeometryEffect(id: "gear", in: animationNamespace)
+                    .padding(.trailing, 15)
                 }
-                .padding(.trailing, 15)
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 30)
             
-            if isQuickSettingsVisible {
+            if !cameraManager.isRecording && !cameraManager.isRestarting {
                 QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)
                     .matchedGeometryEffect(id: "quickSettings", in: animationNamespace)
                     .transition(.asymmetric(
@@ -65,6 +72,7 @@ struct ControlsView: View {
                         removal: .scale(scale: 0.5, anchor: .topTrailing).combined(with: .opacity)
                     ))
                     .offset(y: -100)
+                    .offset(x: 20)
                     .zIndex(1)
             }
         }

@@ -15,10 +15,16 @@ struct ContentView: View {
                 
                 VStack {
                     // Top Bar
+                    
                     HStack {
-                        OrientationHeader(currentOrientation: $cameraManager.currentOrientation)
+                        if cameraManager.showOrientationBadge {
+                            OrientationHeader(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation)
+                        }
+                        
                         Spacer()
-                        ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation)
+                        if cameraManager.showClipBadge {
+                            ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, showClipBadge: $cameraManager.showClipBadge)
+                        }
                     }
                     if cameraManager.showZoomBar {
                                             ZoomBarView(cameraManager: cameraManager)
