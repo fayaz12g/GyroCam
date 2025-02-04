@@ -64,16 +64,6 @@ struct QuickSettingsView: View {
                 cameraManager.configureSession()
             }
             
-            // Improved ellipsis button with larger tap area
-            Button {
-                showSettings = true
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 14))
-                    .padding(8) // Increased padding
-                    .contentShape(Rectangle()) // Larger tap area
-            }
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
