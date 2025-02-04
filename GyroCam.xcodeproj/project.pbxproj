@@ -63,11 +63,21 @@
 			);
 			target = F4A0FC402D5006E4000DCC1A /* GyroCamCaptureExtension */;
 		};
+		F4F2DC582D519AE4002E97DD /* Exceptions for "GyroCam" folder in "GyroCam" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F45584CB2D40BF26005461E0 /* GyroCam */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F45584CE2D40BF26005461E0 /* GyroCam */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F4F2DC582D519AE4002E97DD /* Exceptions for "GyroCam" folder in "GyroCam" target */,
+			);
 			path = GyroCam;
 			sourceTree = "<group>";
 		};
@@ -476,11 +486,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 008;
 				DEVELOPMENT_ASSET_PATHS = "\"GyroCam/Preview Content\"";
 				DEVELOPMENT_TEAM = V4662QC35T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GyroCam/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GyroCam;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record videos.";
@@ -499,7 +510,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2;
+				MARKETING_VERSION = 0.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -514,11 +525,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 008;
 				DEVELOPMENT_ASSET_PATHS = "\"GyroCam/Preview Content\"";
 				DEVELOPMENT_TEAM = V4662QC35T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GyroCam/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GyroCam;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to the camera to record videos.";
@@ -537,7 +549,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2;
+				MARKETING_VERSION = 0.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
