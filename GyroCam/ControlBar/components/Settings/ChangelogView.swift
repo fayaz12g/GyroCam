@@ -17,8 +17,12 @@ struct ChangelogView: View {
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 009", changes: [
                     "Brought Zoom Bar into beta",
                     "New beta auto stitch feature",
+                    "Disabled coming soon toggle",
+                    "Disabled minimal when orientation is hidden",
                     "Added a Privacy Policy",
-                    "Incremented version number ;)",                    
+                    "Consolidated Camera Options",
+                    "Updated changelog",
+                    "Incremented version number ;)",
                 ])
                 
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 008", changes: [
