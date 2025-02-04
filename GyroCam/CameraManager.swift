@@ -211,89 +211,212 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
+    
     private func stitchClips() {
-        Task(priority: .userInitiated) { [weak self] in  // Changed to Swift concurrency
-                guard let self else { return }
-                let clips = self.clipURLs
-                guard !clips.isEmpty else { return }
-
-                let composition = AVMutableComposition()
-            guard let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid),
-                  let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) else {
-                DispatchQueue.main.async {
-                    self.setErrorMessage("Failed to create composition tracks")
-                }
+        Task(priority: .userInitiated) { [weak self] in
+            guard let self = self, !self.clipURLs.isEmpty else { return }
+            let clips = self.clipURLs
+            // 1. Determine base orientation from first clip
+            let firstAsset = AVAsset(url: self.clipURLs[0])
+            guard let firstVideoTrack = try? await firstAsset.loadTracks(withMediaType: .video).first else {
+                await self.showError("Failed to load first clip")
                 return
             }
-
-            var currentTime = CMTime.zero
-
-            for url in clips {
-                let asset = AVAsset(url: url)
-                do {
-                    let videoAssetTracks = try await asset.loadTracks(withMediaType: .video)
-                    if let videoAssetTrack = videoAssetTracks.first {
-                        let timeRange = try await videoAssetTrack.load(.timeRange)
-                        try videoTrack.insertTimeRange(timeRange, of: videoAssetTrack, at: currentTime)
-                        let transform = try await videoAssetTrack.load(.preferredTransform)
-                        videoTrack.preferredTransform = transform
-                    }
-
-                    let audioAssetTracks = try await asset.loadTracks(withMediaType: .audio)
-                    if let audioAssetTrack = audioAssetTracks.first {
-                        let timeRange = try await audioAssetTrack.load(.timeRange)
-                        try audioTrack.insertTimeRange(timeRange, of: audioAssetTrack, at: currentTime)
-                    }
-
-                    let duration = try await asset.load(.duration)
-                    currentTime = CMTimeAdd(currentTime, duration)
-                } catch {
-                    DispatchQueue.main.async {
-                        self.setErrorMessage("Failed to insert clip: \(error.localizedDescription)")
-                    }
-                    return
-                }
-            }
-
-            guard let exporter = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality) else {
-                DispatchQueue.main.async {
-                    self.setErrorMessage("Failed to create exporter")
-                }
+            
+            let baseTransform = try await firstVideoTrack.load(.preferredTransform)
+            let baseSize = try await firstVideoTrack.load(.naturalSize)
+            let baseOrientation = orientationFromTransform(baseTransform)
+            let isPortrait = baseOrientation.isPortrait
+            
+            // 2. Create composition with base orientation
+            let composition = AVMutableComposition()
+            let videoTracks = clips.compactMap { AVAsset(url: $0).tracks(withMediaType: .video).first }
+            
+            guard let compositionVideoTrack = composition.addMutableTrack(
+                withMediaType: .video,
+                preferredTrackID: kCMPersistentTrackID_Invalid
+            ) else {
+                await self.showError("Failed to create video track")
                 return
             }
-
+            
+            // 3. Create video composition instructions
+            let videoComposition = AVMutableVideoComposition()
+            let instructions = try await createLayerInstructions(
+                clips: self.clipURLs,
+                baseOrientation: baseOrientation.orientation,
+                baseSize: baseSize,
+                compositionTrack: compositionVideoTrack
+            )
+            
+            // 4. Configure video composition
+            videoComposition.instructions = instructions
+            videoComposition.renderSize = isPortrait ?
+                CGSize(width: baseSize.height, height: baseSize.width) :
+                baseSize
+            videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+            
+            // 5. Export configuration
+            guard let exporter = AVAssetExportSession(
+                asset: composition,
+                presetName: AVAssetExportPresetHighestQuality
+            ) else {
+                await self.showError("Failed to create exporter")
+                return
+            }
+            
             let outputURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString)
+                .appendingPathComponent("stitched-\(UUID().uuidString)")
                 .appendingPathExtension("mp4")
+            
             exporter.outputURL = outputURL
             exporter.outputFileType = .mp4
+            exporter.videoComposition = videoComposition
+            
+            // 6. Perform export
+            await exporter.export()
+            
+            switch exporter.status {
+            case .completed:
+                await self.saveFinalVideo(outputURL)
+                await self.cleanupClips()
+            case .failed:
+                await self.showError("Export failed: \(exporter.error?.localizedDescription ?? "")")
+            default: break
+            }
+        }
+    }
 
-            exporter.exportAsynchronously {
-                DispatchQueue.main.async {
-                    switch exporter.status {
-                    case .completed:
-                        PHPhotoLibrary.shared().performChanges({
-                            let options = PHAssetResourceCreationOptions()
-                            options.originalFilename = self.getNextClipNumber()
-                            options.shouldMoveFile = true
-                            _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
-                        }) { success, error in
-                            if success {
-                                clips.forEach { try? FileManager.default.removeItem(at: $0) }
-                                try? FileManager.default.removeItem(at: outputURL)
-                                print("✅ Stitched video saved")
-                            } else {
-                                self.setErrorMessage("Failed to save stitched video: \(error?.localizedDescription ?? "Unknown error")")
-                            }
-                        }
-                    case .failed:
-                        self.setErrorMessage("Stitching failed: \(exporter.error?.localizedDescription ?? "Unknown error")")
-                    default:
-                        break
-                    }
+    // Orientation helper function
+    private func orientationFromTransform(_ transform: CGAffineTransform) -> (orientation: UIImage.Orientation, isPortrait: Bool) {
+        let assetAngle = atan2(transform.b, transform.a)
+        let angleDegrees = abs(assetAngle * CGFloat(180) / .pi)
+        
+        switch angleDegrees {
+        case 0:    return (.up, false)
+        case 90:   return (.right, true)
+        case 180:  return (.down, false)
+        case 270:  return (.left, true)
+        default:    return (.up, false)
+        }
+    }
+
+    
+    // Create layer instructions for all clips
+    private func createLayerInstructions(clips: [URL],
+                                       baseOrientation: UIImage.Orientation,
+                                       baseSize: CGSize,
+                                       compositionTrack: AVMutableCompositionTrack) async throws -> [AVVideoCompositionInstructionProtocol] {
+        var instructions: [AVMutableVideoCompositionInstruction] = []
+        var currentTime = CMTime.zero
+        
+        for (index, url) in clips.enumerated() {
+            let asset = AVAsset(url: url)
+            guard let videoTrack = try await asset.loadTracks(withMediaType: .video).first else { continue }
+            
+            let clipTransform = try await videoTrack.load(.preferredTransform)
+            let clipSize = try await videoTrack.load(.naturalSize)
+            let clipOrientation = orientationFromTransform(clipTransform)
+            
+            // Calculate required rotation
+            let rotationAngle = rotationBetween(baseOrientation, clipOrientation.orientation)
+            let rotationTransform = CGAffineTransform(rotationAngle: rotationAngle)
+            
+            // Calculate scaling to maintain aspect ratio
+            let scale = scaleToFill(
+                sourceSize: clipSize.applying(clipTransform).applying(rotationTransform),
+                targetSize: baseSize
+            )
+            let scaleTransform = CGAffineTransform(scaleX: scale.width, y: scale.height)
+            
+            // Combine transforms
+            let finalTransform = clipTransform.concatenating(rotationTransform).concatenating(scaleTransform)
+            
+            // Create layer instruction
+            let instruction = AVMutableVideoCompositionInstruction()
+            instruction.timeRange = CMTimeRange(
+                start: currentTime,
+                duration: try await asset.load(.duration)
+            )
+            
+            let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionTrack)
+            layerInstruction.setTransform(finalTransform, at: .zero)
+            instruction.layerInstructions = [layerInstruction]
+            instructions.append(instruction)
+            
+            // Insert into composition track
+            try compositionTrack.insertTimeRange(
+                CMTimeRange(start: .zero, duration: try await asset.load(.duration)),
+                of: videoTrack,
+                at: currentTime
+            )
+            
+            currentTime = CMTimeAdd(currentTime, try await asset.load(.duration))
+        }
+        
+        return instructions
+    }
+
+    private let videoDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        return formatter
+    }()
+    
+    // Calculate rotation needed between two orientations
+    private func rotationBetween(_ target: UIImage.Orientation, _ source: UIImage.Orientation) -> CGFloat {
+        let rotationMap: [UIImage.Orientation: CGFloat] = [
+            .up: 0,
+            .right: .pi/2,
+            .down: .pi,
+            .left: 3 * .pi/2
+        ]
+        
+        let sourceAngle = rotationMap[source] ?? 0
+        let targetAngle = rotationMap[target] ?? 0
+        return targetAngle - sourceAngle
+    }
+
+    // Calculate scale to fill target size while maintaining aspect ratio
+    private func scaleToFill(sourceSize: CGSize, targetSize: CGSize) -> CGSize {
+        let widthRatio = targetSize.width / sourceSize.width
+        let heightRatio = targetSize.height / sourceSize.height
+        let scale = max(widthRatio, heightRatio)
+        return CGSize(width: scale, height: scale)
+    }
+
+    @MainActor
+    private func saveFinalVideo(_ url: URL) {
+        PHPhotoLibrary.shared().performChanges {
+            let options = PHAssetResourceCreationOptions()
+            options.shouldMoveFile = true
+            options.originalFilename = "GRC-\(self.videoDateFormatter.string(from: Date()))"
+            
+            _ = PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: options)
+            
+        } completionHandler: { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    print("Successfully saved stitched video")
+                    try? FileManager.default.removeItem(at: url)
+                } else {
+                    print("Save error: \(error?.localizedDescription ?? "Unknown error")")
+                    self.errorMessage = error?.localizedDescription ?? "Failed to save video"
                 }
             }
         }
+    }
+
+    @MainActor
+    private func cleanupClips() {
+        clipURLs.forEach { try? FileManager.default.removeItem(at: $0) }
+        clipURLs.removeAll()
+    }
+
+    @MainActor
+    private func showError(_ message: String) {
+        errorMessage = message
+//        isExporting = false
     }
     
     private func loadSettings() {

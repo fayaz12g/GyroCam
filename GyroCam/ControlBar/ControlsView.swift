@@ -35,7 +35,8 @@ struct ControlsView: View {
                         }
                     }
                 )
-                .padding(.leading, -15)
+                .padding(.leading, cameraManager.isRecording || cameraManager.isRestarting ? 35 : -15)
+                .padding(.vertical, cameraManager.isRecording || cameraManager.isRestarting ? 10 : 0)
 
                 
                 Spacer()

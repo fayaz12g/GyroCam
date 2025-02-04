@@ -12,12 +12,12 @@ struct SettingsView: View {
                     HStack {
                         Text("Show Zoom Bar")
                         Spacer()
-                        Text("Coming Soon")
+                        Text("Beta")
                             .font(.caption)
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.purple)
+                            .background(Color.red)
                             .cornerRadius(10)
                         Toggle("", isOn: $cameraManager.showZoomBar)
                             .tint(cameraManager.accentColor)
@@ -116,7 +116,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Auto Stitch")
                             Spacer()
-                            Text("Slower")
+                            Text("Beta")
                                 .font(.caption)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8)
