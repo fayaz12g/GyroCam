@@ -14,6 +14,13 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Current Features")) {
                 
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 009", changes: [
+                    "Brought Zoom Bar into beta",
+                    "New beta auto stitch feature",
+                    "Added a Privacy Policy",
+                    "Incremented version number ;)",                    
+                ])
+                
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 008", changes: [
                     "Introduced new settings:",
                     "Preserve Aspect Ratio",
