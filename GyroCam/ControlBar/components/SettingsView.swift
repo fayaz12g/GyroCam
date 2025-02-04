@@ -29,10 +29,10 @@ struct SettingsView: View {
                     Toggle("Show Orientation Badge", isOn: $cameraManager.showOrientationBadge)
                         .tint(cameraManager.accentColor)
                     
-                    if cameraManager.showOrientationBadge {
+                
                         Toggle("Minimal Orientation Badge", isOn: $cameraManager.minimalOrientationBadge)
                             .tint(cameraManager.accentColor)
-                    }
+                            .disabled(!cameraManager.showOrientationBadge)
                     
                     Toggle("Show Clip Badge", isOn: $cameraManager.showClipBadge)
                         .tint(cameraManager.accentColor)
@@ -49,6 +49,7 @@ struct SettingsView: View {
                             .cornerRadius(10)
                         Toggle("", isOn: $cameraManager.showRecordingTimer)
                             .tint(cameraManager.accentColor)
+                            .disabled(true)
                     }
                     
                     

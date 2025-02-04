@@ -32,7 +32,7 @@ struct AppSettings: Codable {
     var shouldStitchClips: Bool = false
     
     // Header
-    var showRecordingTimer: Bool = true
+    var showRecordingTimer: Bool = false
     var showOrientationBadge: Bool = true
     var showClipBadge: Bool = true
     var minimalOrientationBadge: Bool = false
