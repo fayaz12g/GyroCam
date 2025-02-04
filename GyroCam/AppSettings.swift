@@ -29,6 +29,8 @@ struct AppSettings: Codable {
     var showZoomBar: Bool = false
     var maximizePreview: Bool = true
     
+    var shouldStitchClips: Bool = false
+    
     // Header
     var showRecordingTimer: Bool = true
     var showOrientationBadge: Bool = true

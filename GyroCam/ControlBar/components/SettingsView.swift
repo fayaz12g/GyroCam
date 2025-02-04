@@ -77,7 +77,9 @@ struct SettingsView: View {
                         
                     }
                     
-                    Section(header: Text("Video Quality")) {
+                    
+                    Section(header: Text("Camera Options")) {
+                        
                         Picker("Resolution", selection: $cameraManager.currentFormat) {
                             ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in
                                 Text(format.rawValue).tag(format)
@@ -92,9 +94,7 @@ struct SettingsView: View {
                             .onChange(of: cameraManager.isHDREnabled) { _, _ in
                                 cameraManager.configureSession()
                             }
-                    }
-                    
-                    Section(header: Text("Camera Options")) {
+                        
                         Picker("Camera Type", selection: $cameraManager.currentLens) {
                             ForEach(cameraManager.availableLenses, id: \.self) { lens in
                                 Text(lens.rawValue).tag(lens)
@@ -113,10 +113,24 @@ struct SettingsView: View {
                             cameraManager.configureSession()
                         }
                         
+                        HStack {
+                            Text("Auto Stitch")
+                            Spacer()
+                            Text("Slower")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.red)
+                                .cornerRadius(10)
+                            Toggle("", isOn: $cameraManager.shouldStitchClips)
+                                .tint(cameraManager.accentColor)
+                        }
+                        
                         
                     }
                     
-                    Section(header: Text("Updates")) {
+                    Section(header: Text("miscellaneous")) {
                         NavigationLink {
                             ChangelogView(cameraManager: cameraManager)
                         } label: {
@@ -125,19 +139,34 @@ struct SettingsView: View {
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Image(systemName: "clock.badge.checkmark")
+                                    .tint(cameraManager.accentColor)
                             }
                         }
                         
                         NavigationLink {
-                            UpcomingFeaturesView()
+                            UpcomingFeaturesView(cameraManager: cameraManager)
                         } label: {
                             HStack {
                                 Text("Upcoming Features")
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Image(systemName: "road.lanes.curved.right")
+                                    .tint(cameraManager.accentColor)
                             }
                         }
+                        
+                        NavigationLink {
+                            PrivacyPolicyView(cameraManager: cameraManager)
+                        } label: {
+                            HStack {
+                                Text("Privacy Policy")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .tint(cameraManager.accentColor)
+                            }
+                        }
+                        
                     }
                     
                     Section {

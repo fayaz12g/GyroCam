@@ -23,6 +23,7 @@ enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
 
 @MainActor
 class CameraManager: NSObject, ObservableObject {
+    
     let session = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
     private let motionManager = CMMotionManager()
@@ -31,6 +32,9 @@ class CameraManager: NSObject, ObservableObject {
     private var stopCompletion: (() -> Void)?
     
 
+    private var clipURLs: [URL] = []
+    private var stitchingGroup: DispatchGroup?
+    
     // location
     private let locationManager = CLLocationManager()
     private var lastKnownLocation: CLLocation?
@@ -39,6 +43,12 @@ class CameraManager: NSObject, ObservableObject {
     // Main actor isolated properties
     // Main properties
     
+    
+    @MainActor var shouldStitchClips: Bool {
+        get { settings.shouldStitchClips }
+        set { settings.shouldStitchClips = newValue }
+    }
+   
     
     @MainActor var isProMode: Bool {
         get { settings.isProMode }
@@ -201,6 +211,91 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
+    private func stitchClips() {
+        Task(priority: .userInitiated) { [weak self] in  // Changed to Swift concurrency
+                guard let self else { return }
+                let clips = self.clipURLs
+                guard !clips.isEmpty else { return }
+
+                let composition = AVMutableComposition()
+            guard let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid),
+                  let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                DispatchQueue.main.async {
+                    self.setErrorMessage("Failed to create composition tracks")
+                }
+                return
+            }
+
+            var currentTime = CMTime.zero
+
+            for url in clips {
+                let asset = AVAsset(url: url)
+                do {
+                    let videoAssetTracks = try await asset.loadTracks(withMediaType: .video)
+                    if let videoAssetTrack = videoAssetTracks.first {
+                        let timeRange = try await videoAssetTrack.load(.timeRange)
+                        try videoTrack.insertTimeRange(timeRange, of: videoAssetTrack, at: currentTime)
+                        let transform = try await videoAssetTrack.load(.preferredTransform)
+                        videoTrack.preferredTransform = transform
+                    }
+
+                    let audioAssetTracks = try await asset.loadTracks(withMediaType: .audio)
+                    if let audioAssetTrack = audioAssetTracks.first {
+                        let timeRange = try await audioAssetTrack.load(.timeRange)
+                        try audioTrack.insertTimeRange(timeRange, of: audioAssetTrack, at: currentTime)
+                    }
+
+                    let duration = try await asset.load(.duration)
+                    currentTime = CMTimeAdd(currentTime, duration)
+                } catch {
+                    DispatchQueue.main.async {
+                        self.setErrorMessage("Failed to insert clip: \(error.localizedDescription)")
+                    }
+                    return
+                }
+            }
+
+            guard let exporter = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality) else {
+                DispatchQueue.main.async {
+                    self.setErrorMessage("Failed to create exporter")
+                }
+                return
+            }
+
+            let outputURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("mp4")
+            exporter.outputURL = outputURL
+            exporter.outputFileType = .mp4
+
+            exporter.exportAsynchronously {
+                DispatchQueue.main.async {
+                    switch exporter.status {
+                    case .completed:
+                        PHPhotoLibrary.shared().performChanges({
+                            let options = PHAssetResourceCreationOptions()
+                            options.originalFilename = self.getNextClipNumber()
+                            options.shouldMoveFile = true
+                            _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputURL)
+                        }) { success, error in
+                            if success {
+                                clips.forEach { try? FileManager.default.removeItem(at: $0) }
+                                try? FileManager.default.removeItem(at: outputURL)
+                                print("✅ Stitched video saved")
+                            } else {
+                                self.setErrorMessage("Failed to save stitched video: \(error?.localizedDescription ?? "Unknown error")")
+                            }
+                        }
+                    case .failed:
+                        self.setErrorMessage("Stitching failed: \(exporter.error?.localizedDescription ?? "Unknown error")")
+                    default:
+                        break
+                    }
+                }
+            }
+        }
+    }
+    
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "appSettings") {
             let decoder = JSONDecoder()
@@ -289,6 +384,8 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
     }
+    
+    
     
     private func setupOutputs() throws {
         session.outputs.forEach { session.removeOutput($0) }
@@ -516,6 +613,12 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor func startRecording() {
         
+        if !isRestarting {
+               clipURLs.removeAll()
+               stitchingGroup = DispatchGroup()
+           }
+           stitchingGroup?.enter()
+        
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mov")
@@ -535,9 +638,19 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor func stopRecording(completion: (() -> Void)? = nil) {
         stopCompletion = completion
-        stopLocationUpdates()
-        movieOutput.stopRecording()
-        isRecording = false
+            stopLocationUpdates()
+            movieOutput.stopRecording()
+            isRecording = false
+            
+            if !isRestarting {
+                stitchingGroup?.notify(queue: .main) { [weak self] in
+                    guard let self = self else { return }
+                    if self.shouldStitchClips && !self.clipURLs.isEmpty {
+                        self.stitchClips()
+                    }
+                    self.stitchingGroup = nil
+                }
+            }
         print("⏹ Stopped recording clip #\(currentClipNumber)")
         if !isRestarting {
             self.currentClipNumber = 1 // reset
@@ -554,6 +667,7 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
         return String(format: "GRC_%02d", currentNumber)
     }
     
+    
     @MainActor
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
@@ -564,6 +678,10 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
             // Immediately trigger completion to allow next recording
             stopCompletion?()
             stopCompletion = nil
+            
+        if self.shouldStitchClips {
+                   self.clipURLs.append(outputFileURL)
+        } else {
             
             // Capture necessary data for background processing
             let clipName = getNextClipNumber()
@@ -610,6 +728,8 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                     }
                 }
             }
+        }
+        self.stitchingGroup?.leave()
         }
     }
 

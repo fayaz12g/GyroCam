@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct UpcomingFeaturesView: View {
+    @ObservedObject var cameraManager: CameraManager
     var body: some View {
         Form {
             Section(header: header("Development Pipeline")) {
