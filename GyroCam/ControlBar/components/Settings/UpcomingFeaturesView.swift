@@ -13,27 +13,24 @@ struct UpcomingFeaturesView: View {
         Form {
             Section(header: header("Development Pipeline")) {
                 FeatureGroup(title: "Core Functionality", features: [
-                    "Fill preview implementation",
-                    "Background saving during next clip",
-                    "Device metadata improvements",
-                    "Aspect ratio mode selector",
-                    "Lens switching during recording"
+                    "Fill preview bug fixes",
+                    "Background haptics while saving",
+                    "Device metadata improvements (location)",
+                    "Aspect ratio mode selector with gridlines",
+                    "Lens switching during recording (if Apple allows)"
                 ])
                 
                 FeatureGroup(title: "Interface Enhancements", features: [
-                    "HDR visualization indicators",
-                    "Pinch-to-zoom gesture control",
-                    "Tap-to-focus targeting system",
-                    "Recording status visualization",
-                    "Contextual haptic feedback system"
+                    "HDR overlays to match image",
+                    "Pinch-to-zoom gestures with full zoom bar",
+                    "Tap-to-focus system",
+                    "Recording status visualization with timer",
                 ])
                 
                 FeatureGroup(title: "Advanced Capabilities", features: [
                     "Manual exposure controls (ISO/shutter)",
-                    "Clip management tools",
-                    "Session timer display",
-                    "Audio feedback integration",
-                    "Smart file naming conventions"
+                    "Clip management tools (deletion, renaming)",
+                    "Full audio feedback integration",
                 ])
             }
         }

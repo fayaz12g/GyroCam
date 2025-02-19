@@ -55,6 +55,12 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.isProMode = newValue }
     }
     
+    
+    @MainActor var lockLandscape: Bool {
+        get { settings.lockLandscape }
+        set { settings.lockLandscape = newValue }
+    }
+    
     @MainActor var currentFormat: CameraManager.VideoFormat {
         get { settings.currentFormat }
         set { settings.currentFormat = newValue }
@@ -443,14 +449,23 @@ class CameraManager: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        requestCameraAccess()
-        requestLocationAccess()
+        
+        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+            requestCameraAccess()
+            requestLocationAccess()
+        }
+        
         loadSettings()
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 5 // Update every 5 meters
         
+    }
+    
+    public func setupFreshStart() {
+        requestCameraAccess()
+        requestLocationAccess()
     }
     
     private func requestCameraAccess() {
@@ -678,7 +693,7 @@ class CameraManager: NSObject, ObservableObject {
                 return
             }
             
-            let newOrientation = OrientationHelper.getOrientation(from: motion)
+            let newOrientation = OrientationHelper.getOrientation(from: motion, lockLandscape: lockLandscape, currentOrientation: self.previousOrientation)
             
             if newOrientation != self.previousOrientation && newOrientation != .unknown {
                 self.handleOrientationChange(newOrientation: newOrientation)

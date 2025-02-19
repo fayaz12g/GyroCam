@@ -2,28 +2,44 @@ import CoreMotion
 import UIKit
 import AVFoundation
 
+import CoreMotion
+import UIKit
+import AVFoundation
+
 struct OrientationHelper {
-    static func getOrientation(from motion: CMDeviceMotion) -> UIDeviceOrientation {
+    static func getOrientation(from motion: CMDeviceMotion, lockLandscape: Bool, currentOrientation: UIDeviceOrientation) -> UIDeviceOrientation {
         let gravity = motion.gravity
         let absX = abs(gravity.x)
         let absY = abs(gravity.y)
         let absZ = abs(gravity.z)
         
-        // First check for face up/down using z-axis
-        if absZ > max(absX, absY) {
-            if gravity.z > 0.8 {
-                return .faceUp
-            } else if gravity.z < -0.8 {
-                return .faceDown
+        // Skip face up/down check if locked to landscape
+        if !lockLandscape {
+            if absZ > max(absX, absY) {
+                if gravity.z > 1 {
+                    return .faceUp
+                } else if gravity.z < -1 {
+                    return .faceDown
+                }
+                // If not clearly face up/down, fall through to closest orientation logic
             }
-            return .unknown
         }
         
-        // Then check for other orientations
+        // Determine the closest orientation based on gravity vector
         if absX > absY {
+            // Landscape orientation
             return gravity.x > 0 ? .landscapeRight : .landscapeLeft
+        } else if absY > absX {
+            // Portrait orientation (only if not locked to landscape)
+            if !lockLandscape {
+                return gravity.y > 0 ? .portraitUpsideDown : .portrait
+            } else {
+                // If locked to landscape, return the current orientation to avoid flipping
+                return currentOrientation
+            }
         } else {
-            return gravity.y > 0 ? .portraitUpsideDown : .portrait
+            // If X and Y are nearly equal (device is centered), retain the current orientation
+            return currentOrientation
         }
     }
 }

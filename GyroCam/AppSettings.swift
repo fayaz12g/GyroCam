@@ -29,6 +29,8 @@ struct AppSettings: Codable {
     var showZoomBar: Bool = false
     var maximizePreview: Bool = true
     
+    var lockLandscape: Bool = false
+    
     var shouldStitchClips: Bool = false
     
     // Header

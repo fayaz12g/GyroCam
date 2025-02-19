@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "gaycam (1).png",
+      "filename" : "gyrodarker.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "gaycam (1) 1.png",
+      "filename" : "newlogo.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "Slide5.png",
+      "filename" : "gyrotint.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

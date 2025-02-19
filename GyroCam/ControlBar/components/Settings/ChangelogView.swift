@@ -14,6 +14,14 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Current Features")) {
                 
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 010", changes: [
+                    "Added the onboarding screen with centralized permissions requests.",
+                    "Updated the roadmap to be more in line with planned features",
+                    "Introduced new App Logos",
+                    "Added the Landscape Lock feature",
+                    "Adjusted how Face Up and Face Down orientations are handled"
+                ])
+                
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 009", changes: [
                     "Brought Zoom Bar into beta",
                     "New beta auto stitch feature",

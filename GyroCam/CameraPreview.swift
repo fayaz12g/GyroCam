@@ -12,6 +12,9 @@ struct CameraPreview: UIViewRepresentable {
     let session: AVCaptureSession
     @ObservedObject var cameraManager: CameraManager
     @State private var lastScaleValue: CGFloat = 1.0
+    @Binding var showOnboarding: Bool
+    
+    
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: UIScreen.main.bounds)

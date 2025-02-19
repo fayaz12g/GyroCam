@@ -105,6 +105,7 @@ struct SettingsView: View {
                             cameraManager.configureSession()
                         }
                         
+                        
                         Picker("Frame Rate", selection: $cameraManager.currentFPS) {
                             ForEach(cameraManager.availableFrameRates) { fps in
                                 Text(fps.description).tag(fps)
@@ -113,6 +114,9 @@ struct SettingsView: View {
                         .onChange(of: cameraManager.currentFPS) { _, _ in
                             cameraManager.configureSession()
                         }
+                        
+                        Toggle("Lock Orientation to Landscape", isOn: $cameraManager.lockLandscape)
+                            .tint(cameraManager.accentColor)
                         
                         HStack {
                             Text("Auto Stitch")
@@ -200,6 +204,7 @@ struct SettingsView: View {
                     private func resetDefaults() {
                         cameraManager.resetToDefaults()
                         cameraManager.configureSession()
+                        UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
                     }
                 }
 
