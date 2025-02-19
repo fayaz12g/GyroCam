@@ -23,6 +23,7 @@ struct OnboardingView: View {
         VStack {
             TabView(selection: $currentPage) {
                 OnboardingPage(
+                    cameraManager: cameraManager,
                     customIcon: Image("newlogo"),
                     iconName: "",
                     title: "Welcome to GyroCam",
@@ -31,6 +32,7 @@ struct OnboardingView: View {
                 .tag(0)
                 
                 OnboardingPage(
+                    cameraManager: cameraManager,
                     customIcon: nil,
                     iconName: "camera",
                     title: "Live in the Moment",
@@ -39,6 +41,7 @@ struct OnboardingView: View {
                 .tag(1)
                 
                 OnboardingPage(
+                    cameraManager: cameraManager,
                     customIcon: nil,
                     iconName: "film",
                     title: "Preview Clips",
@@ -47,6 +50,7 @@ struct OnboardingView: View {
                 .tag(2)
                 
                 OnboardingPage(
+                    cameraManager: cameraManager,
                     customIcon: nil,
                     iconName: "slider.horizontal.3",
                     title: "Customize Settings",
@@ -85,6 +89,7 @@ struct OnboardingView: View {
 }
 
 struct OnboardingPage: View {
+    @ObservedObject var cameraManager: CameraManager
     let customIcon: Image?
     let iconName: String
     let title: String
@@ -93,16 +98,44 @@ struct OnboardingPage: View {
     var body: some View {
         VStack(spacing: 20) {
             if let customIcon = customIcon {
-                customIcon
-                    .resizable()
-//                    .renderingMode(.template) // if want to make it match the rest
-                    .frame(width: 120, height: 120)
-//                    .foregroundColor(.blue) // if want to make it match the rest
+                if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+                    customIcon
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: 120, height: 120)
+                        .foregroundColor(cameraManager.accentColor)
+                } else {
+                    customIcon
+                        .resizable()
+                        .frame(width: 120, height: 120)
+                
+                }
+
             } else {
-                Image(systemName: iconName)
-                    .font(.system(size: 60))
-                    .foregroundColor(.blue)
+                if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+                    Image(systemName: iconName)
+                        .font(.system(size: 60))
+                        .foregroundColor(cameraManager.accentColor)
+                } else {
+                    Image(systemName: iconName)
+                        .font(.system(size: 60))
+                        .foregroundColor(.clear) // Clear color to let the gradient show
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            .mask(
+                                Image(systemName: iconName) // Apply the mask to the icon
+                                    .font(.system(size: 60))
+                            )
+                        )
+
+                }
+                
             }
+                
             
             Text(title)
                 .font(.title)
@@ -126,7 +159,18 @@ struct PermissionsPage: View {
             VStack {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 50))
-                    .foregroundColor(.blue)
+                    .foregroundColor(.clear) // Clear color to let the gradient show
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .mask(
+                            Image(systemName: "lock.shield.fill") // Apply the mask to the icon
+                                .font(.system(size: 60))
+                        )
+                    )
                 Text("Permissions")
                     .font(.title2)
                     .fontWeight(.bold)
@@ -191,14 +235,35 @@ struct PermissionRow: View {
             }) {
                 ZStack {
                     Circle()
-                        .stroke(granted ? Color.blue : Color.gray, lineWidth: 2)
+                        .stroke(granted ? LinearGradient(
+                            gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ) :  LinearGradient(
+                            gradient: Gradient(colors: [.gray]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ), lineWidth: 2)
+                    
                         .frame(width: 30, height: 30)
+                    
                     if granted {
                         Circle()
-                            .fill(Color.blue)
+                            .fill(
+                                granted ? LinearGradient(
+                                    gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ) :  LinearGradient(
+                                    gradient: Gradient(colors: [.clear]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                             .frame(width: 20, height: 20)
                     }
                 }
+
             }
             
             // Permission Details

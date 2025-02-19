@@ -19,7 +19,8 @@ struct ChangelogView: View {
                     "Updated the roadmap to be more in line with planned features",
                     "Introduced new App Logos",
                     "Added the Landscape Lock feature",
-                    "Adjusted how Face Up and Face Down orientations are handled"
+                    "Adjusted how Face Up and Face Down orientations are handled",
+                    "Added a show onboarding button in settings. Onboarding is rainbow the first time, and follows accent color after that."
                 ])
                 
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 009", changes: [

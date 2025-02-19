@@ -4,74 +4,78 @@ import AVFoundation
 struct SettingsView: View {
     @ObservedObject var cameraManager: CameraManager
     @Environment(\.presentationMode) var presentationMode
+    @State private var showOnboarding = false
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("User Interface")) {
-                    HStack {
-                        Text("Show Zoom Bar")
-                        Spacer()
-                        Text("Beta")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.red)
-                            .cornerRadius(10)
-                        Toggle("", isOn: $cameraManager.showZoomBar)
+        if showOnboarding {
+            OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding)
+        } else {
+            NavigationView {
+                Form {
+                    Section(header: Text("User Interface")) {
+                        HStack {
+                            Text("Show Zoom Bar")
+                            Spacer()
+                            Text("Beta")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.red)
+                                .cornerRadius(10)
+                            Toggle("", isOn: $cameraManager.showZoomBar)
+                                .tint(cameraManager.accentColor)
+                        }
+                        
+                        Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
                             .tint(cameraManager.accentColor)
-                    }
-                    
-                    Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
-                        .tint(cameraManager.accentColor)
-                    
-                    Toggle("Show Orientation Badge", isOn: $cameraManager.showOrientationBadge)
-                        .tint(cameraManager.accentColor)
-                    
-                
+                        
+                        Toggle("Show Orientation Badge", isOn: $cameraManager.showOrientationBadge)
+                            .tint(cameraManager.accentColor)
+                        
+                        
                         Toggle("Minimal Orientation Badge", isOn: $cameraManager.minimalOrientationBadge)
                             .tint(cameraManager.accentColor)
                             .disabled(!cameraManager.showOrientationBadge)
-                    
-                    Toggle("Show Clip Badge", isOn: $cameraManager.showClipBadge)
-                        .tint(cameraManager.accentColor)
-                    
-                    HStack {
-                        Text("Show Recording Timer")
-                        Spacer()
-                        Text("Coming Soon")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.purple)
-                            .cornerRadius(10)
-                        Toggle("", isOn: $cameraManager.showRecordingTimer)
+                        
+                        Toggle("Show Clip Badge", isOn: $cameraManager.showClipBadge)
                             .tint(cameraManager.accentColor)
-                            .disabled(true)
+                        
+                        HStack {
+                            Text("Show Recording Timer")
+                            Spacer()
+                            Text("Coming Soon")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.purple)
+                                .cornerRadius(10)
+                            Toggle("", isOn: $cameraManager.showRecordingTimer)
+                                .tint(cameraManager.accentColor)
+                                .disabled(true)
+                        }
+                        
+                        
+                        
+                        HStack {
+                            Text("App Theme")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            ColorPicker("Select Theme Color", selection: $cameraManager.accentColor, supportsOpacity: false)
+                                .labelsHidden()
+                                .frame(width: 44, height: 44)
+                                .padding(.trailing, -8)
+                        }
+                        .frame(height: 44)
+                        .contentShape(Rectangle())
                     }
                     
-                    
-                    
-                    HStack {
-                        Text("App Theme")
-                            .foregroundColor(.primary)
-                        Spacer()
-                        ColorPicker("Select Theme Color", selection: $cameraManager.accentColor, supportsOpacity: false)
-                            .labelsHidden()
-                            .frame(width: 44, height: 44)
-                            .padding(.trailing, -8)
-                    }
-                    .frame(height: 44)
-                    .contentShape(Rectangle())
-                }
-                
-                Section(header: Text("Photo Library")) {
-                    HStack {
-                        Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
-                            .tint(cameraManager.accentColor)
-                    }
+                    Section(header: Text("Photo Library")) {
+                        HStack {
+                            Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
+                                .tint(cameraManager.accentColor)
+                        }
                         
                         Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
                             .tint(cameraManager.accentColor)
@@ -171,6 +175,11 @@ struct SettingsView: View {
                                     .tint(cameraManager.accentColor)
                             }
                         }
+                        Button(action: doShowOnboarding) {
+                            Text("Show Onboarding")
+                                .foregroundColor(cameraManager.accentColor)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
                         
                     }
                     
@@ -199,7 +208,11 @@ struct SettingsView: View {
                 }
             }
         }
+    }
 
+                    private func doShowOnboarding() {
+                        showOnboarding = true
+                    }
                     
                     private func resetDefaults() {
                         cameraManager.resetToDefaults()
