@@ -67,9 +67,55 @@
 - Added privacy policy section  
 - Consolidated camera options  
 
-[View truncated history...]
+### Alpha 008
+**UI Customization**  
+- Preserve Aspect Ratio toggle  
+- Clip/Orientation badge controls  
+- Minimal orientation header option  
 
-## Internal Builds (Pre-Alpha)
+**Workflow Improvements**  
+- Re-centered Quick Settings panel  
+- Settings button direct access  
+- Face up/down orientation support  
+
+### Alpha 007
+**Audio/Visual**  
+- Added recording sound effects  
+- New rainbow app icon  
+
+**Photo Library**  
+- Aspect ratio preservation  
+- Pro mode information badges  
+
+### Alpha 006
+**Device Support**  
+- Full iPad compatibility  
+- Added 120/240 FPS modes  
+
+**Technical Updates**  
+- iOS 17 support baseline  
+- Device-based lens detection  
+
+### Alpha 005
+**Customization**  
+- Dynamic accent color theming  
+- Preview size toggle  
+
+**Performance**  
+- Background video processing  
+- Redesigned record button  
+
+### Alpha 004
+**Feature Foundation**  
+- Complete Quick Settings panel  
+- Photo library integration  
+- Basic geotagging support  
+
+**Framework**  
+- Initial changelog implementation  
+- Orientation header fixes  
+
+## Internal Builds
 
 ### Alpha 003
 - Double-tap lens switching  
@@ -89,7 +135,7 @@
 ### Alpha 00 (Foundation)
 - Gyroscopic clip splitting  
 - 720p HDR recording  
-- Basic orientation detection  
+- Basic orientation detection
 
 ---
 
