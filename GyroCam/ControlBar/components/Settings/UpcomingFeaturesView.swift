@@ -23,6 +23,8 @@ struct UpcomingFeaturesView: View {
                 FeatureGroup(title: "Interface Enhancements", features: [
                     "HDR overlays to match image",
                     "Recording status visualization with timer",
+                    "Implement full iPhone 16+ Camera Control Support",
+                    "Implement locked camera Control Center support"
                 ])
                 
                 FeatureGroup(title: "Advanced Capabilities", features: [
