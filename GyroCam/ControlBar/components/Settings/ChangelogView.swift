@@ -23,7 +23,8 @@ struct ChangelogView: View {
                     "Added the Focus Bar with manual focus controls",
                     "Added logic to make the Focus Bar and Auto focus mutually exclusive",
                     "Added a tap targeting focus system (auto focus off)",
-                    "Added a continuous auto focus system"
+                    "Added a continuous auto focus system",
+                    "Added auto exposure control with manual shutter speed and ISO shells (functionality not implemented)"
                     
                 ])
                 

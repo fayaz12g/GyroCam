@@ -245,7 +245,7 @@ class CameraManager: NSObject, ObservableObject {
         }
         
         @MainActor var manualShutterSpeed: CMTime? {
-            get { CMTime(seconds: settings.manualShutterSpeed, preferredTimescale: 1000000) }
+            get { CMTime(seconds: settings.manualShutterSpeed, preferredTimescale: 1/60) }
             set {
                 settings.manualShutterSpeed = newValue.map(CMTimeGetSeconds) ?? (1/60)
                 updateExposureSettings()
