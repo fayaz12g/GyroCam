@@ -4,7 +4,9 @@
 
 ### Alpha 013 (Current)
 **Changelog Improvements**  
-- Revamped section headers for better clarity  
+- Revamped section headers for better clarity
+**Settings**  
+- Major restructure of the settings view  
 - Added detailed 'About' submenu with version info  
 
 **App Icon**  
