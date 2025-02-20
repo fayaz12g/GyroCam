@@ -44,6 +44,8 @@ class CameraManager: NSObject, ObservableObject {
     // Main properties
     
     
+    @Published var focusValue: Float = 0.5 // Initial value
+    
     @MainActor var shouldStitchClips: Bool {
         get { settings.shouldStitchClips }
         set { settings.shouldStitchClips = newValue }
@@ -117,6 +119,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.showZoomBar = newValue }
     }
     
+    @MainActor var showFocusBar: Bool {
+        get { settings.showFocusBar }
+        set { settings.showFocusBar = newValue }
+    }
+    
     @MainActor var maximizePreview: Bool {
         get { settings.maximizePreview }
         set { settings.maximizePreview = newValue }
@@ -148,6 +155,29 @@ class CameraManager: NSObject, ObservableObject {
     // Camera Control Elements
     
     
+    func updateFocusValueLive() {
+        if let device = captureDevice {
+            do {
+                try device.lockForConfiguration()
+                device.setFocusModeLocked(lensPosition: focusValue) { _ in }
+                device.unlockForConfiguration()
+            } catch {
+                print("Error adjusting focus: \(error)")
+            }
+        }
+    }
+    
+    func adjustFocus(to focusValue: Float) {
+           guard let device = captureDevice else { return }
+
+           do {
+               try device.lockForConfiguration()
+               device.setFocusModeLocked(lensPosition: focusValue, completionHandler: nil)
+               device.unlockForConfiguration()
+           } catch {
+               print("Error adjusting focus: \(error)")
+           }
+       }
     
     private var zoomTimer: Timer?
     

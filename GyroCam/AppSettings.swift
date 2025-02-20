@@ -27,6 +27,7 @@ struct AppSettings: Codable {
     var currentLens: CameraManager.LensType = .wide
     var isHDREnabled: Bool = true
     var showZoomBar: Bool = false
+    var showFocusBar: Bool = false
     var maximizePreview: Bool = true
     
     var lockLandscape: Bool = false

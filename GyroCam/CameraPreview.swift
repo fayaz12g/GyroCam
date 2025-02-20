@@ -14,8 +14,6 @@ struct CameraPreview: UIViewRepresentable {
     @State private var lastScaleValue: CGFloat = 1.0
     @Binding var showOnboarding: Bool
     
-    
-    
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: UIScreen.main.bounds)
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
@@ -67,7 +65,7 @@ struct CameraPreview: UIViewRepresentable {
                 parent.lastScaleValue = device.videoZoomFactor
             case .changed:
                 let minZoomFactor: CGFloat = 1.0
-                let maxZoomFactor: CGFloat = 10.0 
+                let maxZoomFactor: CGFloat = 10.0
 
                 let desiredZoomFactor = parent.lastScaleValue * gesture.scale
                 let zoomFactor = max(minZoomFactor, min(desiredZoomFactor, maxZoomFactor))
@@ -88,6 +86,10 @@ struct CameraPreview: UIViewRepresentable {
         }
         
         @MainActor @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+            if cameraManager.showFocusBar {
+                return // Don't perform tap to focus if the manual focus bar is shown.
+            }
+            
             guard let device = cameraManager.captureDevice,
                   device.isFocusPointOfInterestSupported else { return }
             
@@ -131,6 +133,18 @@ struct CameraPreview: UIViewRepresentable {
         @MainActor @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
             cameraManager.switchCamera()
         }
+        
+        // Updates the focus value live as the user adjusts the slider
+        @MainActor func updateFocusValue(to value: Float) {
+            guard let device = cameraManager.captureDevice else { return }
+            do {
+                try device.lockForConfiguration()
+                device.setFocusModeLocked(lensPosition: value) { _ in }
+                device.unlockForConfiguration()
+            } catch {
+                print("Error adjusting focus: \(error)")
+            }
+        }
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
@@ -153,12 +167,12 @@ struct CameraPreview: UIViewRepresentable {
             }
         }
     }
-
     
     static func dismantleUIView(_ uiView: UIView, coordinator: ()) {
         NotificationCenter.default.removeObserver(uiView)
     }
 }
+
 
 extension AVCaptureVideoOrientation {
     init?(interfaceOrientation: UIInterfaceOrientation) {

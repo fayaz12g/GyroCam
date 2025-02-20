@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
+    @State private var focusValue: Float = 0.5
     @State private var clipNumber = 1
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
     
@@ -30,6 +31,9 @@ struct ContentView: View {
                                 }
                             }
                             
+                            FocusBar(cameraManager: cameraManager)
+                                .padding(.bottom, cameraManager.showZoomBar ? 0 : 100)
+
                             if cameraManager.showZoomBar {
                                 ZoomIndicator(cameraManager: cameraManager)
                                     .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom) // 80% of the screen width
