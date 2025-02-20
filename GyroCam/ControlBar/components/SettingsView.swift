@@ -13,23 +13,15 @@ struct SettingsView: View {
             NavigationView {
                 Form {
                     Section(header: Text("User Interface")) {
-                        Toggle("Show Zoom Bar", isOn: $cameraManager.showZoomBar)
+                        Toggle("Zoom Bar", isOn: $cameraManager.showZoomBar)
                             .tint(cameraManager.accentColor)
                         
+                        Toggle("Focus Bar", isOn: $cameraManager.showFocusBar)
+                            .tint(cameraManager.accentColor)
                         
-                        HStack {
-                            Text("Show Focus Bar")
-                            Spacer()
-                            Text("Disables Auto Focus")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.red)
-                                .cornerRadius(10)
-                            Toggle("", isOn: $cameraManager.showFocusBar)
-                                .tint(cameraManager.accentColor)
-                        }
+                        Toggle("Auto Focus", isOn: $cameraManager.autoFocus)
+                            .tint(cameraManager.accentColor)
+                            .disabled(cameraManager.showFocusBar)
                         
                         Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
                             .tint(cameraManager.accentColor)

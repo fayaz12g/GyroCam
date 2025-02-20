@@ -121,8 +121,52 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor var showFocusBar: Bool {
         get { settings.showFocusBar }
-        set { settings.showFocusBar = newValue }
+        set {
+            settings.showFocusBar = newValue
+            if newValue {
+                autoFocus = false
+            }
+        }
     }
+    
+    @MainActor var autoFocus: Bool {
+        get { settings.autoFocus }
+        set {
+            settings.autoFocus = newValue
+            
+            guard let device = captureDevice else { return }
+            
+            do {
+                try device.lockForConfiguration()
+                
+                if newValue {
+                    // Reset any locked focus state and enable continuous auto focus
+                    device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
+                    device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
+                    
+                    if device.isFocusModeSupported(.continuousAutoFocus) {
+                        device.focusMode = .continuousAutoFocus
+                    }
+                    if device.isExposureModeSupported(.continuousAutoExposure) {
+                        device.exposureMode = .continuousAutoExposure
+                    }
+                } else {
+                    // Switch to auto focus mode (requiring tap)
+                    if device.isFocusModeSupported(.autoFocus) {
+                        device.focusMode = .autoFocus
+                    }
+                    if device.isExposureModeSupported(.autoExpose) {
+                        device.exposureMode = .autoExpose
+                    }
+                }
+                
+                device.unlockForConfiguration()
+            } catch {
+                print("Error updating focus mode: \(error)")
+            }
+        }
+    }
+
     
     @MainActor var maximizePreview: Bool {
         get { settings.maximizePreview }

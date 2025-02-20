@@ -28,6 +28,7 @@ struct AppSettings: Codable {
     var isHDREnabled: Bool = true
     var showZoomBar: Bool = false
     var showFocusBar: Bool = false
+    var autoFocus: Bool = true
     var maximizePreview: Bool = true
     
     var lockLandscape: Bool = false

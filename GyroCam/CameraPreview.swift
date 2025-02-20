@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 
+
 struct CameraPreview: UIViewRepresentable {
     let session: AVCaptureSession
     @ObservedObject var cameraManager: CameraManager
@@ -38,6 +39,9 @@ struct CameraPreview: UIViewRepresentable {
         view.addGestureRecognizer(tapGesture)
         view.addGestureRecognizer(doubleTapGesture)
         
+        // Set initial focus mode based on autoFocus setting
+        context.coordinator.updateFocusMode()
+        
         return view
     }
     
@@ -46,13 +50,63 @@ struct CameraPreview: UIViewRepresentable {
     }
     
     class Coordinator: NSObject {
-        var parent: CameraPreview
-        var cameraManager: CameraManager
-        
-        init(_ parent: CameraPreview, cameraManager: CameraManager) {
-            self.parent = parent
-            self.cameraManager = cameraManager
-        }
+            var parent: CameraPreview
+            var cameraManager: CameraManager
+            
+            init(_ parent: CameraPreview, cameraManager: CameraManager) {
+                self.parent = parent
+                self.cameraManager = cameraManager
+                super.init()
+                
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(autoFocusChanged),
+                    name: NSNotification.Name("AutoFocusChanged"),
+                    object: nil
+                )
+            }
+            
+            deinit {
+                NotificationCenter.default.removeObserver(self)
+            }
+            
+            @MainActor @objc func autoFocusChanged() {
+                updateFocusMode()
+            }
+            
+            @MainActor func updateFocusMode() {
+                guard let device = cameraManager.captureDevice else { return }
+                
+                do {
+                    try device.lockForConfiguration()
+                    
+                    if cameraManager.autoFocus {
+                        // Reset any locked focus state
+                        device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
+                        device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
+                        
+                        // Enable continuous auto focus
+                        if device.isFocusModeSupported(.continuousAutoFocus) {
+                            device.focusMode = .continuousAutoFocus
+                        }
+                        if device.isExposureModeSupported(.continuousAutoExposure) {
+                            device.exposureMode = .continuousAutoExposure
+                        }
+                    } else {
+                        // If not in auto focus mode, default to auto but require tap
+                        if device.isFocusModeSupported(.autoFocus) {
+                            device.focusMode = .autoFocus
+                        }
+                        if device.isExposureModeSupported(.autoExpose) {
+                            device.exposureMode = .autoExpose
+                        }
+                    }
+                    
+                    device.unlockForConfiguration()
+                } catch {
+                    print("Error updating focus mode: \(error)")
+                }
+            }
         
         @MainActor @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             guard let device = cameraManager.captureDevice else {
@@ -86,8 +140,9 @@ struct CameraPreview: UIViewRepresentable {
         }
         
         @MainActor @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            if cameraManager.showFocusBar {
-                return // Don't perform tap to focus if the manual focus bar is shown.
+            // Don't handle taps if using continuous auto focus or if focus bar is shown
+            if cameraManager.autoFocus || cameraManager.showFocusBar {
+                return
             }
             
             guard let device = cameraManager.captureDevice,
@@ -134,7 +189,6 @@ struct CameraPreview: UIViewRepresentable {
             cameraManager.switchCamera()
         }
         
-        // Updates the focus value live as the user adjusts the slider
         @MainActor func updateFocusValue(to value: Float) {
             guard let device = cameraManager.captureDevice else { return }
             do {
@@ -146,6 +200,7 @@ struct CameraPreview: UIViewRepresentable {
             }
         }
     }
+    
     
     func updateUIView(_ uiView: UIView, context: Context) {
         // Always operate on main thread
