@@ -34,6 +34,8 @@ struct FocusBar: View {
                         Text("\(String(format: "%.1f", cameraManager.focusValue))f")
                             .font(.system(size: 12, weight: .bold))
                     )
+                    .rotationEffect(rotationAngle)
+                    .animation(.easeInOut(duration: 0.2), value: cameraManager.currentOrientation)
                     .shadow(radius: 3)
                     .offset(x: position)
                     .gesture(
@@ -61,6 +63,14 @@ struct FocusBar: View {
             }
         }
         .frame(height: 40)
+    }
+    private var rotationAngle: Angle {
+        switch cameraManager.currentOrientation {
+        case "Landscape Left": return .degrees(90)
+        case "Landscape Right": return .degrees(-90)
+        case "Upside Down": return .degrees(180)
+        default: return .degrees(0)
+        }
     }
 }
 

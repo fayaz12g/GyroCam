@@ -34,7 +34,9 @@ struct ZoomIndicator: View {
                         Text("\(String(format: "%.1f", cameraManager.currentZoom))x")
                             .font(.system(size: 12, weight: .bold))
                     )
+                    .rotationEffect(rotationAngle)
                     .shadow(radius: 3)
+                    .animation(.easeInOut(duration: 0.2), value: cameraManager.currentOrientation)
                     .offset(x: position)
                     .gesture(
                         DragGesture()
@@ -58,9 +60,17 @@ struct ZoomIndicator: View {
                                 }
                             }
                     )
-
             }
         }
         .frame(height: 40)
+    }
+    
+    private var rotationAngle: Angle {
+        switch cameraManager.currentOrientation {
+        case "Landscape Left": return .degrees(90)
+        case "Landscape Right": return .degrees(-90)
+        case "Upside Down": return .degrees(180)
+        default: return .degrees(0)
+        }
     }
 }

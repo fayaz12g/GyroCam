@@ -32,6 +32,7 @@ struct ContentView: View {
                             }
                             
                             FocusBar(cameraManager: cameraManager)
+                                .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom) // 80% of the screen width
                                 .padding(.bottom, cameraManager.showZoomBar ? 0 : 100)
 
                             if cameraManager.showZoomBar {
