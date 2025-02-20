@@ -22,8 +22,6 @@ struct UpcomingFeaturesView: View {
                 
                 FeatureGroup(title: "Interface Enhancements", features: [
                     "HDR overlays to match image",
-                    "Pinch-to-zoom gestures with full zoom bar",
-                    "Tap-to-focus system",
                     "Recording status visualization with timer",
                 ])
                 

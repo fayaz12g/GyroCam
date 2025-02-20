@@ -35,6 +35,12 @@ struct AppSettings: Codable {
     
     var shouldStitchClips: Bool = false
     
+    
+    // exposure
+    var autoExposure: Bool = true
+    var manualISO: Float = 100
+    var manualShutterSpeed: Double = 1/60
+    
     // Header
     var showRecordingTimer: Bool = false
     var showOrientationBadge: Bool = true

@@ -135,6 +135,26 @@ struct SettingsView: View {
                         
                     }
                     
+                    Section(header: Text("Exposure Controls")) {
+                        Toggle("Auto Exposure", isOn: $cameraManager.autoExposure)
+                            .tint(cameraManager.accentColor)
+                        
+                        Picker("ISO", selection: $cameraManager.manualISO) {
+                            ForEach(Array(stride(from: 50, through: 3200, by: 50)), id: \.self) { iso in
+                                Text("\(iso)").tag(Float(iso))
+                            }
+                        }
+                        .disabled(cameraManager.autoExposure) // Disable when autoExposure is on
+                        
+                        Picker("Shutter Speed", selection: $cameraManager.manualShutterSpeed) {
+                            ForEach(CameraManager.ShutterSpeed.allCases, id: \.self) { speed in
+                                Text(speed.description).tag(speed.cmTime)
+                            }
+                        }
+                        .disabled(cameraManager.autoExposure) // Disable when autoExposure is on
+                    }
+
+                    
                     Section(header: Text("miscellaneous")) {
                         NavigationLink {
                             ChangelogView(cameraManager: cameraManager)

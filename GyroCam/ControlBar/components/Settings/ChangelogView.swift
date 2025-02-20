@@ -19,7 +19,12 @@ struct ChangelogView: View {
                     "Added context menu parity for orientation badge to hide",
                     "Updated the onboarding view to describe camera controls",
                     "Implemented funtional support for the zoom bar bringing it out of beta",
-                    "Added the Focus Bar and Auto-Focus modes"
+                    "Implemented pinch to zoom gestures with zoom bar",
+                    "Added the Focus Bar with manual focus controls",
+                    "Added logic to make the Focus Bar and Auto focus mutually exclusive",
+                    "Added a tap targeting focus system (auto focus off)",
+                    "Added a continuous auto focus system"
+                    
                 ])
                 
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 010", changes: [
