@@ -68,3 +68,4 @@ struct AppSettings: Codable {
          try container.encode(data)
      }
  }
+

@@ -21,6 +21,7 @@ enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
     }
 }
 
+
 @MainActor
 class CameraManager: NSObject, ObservableObject {
     
@@ -39,6 +40,55 @@ class CameraManager: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     private var lastKnownLocation: CLLocation?
     @Published var locationAuthorizationStatus: CLAuthorizationStatus = .notDetermined
+    
+    
+    enum ShutterSpeed: CaseIterable {
+        case speed1_1000
+        case speed1_500
+        case speed1_250
+        case speed1_125
+        case speed1_60
+        case speed1_48
+        case speed1_15
+        case speed1_8
+        case speed1_4
+        case speed1_2
+        case speed1
+        
+        var cmTime: CMTime {
+            let seconds: Double
+            switch self {
+            case .speed1_1000: seconds = 1/1000
+            case .speed1_500: seconds = 1/500
+            case .speed1_250: seconds = 1/250
+            case .speed1_125: seconds = 1/125
+            case .speed1_60: seconds = 1/60
+            case .speed1_48: seconds = 1/48
+            case .speed1_15: seconds = 1/15
+            case .speed1_8: seconds = 1/8
+            case .speed1_4: seconds = 1/4
+            case .speed1_2: seconds = 1/2
+            case .speed1: seconds = 1
+            }
+            return CMTime(seconds: seconds, preferredTimescale: 1000000)
+        }
+        
+        var description: String {
+            switch self {
+            case .speed1_1000: return "1/1000"
+            case .speed1_500: return "1/500"
+            case .speed1_250: return "1/250"
+            case .speed1_125: return "1/125"
+            case .speed1_60: return "1/60"
+            case .speed1_48: return "1/48"
+            case .speed1_15: return "1/15"
+            case .speed1_8: return "1/8"
+            case .speed1_4: return "1/4"
+            case .speed1_2: return "1/2"
+            case .speed1: return "1"
+            }
+        }
+    }
     
     // Main actor isolated properties
     // Main properties
@@ -182,7 +232,7 @@ class CameraManager: NSObject, ObservableObject {
             get { settings.autoExposure }
             set {
                 settings.autoExposure = newValue
-                configureSession()  
+                configureSession()
             }
         }
         
@@ -202,55 +252,7 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
         
-        // Add this enum for the shutter speed picker
-        enum ShutterSpeed: CaseIterable {
-            case speed1_1000
-            case speed1_500
-            case speed1_250
-            case speed1_125
-            case speed1_60
-            case speed1_30
-            case speed1_15
-            case speed1_8
-            case speed1_4
-            case speed1_2
-            case speed1
-            
-            var cmTime: CMTime {
-                let seconds: Double
-                switch self {
-                case .speed1_1000: seconds = 1/1000
-                case .speed1_500: seconds = 1/500
-                case .speed1_250: seconds = 1/250
-                case .speed1_125: seconds = 1/125
-                case .speed1_60: seconds = 1/60
-                case .speed1_30: seconds = 1/30
-                case .speed1_15: seconds = 1/15
-                case .speed1_8: seconds = 1/8
-                case .speed1_4: seconds = 1/4
-                case .speed1_2: seconds = 1/2
-                case .speed1: seconds = 1
-                }
-                return CMTime(seconds: seconds, preferredTimescale: 1000000)
-            }
-            
-            var description: String {
-                switch self {
-                case .speed1_1000: return "1/1000"
-                case .speed1_500: return "1/500"
-                case .speed1_250: return "1/250"
-                case .speed1_125: return "1/125"
-                case .speed1_60: return "1/60"
-                case .speed1_30: return "1/30"
-                case .speed1_15: return "1/15"
-                case .speed1_8: return "1/8"
-                case .speed1_4: return "1/4"
-                case .speed1_2: return "1/2"
-                case .speed1: return "1"
-                }
-            }
-        }
-        
+    
         private func updateExposureSettings() {
             guard !autoExposure,
                   let device = captureDevice else { return }
