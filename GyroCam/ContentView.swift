@@ -30,10 +30,11 @@ struct ContentView: View {
                                     ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, showClipBadge: $cameraManager.showClipBadge)
                                 }
                             }
-                            
-                            FocusBar(cameraManager: cameraManager)
-                                .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom) // 80% of the screen width
-                                .padding(.bottom, cameraManager.showZoomBar ? 0 : 100)
+                            if cameraManager.showFocusBar {
+                                FocusBar(cameraManager: cameraManager)
+                                    .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom) // 80% of the screen width
+                                    .padding(.bottom, cameraManager.showZoomBar ? 0 : 100)
+                            }
 
                             if cameraManager.showZoomBar {
                                 ZoomIndicator(cameraManager: cameraManager)
