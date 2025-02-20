@@ -144,6 +144,11 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     
+    
+    // Camera Control Elements
+    
+    
+    
     private var zoomTimer: Timer?
     
     // Add to existing properties
@@ -503,9 +508,25 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor private func setupInputs() throws {
         session.inputs.forEach { session.removeInput($0) }
         
+        
+
+        
         guard let device = getCurrentDevice() else {
             throw NSError(domain: "CameraManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Device unavailable"])
         }
+        
+        // Camera Control
+        
+        // Create a control to adjust the device's video zoom factor.
+        let systemZoomSlider = AVCaptureSystemZoomSlider(device: device) { zoomFactor in
+            // Calculate and display a zoom value.
+            let displayZoom = device.displayVideoZoomFactorMultiplier * zoomFactor
+            // Update the user interface.
+        }
+
+
+        // Create a control to adjust the device's exposure bias.
+        let systemBiasSlider = AVCaptureSystemExposureBiasSlider(device: device)
         
         currentDevice = device
         let input = try AVCaptureDeviceInput(device: device)

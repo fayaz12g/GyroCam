@@ -30,3 +30,4 @@ struct GyroCamCaptureExtensionViewFinder: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Self.Context) {
     }
 }
+
