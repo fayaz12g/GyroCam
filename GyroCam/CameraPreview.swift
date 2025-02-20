@@ -61,14 +61,14 @@ struct CameraPreview: UIViewRepresentable {
                 print("No capture device available for zoom")
                 return
             }
-            
+
             switch gesture.state {
             case .began:
                 parent.lastScaleValue = device.videoZoomFactor
             case .changed:
                 let minZoomFactor: CGFloat = 1.0
-                let maxZoomFactor = device.activeFormat.videoMaxZoomFactor
-                
+                let maxZoomFactor: CGFloat = 10.0 
+
                 let desiredZoomFactor = parent.lastScaleValue * gesture.scale
                 let zoomFactor = max(minZoomFactor, min(desiredZoomFactor, maxZoomFactor))
                 

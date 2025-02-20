@@ -21,7 +21,7 @@ struct ContentView: View {
                             // Top Bar
                             HStack {
                                 if cameraManager.showOrientationBadge {
-                                    OrientationHeader(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation)
+                                    OrientationHeader(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showOrientationBadge: $cameraManager.showOrientationBadge)
                                 }
                                 
                                 Spacer()
@@ -31,10 +31,11 @@ struct ContentView: View {
                             }
                             
                             if cameraManager.showZoomBar {
-                                ZoomBarView(cameraManager: cameraManager)
-                                    .transition(.opacity)
-                                    .padding(.bottom, 8)
+                                ZoomIndicator(cameraManager: cameraManager)
+                                    .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom) // 80% of the screen width
+                                    .padding(.bottom, 100)
                             }
+
                             
                             Spacer()
                             

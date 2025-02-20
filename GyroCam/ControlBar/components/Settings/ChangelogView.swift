@@ -15,6 +15,13 @@ struct ChangelogView: View {
             Section(header: header("Current Features")) {
                 
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 010", changes: [
+                    "Updated the logo again (removed camera)",
+                    "Added context menu parity for orientation badge to hide",
+                    "Updated the onboarding view to describe camera controls",
+                    "Implemented funtional support for the zoom bar"
+                ])
+                
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 010", changes: [
                     "Added the onboarding screen with centralized permissions requests.",
                     "Updated the roadmap to be more in line with planned features",
                     "Introduced new App Logos",

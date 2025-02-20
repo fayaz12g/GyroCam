@@ -3,6 +3,7 @@ import SwiftUI
 struct OrientationHeader: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var currentOrientation: String
+    @Binding var showOrientationBadge: Bool
     @Environment(\.colorScheme) var colorScheme
     
     private var rotationAngle: Angle {
@@ -81,6 +82,14 @@ struct OrientationHeader: View {
                 .padding(.leading, horizontalPadding)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
                 .offset(y: verticalOffset)
+                .contextMenu {
+                    Button {
+                        showOrientationBadge.toggle()
+                    } label: {
+                        Label(showOrientationBadge ? "Hide Badge" : "Show Badge",
+                              systemImage: showOrientationBadge ? "eye.slash" : "eye")
+                    }
+                }
                 
                 Spacer()
             }

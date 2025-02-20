@@ -54,7 +54,7 @@ struct OnboardingView: View {
                     customIcon: nil,
                     iconName: "slider.horizontal.3",
                     title: "Customize Settings",
-                    description: "Adjust camera settings including lens, frame rate, and resolution."
+                    description: "Adjust camera settings including lens, frame rate, and resolution. Other gesture controls include pinch to zoom, double tap to switch lens between front and back, and swipe to switch lens between wide, ultrawide and telephoto depending on device support."
                 )
                 .tag(3)
                 

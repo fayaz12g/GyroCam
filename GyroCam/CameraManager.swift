@@ -158,9 +158,9 @@ class CameraManager: NSObject, ObservableObject {
     
     func resetZoomTimer() {
         zoomTimer?.invalidate()
-        zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
-            self?.showZoomBar = self?.showZoomBar ?? true
-        }
+//        zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+//            self?.showZoomBar = false
+//        }
     }
     
     @MainActor func switchCamera() {
@@ -507,12 +507,18 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor private func setupInputs() throws {
         session.inputs.forEach { session.removeInput($0) }
-        
-        
 
-        
         guard let device = getCurrentDevice() else {
             throw NSError(domain: "CameraManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Device unavailable"])
+        }
+        
+        currentDevice = device
+        currentCaptureDevice = device
+        let input = try AVCaptureDeviceInput(device: device)
+
+        if session.canAddInput(input) {
+            session.addInput(input)
+            activeInput = input
         }
         
         // Camera Control
@@ -528,13 +534,7 @@ class CameraManager: NSObject, ObservableObject {
         // Create a control to adjust the device's exposure bias.
         let systemBiasSlider = AVCaptureSystemExposureBiasSlider(device: device)
         
-        currentDevice = device
-        let input = try AVCaptureDeviceInput(device: device)
         
-        if session.canAddInput(input) {
-            session.addInput(input)
-            activeInput = input
-        }
         
         if let audioDevice = AVCaptureDevice.default(for: .audio) {
             let audioInput = try AVCaptureDeviceInput(device: audioDevice)
