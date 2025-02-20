@@ -164,6 +164,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.showRecordingTimer = newValue }
     }
     
+    @MainActor var showQuickSettings: Bool {
+        get { settings.showQuickSettings }
+        set { settings.showQuickSettings = newValue }
+    }
+    
     @MainActor var showZoomBar: Bool {
         get { settings.showZoomBar }
         set { settings.showZoomBar = newValue }
@@ -252,6 +257,34 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
         
+    
+    @MainActor var isFlashOn: Bool {
+        get { settings.isFlashOn }
+        set { settings.isFlashOn = newValue }
+    }
+    
+    func toggleFlash() {
+            // For video torch:
+            guard let device = captureDevice, device.hasTorch else { return }
+            
+            do {
+                try device.lockForConfiguration()
+                
+                if device.torchMode == .off {
+                    // Turn it on
+                    try device.setTorchModeOn(level: 1.0)
+                    isFlashOn = true
+                } else {
+                    // Turn it off
+                    device.torchMode = .off
+                    isFlashOn = false
+                }
+                
+                device.unlockForConfiguration()
+            } catch {
+                print("Error toggling flash: \(error)")
+            }
+        }
     
         private func updateExposureSettings() {
             guard !autoExposure,
@@ -370,6 +403,7 @@ class CameraManager: NSObject, ObservableObject {
                 return .builtInTelephotoCamera
             }
         }
+        
         var position: AVCaptureDevice.Position {
                     switch self {
                     case .frontWide:
@@ -867,7 +901,13 @@ class CameraManager: NSObject, ObservableObject {
             setErrorMessage("Selected lens is unavailable")
             return
         }
+        print("Lens switching detected. Switching from:")
+        print(currentLens)
+        print("To target lens:")
+        print(lens)
         currentLens = lens
+        print("Successfully switched to:")
+        print(currentLens)
         configureSession()
     }
     

@@ -13,6 +13,9 @@ struct SettingsView: View {
             NavigationView {
                 Form {
                     Section(header: Text("User Interface")) {
+                        Toggle("Quick Settings", isOn: $cameraManager.showQuickSettings)
+                            .tint(cameraManager.accentColor)
+                        
                         Toggle("Zoom Bar", isOn: $cameraManager.showZoomBar)
                             .tint(cameraManager.accentColor)
                         
@@ -136,6 +139,13 @@ struct SettingsView: View {
                     }
                     
                     Section(header: Text("Exposure Controls")) {
+                        Toggle("Flash", isOn: $cameraManager.isFlashOn)
+                            .tint(cameraManager.accentColor)
+                            .onChange(of: cameraManager.isFlashOn) { _, _ in
+                                cameraManager.toggleFlash()
+                            }
+
+                        
                         Toggle("Auto Exposure", isOn: $cameraManager.autoExposure)
                             .tint(cameraManager.accentColor)
                         
@@ -146,12 +156,12 @@ struct SettingsView: View {
                         }
                         .disabled(cameraManager.autoExposure) // Disable when autoExposure is on
                         
-                        Picker("Shutter Speed", selection: $cameraManager.manualShutterSpeed) {
-                            ForEach(CameraManager.ShutterSpeed.allCases, id: \.self) { speed in
-                                Text(speed.description).tag(speed.cmTime)
-                            }
-                        }
-                        .disabled(cameraManager.autoExposure) // Disable when autoExposure is on
+//                        Picker("Shutter Speed", selection: $cameraManager.manualShutterSpeed) {
+//                            ForEach(CameraManager.ShutterSpeed.allCases, id: \.self) { speed in
+//                                Text(speed.description).tag(speed.cmTime)
+//                            }
+//                        }
+//                        .disabled(cameraManager.autoExposure)
                     }
 
                     

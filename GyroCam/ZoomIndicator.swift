@@ -16,7 +16,9 @@ struct ZoomIndicator: View {
             let maxZoom: CGFloat = 10.0
             let minZoom: CGFloat = 1.0
             let barWidth = geometry.size.width - 40
-            let normalized = (cameraManager.currentZoom - minZoom) / (maxZoom - minZoom)
+            
+            // Non-linear mapping for zoom
+            let normalized = logZoomNormalization(zoom: cameraManager.currentZoom, min: minZoom, max: maxZoom)
             let position = normalized * barWidth
             
             ZStack(alignment: .leading) {
@@ -41,28 +43,56 @@ struct ZoomIndicator: View {
                     .gesture(
                         DragGesture()
                             .onChanged { value in
-                                // Calculate new zoom based on drag position
                                 let dragPosition = min(max(0, value.location.x - 20), barWidth)
-                                let newZoom = minZoom + (dragPosition / barWidth) * (maxZoom - minZoom)
                                 
-                                // Update cameraManager's zoom level
-                                cameraManager.currentZoom = newZoom
+                                // Convert drag position back to zoom using inverse logarithmic mapping
+                                let normalizedPosition = dragPosition / barWidth
+                                let newZoom = inverseLogZoomNormalization(
+                                    normalized: normalizedPosition,
+                                    min: minZoom,
+                                    max: maxZoom
+                                )
                                 
-                                // Update the actual zoom on the capture device
-                                if let device = cameraManager.captureDevice {
-                                    do {
-                                        try device.lockForConfiguration()
-                                        device.videoZoomFactor = newZoom
-                                        device.unlockForConfiguration()
-                                    } catch {
-                                        print("Error adjusting zoom: \(error)")
-                                    }
-                                }
+                                // Update zoom
+                                updateZoom(to: newZoom)
                             }
                     )
             }
         }
         .frame(height: 40)
+    }
+    
+    // Helper function to update zoom
+    private func updateZoom(to newZoom: CGFloat) {
+        let clampedZoom = min(max(1.0, newZoom), 10.0)
+        cameraManager.currentZoom = clampedZoom
+        
+        if let device = cameraManager.captureDevice {
+            do {
+                try device.lockForConfiguration()
+                device.videoZoomFactor = clampedZoom
+                device.unlockForConfiguration()
+            } catch {
+                print("Error adjusting zoom: \(error)")
+            }
+        }
+    }
+    
+    // Logarithmic normalization for zoom values
+    private func logZoomNormalization(zoom: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {
+        let logMin = log(min)
+        let logMax = log(max)
+        let logZoom = log(zoom)
+        
+        return (logZoom - logMin) / (logMax - logMin)
+    }
+    
+    // Inverse logarithmic normalization for converting position to zoom
+    private func inverseLogZoomNormalization(normalized: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {
+        let logMin = log(min)
+        let logMax = log(max)
+        
+        return exp(normalized * (logMax - logMin) + logMin)
     }
     
     private var rotationAngle: Angle {

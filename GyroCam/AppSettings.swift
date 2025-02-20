@@ -33,6 +33,9 @@ struct AppSettings: Codable {
     
     var lockLandscape: Bool = false
     
+    var showQuickSettings: Bool = true
+    var isFlashOn: Bool = false
+    
     var shouldStitchClips: Bool = false
     
     

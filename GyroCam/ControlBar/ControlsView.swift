@@ -15,7 +15,7 @@ struct ControlsView: View {
                 if !cameraManager.isRecording && !cameraManager.isRestarting {
                     
                     // Photo Library Button (Left)
-                    PhotoLibraryButton(cameraManager: cameraManager, currentOrientation: $currentOrientation)
+                    PhotoLibraryButton(cameraManager: cameraManager)
                         .padding(.leading, 35)
                 }
                 
@@ -65,7 +65,7 @@ struct ControlsView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 30)
             
-            if !cameraManager.isRecording && !cameraManager.isRestarting {
+            if !cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting {
                 QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)
                     .matchedGeometryEffect(id: "quickSettings", in: animationNamespace)
                     .transition(.asymmetric(

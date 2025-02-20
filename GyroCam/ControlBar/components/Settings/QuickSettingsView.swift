@@ -64,6 +64,17 @@ struct QuickSettingsView: View {
                 cameraManager.configureSession()
             }
             
+            Divider()
+                .frame(height: 20)
+
+            Button {
+                cameraManager.toggleFlash()
+            } label: {
+                Image(systemName: cameraManager.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
+            }
+//            .disabled(!cameraManager.hasTorch)
+            .tint(.primary)
+            
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

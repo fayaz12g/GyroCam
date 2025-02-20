@@ -11,13 +11,12 @@ import Photos
 
 struct PhotoLibraryButton: View {
     @ObservedObject var cameraManager: CameraManager
-    @Binding var currentOrientation: String
     @Environment(\.colorScheme) var colorScheme
     @State private var showingPhotoLibrary = false
     @State private var latestThumbnail: UIImage?
     
     private var rotationAngle: Angle {
-        switch currentOrientation {
+        switch cameraManager.currentOrientation {
         case "Landscape Left": return .degrees(90)
         case "Landscape Right": return .degrees(-90)
         case "Upside Down": return .degrees(180)
@@ -30,7 +29,7 @@ struct PhotoLibraryButton: View {
     }
     
     private var verticalOffset: CGFloat {
-        switch currentOrientation {
+        switch cameraManager.currentOrientation {
         case "Landscape Left", "Landscape Right": return -6
         case "Upside Down": return 0
         default: return 0
@@ -64,7 +63,7 @@ struct PhotoLibraryButton: View {
         }
 //        .padding(.trailing, horizontalPadding)
 //        .offset(y: verticalOffset)
-        .animation(.easeInOut(duration: 0.2), value: currentOrientation)
+        .animation(.easeInOut(duration: 0.2), value: cameraManager.currentOrientation)
         .sheet(isPresented: $showingPhotoLibrary) {
             PhotoLibraryView(cameraManager: cameraManager)
         }

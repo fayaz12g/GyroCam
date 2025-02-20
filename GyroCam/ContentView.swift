@@ -39,7 +39,8 @@ struct ContentView: View {
                             if cameraManager.showZoomBar {
                                 ZoomIndicator(cameraManager: cameraManager)
                                     .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom) // 80% of the screen width
-                                    .padding(.bottom, 100)
+                                    .padding(.bottom, !cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting  ? 100 : 0)
+                                
                             }
 
                             
