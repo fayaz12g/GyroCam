@@ -68,25 +68,7 @@ Key Innovation:
 
 ## Changelog 📜
 
-**Recent Highlights**:
-
-## Alpha 013 (Current)
-
-- New gesture controls
-
-- Recording pulse effects
-
-- Enhanced focus systems
-
-- Complete onboarding flow
-
-## Alpha 012
-
-- Zoom bar improvements
-
-- Manual exposure controls
-
-- Privacy policy integration
+- [View Full Changelog](CHANGELOG.md)
 
 ---
 
