@@ -76,8 +76,8 @@ Key Innovation:
 
 We welcome issues and PRs! Please review our:
 - [Contribution Guidelines](CONTRIBUTING.md)
-- [Roadmap](GyroCam/UpcomingFeaturesView.swift)
-- [Privacy Policy](GyroCam/PrivacyPolicyView.swift)
+- [Roadmap](GyroCam/ControlBar/components/Settings/UpcomingFeaturesView.swift)
+- [Privacy Policy](GyroCam/ControlBar/components/Settings/PrivacyPolicyView.swift)
 
 ---
 
