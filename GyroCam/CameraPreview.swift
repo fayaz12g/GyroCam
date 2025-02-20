@@ -350,6 +350,11 @@ struct CameraPreview: UIViewRepresentable {
                 )
                 
                 optionView.frame.origin = CGPoint(x: xOffset, y: yOffset)
+                
+                // Apply rotation transformation
+                let rotationAngle: CGFloat = CGFloat(rotationAngle.radians) // Convert Angle to CGFloat radians
+                optionView.transform = CGAffineTransform(rotationAngle: rotationAngle) // Apply rotation
+                
                 optionView.tag = index
                 lensSwitcherView?.addSubview(optionView)
                 

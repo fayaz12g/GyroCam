@@ -65,7 +65,8 @@ struct ControlsView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 30)
             
-            if !cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting {
+            // Remove if block to animate properly so it doesnt dissapear immediatly
+            ZStack {
                 QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)
                     .matchedGeometryEffect(id: "quickSettings", in: animationNamespace)
                     .transition(.asymmetric(
@@ -75,7 +76,11 @@ struct ControlsView: View {
                     .offset(y: -100)
                     .offset(x: 20)
                     .zIndex(1)
+                    .opacity(!cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting ? 1 : 0) // Control visibility
+                    .scaleEffect(!cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting ? 1 : 0.5, anchor: .topTrailing) // Optional: Add scaling
+                    .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
             }
+
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView(cameraManager: cameraManager)

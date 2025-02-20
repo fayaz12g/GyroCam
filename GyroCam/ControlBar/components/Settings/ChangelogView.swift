@@ -23,11 +23,13 @@ struct ChangelogView: View {
                     "Updated the pulse effect to be faster and start from the center",
                     ]),
                     ChangeEntry(title: "Other", details: [
+                        "Added a new toggle to show/hide quick settings",
                         "The zoom bar now moves at an exponentially increasing rate (such that 1x to 2x is the same as 5x to 10x)",
                         "Added a new torch option to the quick settings bar and settings page. This toggles the camera flash",
                         "Removed experimental shutter speed due to crashing on some devices",
                         "Updated the photo library button to refer to camera manager directly to handle rotation",
-                        "Updated the changelog view to handle titles and sub bullets, including a full revamp of all previous entries"
+                        "Updated the changelog view to handle titles and sub bullets, including a full revamp of all previous entries",
+                        "Added animations for the focal bar, zoom bar, and quick settings menu dissapearing"
                     ])
                 ])
                 
