@@ -12,7 +12,20 @@ struct ChangelogView: View {
     
     var body: some View {
         Form {
-            Section(header: header("Current Features")) {
+            Section(header: header("Alpha Releases")) {
+                
+                VersionEntry(cameraManager: cameraManager, version: "Alpha 013", changes: [
+                    ChangeEntry(title: "Changelog", details: [
+                        "Renamed headers to be more aligned with proper descriptions",
+                    ]),
+                    ChangeEntry(title: "Settings", details: [
+                        "Added new 'about' submenu containing version number and brief description",
+                    ]),
+                    ChangeEntry(title: "App Icon", details: [
+                        "Once again more changes have been made, this time reintroducing the color from previous iterations, as well as incorporating it agaisnt the rainbow back, witht the shadow consstent in dark mode.",
+                    ]),
+                ])
+                
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 012", changes: [
                     ChangeEntry(title: "Added new camera gestures:", details: [
                         "Drag across the screen to adjust focus while auto focus is off",
@@ -181,7 +194,7 @@ struct ChangelogView: View {
 
             }
             
-            Section(header: header("Core Development")) {
+            Section(header: header("Internal Builds")) {
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 003", changes: [
                     ChangeEntry(title: nil, details: [
                         "Double-tap lens switching",

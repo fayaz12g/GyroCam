@@ -201,6 +201,19 @@ struct SettingsView: View {
                                     .tint(cameraManager.accentColor)
                             }
                         }
+                        
+                        NavigationLink {
+                            AboutView(cameraManager: cameraManager)
+                        } label: {
+                            HStack {
+                                Text("About")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "info.circle")
+                                    .tint(cameraManager.accentColor)
+                            }
+                        }
+                        
                         Button(action: doShowOnboarding) {
                             Text("Show Onboarding")
                                 .foregroundColor(cameraManager.accentColor)
