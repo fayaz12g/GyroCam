@@ -363,7 +363,7 @@ struct CameraPreview: UIViewRepresentable {
             // Background for selection
             let selectionView = UIView(frame: view.bounds)
             selectionView.backgroundColor = (colorScheme == .dark ?
-                UIColor.black.withAlphaComponent(0.2) :
+                UIColor.black.withAlphaComponent(0.7) :
                 UIColor.white.withAlphaComponent(0.2))
 
             selectionView.layer.borderColor = (colorScheme == .dark ?
@@ -453,6 +453,8 @@ struct CameraPreview: UIViewRepresentable {
         }
     }
     func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.colorScheme = colorScheme
+        
         // Always operate on main thread
         DispatchQueue.main.async {
             guard let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer else { return }
