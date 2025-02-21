@@ -31,7 +31,7 @@ struct SettingsView: View {
     private func InterfaceSettingsSection() -> some View {
         Section(header: Text("Customization")) {
             NavigationLink(destination: InterfaceSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Customize Interface", icon: "uiwindow.split.2x1")
+                SettingsRow(title: "Interface", icon: "uiwindow.split.2x1")
             }
             NavigationLink(destination: PhotoLibrarySettingsView(cameraManager: cameraManager)) {
                 SettingsRow(title: "Photo Library", icon: "photo.stack")
@@ -45,10 +45,10 @@ struct SettingsView: View {
                 SettingsRow(title: "Video Settings", icon: "camera.aperture")
             }
             NavigationLink(destination: ExposureSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Camera Processing", icon: "camera.badge.ellipsis")
+                SettingsRow(title: "Advanced Controls", icon: "camera.badge.ellipsis")
             }
             NavigationLink(destination: OrientationStitchingView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Post Production", icon: "rotate.right")
+                SettingsRow(title: "Output", icon: "list.and.film")
             }
         }
     }
@@ -56,7 +56,7 @@ struct SettingsView: View {
 
     
     private func AboutHelpSection() -> some View {
-        Section(header: Text("More Info")) {
+        Section(header: Text("Information")) {
             NavigationLink(destination: AboutView(cameraManager: cameraManager)) {
                 SettingsRow(title: "About", icon: "info.circle")
             }
@@ -141,6 +141,15 @@ struct InterfaceSettingsView: View {
     
     var body: some View {
         Form {
+            Section(header: Text("Theme")) {
+                HStack {
+                    Text("Accent Color")
+                    Spacer()
+                    ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
+                        .labelsHidden()
+                }
+            }
+            
             Section(header: Text("UI Elements")) {
                 Toggle("Quick Settings", isOn: $cameraManager.showQuickSettings)
                     .tint(cameraManager.accentColor)
@@ -156,14 +165,6 @@ struct InterfaceSettingsView: View {
             }
             
             Section(header: Text("Badges")) {
-                Section(header: Text("Theme")) {
-                    HStack {
-                        Text("Accent Color")
-                        Spacer()
-                        ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
-                            .labelsHidden()
-                    }
-                }
                 Toggle("Clip Badge", isOn: $cameraManager.showClipBadge)
                     .tint(cameraManager.accentColor)
                 Toggle("Orientation Badge", isOn: $cameraManager.showOrientationBadge)
@@ -181,7 +182,7 @@ struct InterfaceSettingsView: View {
             }
             
         }
-        .navigationTitle("Customization")
+        .navigationTitle("Interface")
     }
 }
 
@@ -241,7 +242,7 @@ struct CaptureSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Capture Settings")
+        .navigationTitle("Video Settings")
         .onChange(of: cameraManager.currentFormat) {
             cameraManager.configureSession()
         }
@@ -314,7 +315,7 @@ struct ExposureSettingsView: View {
 //                .disabled(cameraManager.autoExposure)
             }
         }
-        .navigationTitle("Camera Processing")
+        .navigationTitle("Advanced Controls")
     }
 }
 
@@ -333,7 +334,7 @@ struct OrientationStitchingView: View {
                 )
             }
         }
-        .navigationTitle("Post Production")
+        .navigationTitle("Output")
     }
 }
 
