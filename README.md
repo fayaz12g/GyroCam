@@ -55,7 +55,7 @@ Key Innovation:
 ## Installation 📲
 
 ### Sideloading Instructions:
-1. Download latest IPA from [Releases tab](https://github.com/yourusername/GyroCam/releases)
+1. Download latest IPA from [Releases tab](https://github.com/fayaz12g/GyroCam/releases/latest)
 2. Install [Sideloadly](https://sideloadly.io/)
 3. Connect iOS device & trust computer
 4. Drag IPA into Sideloadly
@@ -76,8 +76,8 @@ Key Innovation:
 
 We welcome issues and PRs! Please review our:
 - [Contribution Guidelines](CONTRIBUTING.md)
-- [Roadmap](GyroCam/UpcomingFeaturesView.swift)
-- [Privacy Policy](GyroCam/PrivacyPolicyView.swift)
+- [Roadmap](ROADMAP.md)
+- [Privacy Policy](PRIVACY.md)
 
 ---
 
