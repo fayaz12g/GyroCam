@@ -212,7 +212,7 @@ struct PermissionsPage: View {
                     .padding(.top, 3)
                 
                 if (UserDefaults.standard.bool(forKey: "hasSeenOnboarding") && !permissionsManager.allPermissionsGranted) {
-                    Text("It seems one of your permissions has been denied or revoked. Please navigate to settings to grant them.")
+                    Text("It seems one of your permissions has been denied or revoked. Please click the button below to open settings and grant them.")
                         .font(.headline)
                         .multilineTextAlignment(.center)
                         .padding(.top, 5)
