@@ -19,6 +19,10 @@ struct ChangelogView: View {
                     "Restructure with titles, sub bullets, and more symbols.",
                     "Improved the clutter of page three as well as verbiage in other pages.",
                 ]),
+                ChangeEntry(title: "Stitching", details: [
+                    "Expiremental stitching updates",
+                    "New saving dots for stitch saving",
+                ]),
             ])
             VersionEntry(cameraManager: cameraManager, version: "Alpha 014", changes: [
                 ChangeEntry(title: "Focus", details: [
