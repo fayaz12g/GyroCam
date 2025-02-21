@@ -14,7 +14,9 @@ class CameraManager: NSObject, ObservableObject {
     private var currentDevice: AVCaptureDevice?
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
-    var orientations: [String] = []
+    var orientations: [String] = [] // delete this later
+    private var recordingStartTime: Date?
+    private var orientationChanges: [(time: TimeInterval, orientation: String)] = []
     
     public var loadLatestThumbnail: Bool = false
     
@@ -1168,11 +1170,9 @@ class CameraManager: NSObject, ObservableObject {
     
     
     @MainActor func startRecording() {
-        
         if !isRestarting {
             clipURLs.removeAll()
             stitchingGroup = DispatchGroup()
-//            currentClipNumber = 1 // this ~works~ but isn't good
             AudioServicesPlaySystemSound(1117)
         } else {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
