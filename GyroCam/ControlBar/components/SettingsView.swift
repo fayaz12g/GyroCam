@@ -91,12 +91,16 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity)
             
                 .alert(isPresented: $showReset) {
-                               Alert(
-                                   title: Text("Settings Reset"),
-                                   message: Text("Default settings restored."),
-                                   dismissButton: .default(Text("OK"))
-                               )
-                       }
+                    Alert(
+                        title: Text("Settings Reset"),
+                        message: Text("Default settings restored."),
+                        dismissButton: .default(Text("OK")) {
+                            // Explicitly set showReset to false when dismissing the alert
+                            showReset = false
+                        }
+                    )
+                }
+
         }
         .listRowBackground(Color.clear)
     }
@@ -178,6 +182,7 @@ struct InterfaceSettingsView: View {
                     isOn: $cameraManager.showRecordingTimer,
                     statusColor: .purple, cameraManager: cameraManager
                 )
+                
             
             }
             
@@ -353,6 +358,7 @@ struct FeatureToggle: View {
                 .badgeModifier(backgroundColor: statusColor)
             Toggle("", isOn: $isOn)
                 .tint(cameraManager.accentColor)
+                .disabled(status == "Coming Soon")
         }
     }
 }
