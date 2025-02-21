@@ -41,7 +41,7 @@ class CameraManager: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     private var lastKnownLocation: CLLocation?
     @Published var locationAuthorizationStatus: CLAuthorizationStatus = .notDetermined
-
+    
     
     enum StabilizationMode: String, CaseIterable, Codable {
         case off = "0"

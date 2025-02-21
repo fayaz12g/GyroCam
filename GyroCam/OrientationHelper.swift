@@ -56,14 +56,4 @@ extension UIDeviceOrientation {
         default: return "Unknown"
         }
     }
-    
-    var videoOrientation: AVCaptureVideoOrientation {
-        switch self {
-        case .portrait: return .portrait
-        case .portraitUpsideDown: return .portraitUpsideDown
-        case .landscapeLeft: return .landscapeRight
-        case .landscapeRight: return .landscapeLeft
-        default: return .portrait
-        }
-    }
 }

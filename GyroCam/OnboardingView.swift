@@ -32,117 +32,221 @@ struct OnboardingView: View {
     var body: some View {
         VStack {
             TabView(selection: $currentPage) {
+                // Page 0 - Welcome
                 OnboardingPage(
                     cameraManager: cameraManager,
                     customIcon: Image("newlogo"),
                     iconName: "",
                     title: "Welcome to GyroCam",
-                    description: "The app where your videos are recorded with the proper orientation. Always."
+                    features: [
+                        FeatureSection(
+                            iconName: "sparkles",
+                            title: "Key Benefits",
+                            items: [
+                                "Automatic rotation handling",
+                                "Perfect portrait/landscape videos",
+                                "Smart clip stitching (Beta)",
+                                "Professional-grade stabilization"
+                            ]
+                        ),
+                        FeatureSection(
+                            iconName: "iphone",
+                            title: "Optimized For",
+                            items: [
+                                "iPhone & iPad",
+                                "iOS 18 features",
+                                "All camera systems"
+                            ]
+                        )
+                    ]
                 )
                 .tag(0)
-                
+
+                // Page 1 - Capture
                 OnboardingPage(
                     cameraManager: cameraManager,
                     customIcon: nil,
-                    iconName: "camera",
-                    title: "Live in the Moment",
-                    description: "Use the camera to capture high-quality videos without thinking about device orientation."
+                    iconName: "camera.aperture",
+                    title: "Smart Capture System",
+                    features: [
+                        FeatureSection(
+                            iconName: "gyroscope",
+                            title: "Orientation Intelligence",
+                            items: [
+                                "Real-time gyro monitoring",
+                                "Auto-restart on rotation",
+                                "Face up/down detection",
+                                "Landscape lock override"
+                            ]
+                        ),
+                        FeatureSection(
+                            iconName: "video",
+                            title: "Capture Features",
+                            items: [
+                                "4K UHD up to 240fps",
+                                "Multi-lens switching",
+                                "HDR10+ support",
+                                "Low-light optimization"
+                            ]
+                        )
+                    ]
                 )
                 .tag(1)
-                
+
+                // Page 2 - Library
                 OnboardingPage(
                     cameraManager: cameraManager,
                     customIcon: nil,
-                    iconName: "film",
-                    title: "Preview Clips",
-                    description: "View your video clips with our pro mode library."
+                    iconName: "film.stack",
+                    title: "Pro Media Library",
+                    features: [
+                        FeatureSection(
+                            iconName: "folder",
+                            title: "Organization",
+                            items: [
+                                "Automatic orientation tagging",
+                                "Smart scene grouping",
+                                "Batch operations",
+                                "Metadata visualization"
+                            ]
+                        ),
+                        FeatureSection(
+                            iconName: "scissors",
+                            title: "Editing Tools",
+                            items: [
+                                "Clip stitching (Beta)",
+                                "Orientation-preserving trim",
+                                "Export settings wizard",
+                                "Quick social media presets"
+                            ]
+                        )
+                    ]
                 )
                 .tag(2)
-                
+
+                // Page 3 - Customization
                 OnboardingPage(
                     cameraManager: cameraManager,
                     customIcon: nil,
                     iconName: "slider.horizontal.3",
-                    title: "Customize Settings",
-                    description: "Adjust camera settings including lens, frame rate, and resolution. Other gesture controls include pinch to zoom, double tap to switch lens between front and back, and swipe to switch lens between wide, ultrawide and telephoto depending on device support. Showing the zoom bar and focus bars enables more options to zoom the elens and focus on the subject with manual precision, obscuring backgrounds."
+                    title: "Customize Your Experience",
+                    features: [
+                        FeatureSection(
+                            iconName: "gear",
+                            title: "Core Settings",
+                            items: [
+                                "Lens selection (Wide/Ultra Wide/Tele)",
+                                "Resolution & frame rate profiles",
+                                "HDR10+ toggle"
+                            ]
+                        ),
+                        FeatureSection(
+                            iconName: "hand.tap",
+                            title: "Gesture Controls",
+                            items: [
+                                "Pinch to zoom",
+                                "Double-tap camera swap",
+                                "Swipe lens selector",
+                                "Focus/zoom bar toggles"
+                            ]
+                        ),
+                        FeatureSection(
+                            iconName: "wrench.and.screwdriver",
+                            title: "Pro Tools",
+                            items: [
+                                "Manual ISO/shutter speed",
+                                "Audio monitoring",
+                                "Background blur preservation"
+                            ]
+                        )
+                    ]
                 )
                 .tag(3)
                 
                 PermissionsPage(permissionsManager: permissionsManager, cameraManager: cameraManager)
                                     .tag(4)
                 
-                            }
-                            .tabViewStyle(PageTabViewStyle())
-                            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                if currentPage < 4 {
-                                    currentPage += 1 // Navigate to next page
-                                } else {
-                                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                                    showOnboarding = false
-                                    cameraManager.setupFreshStart()
-                                }
-                            }) {
-                                Text(currentPage < 4 ? "Next" : "Finish")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(
-                                        currentPage == 4 ?
-                                        (permissionsManager.allPermissionsGranted ? cameraManager.accentColor : Color.gray) :
-                                            cameraManager.accentColor
-                                    )
-                                    .cornerRadius(10)
-                                    .padding(.horizontal)
-                            }
-                            .disabled(currentPage == 4 && !permissionsManager.allPermissionsGranted)
-                            .padding(.bottom, 20)
-                        }
-                    }
+            }
+            .tabViewStyle(PageTabViewStyle())
+            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+            
+            Spacer()
+            
+            Button(action: {
+                if currentPage < 4 {
+                    currentPage += 1 // Navigate to next page
+                } else {
+                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                    showOnboarding = false
+                    cameraManager.setupFreshStart()
                 }
+            }) {
+                Text(currentPage < 4 ? "Next" : "Finish")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        currentPage == 4 ?
+                        (permissionsManager.allPermissionsGranted ? cameraManager.accentColor : Color.gray) :
+                            cameraManager.accentColor
+                    )
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+            .disabled(currentPage == 4 && !permissionsManager.allPermissionsGranted)
+            .padding(.bottom, 20)
+        }
+    }
+}
 
+
+
+struct FeatureSection: Identifiable {
+    let id = UUID()
+    let iconName: String
+    let title: String
+    let items: [String]
+}
 
 struct OnboardingPage: View {
     @ObservedObject var cameraManager: CameraManager
     let customIcon: Image?
     let iconName: String
     let title: String
-    let description: String
+    let features: [FeatureSection]
+    
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 25) {
             if let icon = customIcon {
-                        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
-                            icon
-                                .resizable()
-                                .renderingMode(.template)
-                                .frame(width: 120, height: 120)
-                                .foregroundColor(cameraManager.accentColor)
-                        } else {
-                            icon
-                                .resizable()
-                                .renderingMode(.template)
-                                .frame(width: 120, height: 120)
-                                .foregroundColor(.clear)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                    .mask(
-                                        icon
-                                            .resizable()
-                                            .renderingMode(.template)
-                                            .frame(width: 120, height: 120)
-                                    )
-                                )
-                        }
-
+                if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+                    icon
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: 120, height: 120)
+                        .foregroundColor(cameraManager.accentColor)
+                } else {
+                    icon
+                        .resizable()
+                        .renderingMode(.template)
+                        .frame(width: 120, height: 120)
+                        .foregroundColor(.clear)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            .mask(
+                                icon
+                                    .resizable()
+                                    .renderingMode(.template)
+                                    .frame(width: 120, height: 120)
+                            )
+                        )
+                }
+                
             } else {
                 if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
                     Image(systemName: iconName)
@@ -159,26 +263,56 @@ struct OnboardingPage: View {
                                 endPoint: .bottomTrailing
                             )
                             .mask(
-                                Image(systemName: iconName) // Apply the mask to the icon
+                                Image(systemName: iconName)
                                     .font(.system(size: 60))
                             )
                         )
-
+                    
                 }
                 
             }
-                
             
-            Text(title)
-                .font(.title)
-                .bold()
             
-            Text(description)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
+            VStack(alignment: .leading, spacing: 20) {
+                ForEach(features) { section in
+                    featureSection(section: section)
+                }
+            }
+            .padding(.horizontal, 30)
         }
         .padding()
+    }
+    
+    private func featureSection(section: FeatureSection) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                Image(systemName: section.iconName)
+                    .font(.title3)
+                    .foregroundColor(cameraManager.accentColor)
+                    .frame(width: 30)
+                
+                Text(section.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(section.items, id: \.self) { item in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 6))
+                            .padding(.top, 5)
+                            .foregroundColor(cameraManager.accentColor)
+                        
+                        Text(item)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(.leading, 20)
+        }
     }
 }
 

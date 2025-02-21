@@ -15,8 +15,9 @@ struct ChangelogView: View {
             Section(header: header("Alpha Releases")) {
                 
             VersionEntry(cameraManager: cameraManager, version: "Alpha 015", changes: [
-                ChangeEntry(title: "Misc.", details: [
-                    "TBD",
+                ChangeEntry(title: "Onboarding", details: [
+                    "Restructure with titles, sub bullets, and more symbols.",
+                    "Improved the clutter of page three as well as verbiage in other pages.",
                 ]),
             ])
             VersionEntry(cameraManager: cameraManager, version: "Alpha 014", changes: [
