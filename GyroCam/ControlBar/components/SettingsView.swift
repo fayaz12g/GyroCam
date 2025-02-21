@@ -17,7 +17,6 @@ struct SettingsView: View {
                     // Main Settings Sections
                     CaptureSettingsSection()
                     InterfaceSettingsSection()
-                    PhotoLibrarySection()
                     AboutHelpSection()
                     MiscellaneousSection()
                 }
@@ -33,6 +32,9 @@ struct SettingsView: View {
         Section(header: Text("Interface")) {
             NavigationLink(destination: InterfaceSettingsView(cameraManager: cameraManager)) {
                 SettingsRow(title: "Customize Interface", icon: "uiwindow.split.2x1")
+            }
+            NavigationLink(destination: PhotoLibrarySettingsView(cameraManager: cameraManager)) {
+                SettingsRow(title: "Photo Library", icon: "photo.stack")
             }
         }
     }
@@ -51,18 +53,10 @@ struct SettingsView: View {
         }
     }
     
-    
-    private func PhotoLibrarySection() -> some View {
-        Section(header: Text("Photo Library")) {
-            Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
-                .tint(cameraManager.accentColor)
-            Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
-                .tint(cameraManager.accentColor)
-        }
-    }
+
     
     private func AboutHelpSection() -> some View {
-        Section(header: Text("GyroCam More Info")) {
+        Section(header: Text("More Info")) {
             NavigationLink(destination: AboutView(cameraManager: cameraManager)) {
                 SettingsRow(title: "About", icon: "info.circle")
             }
@@ -75,8 +69,17 @@ struct SettingsView: View {
             NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
                 SettingsRow(title: "Roadmap", icon: "road.lanes.curved.right")
             }
-            Button("Show Onboarding") { showOnboarding = true }
+            VStack {
+                Spacer() // Push the button towards the center vertically
+                Button("Show Onboarding") {
+                    showOnboarding = true
+                }
                 .foregroundColor(cameraManager.accentColor)
+                .frame(maxWidth: .infinity) // Take full width
+                .multilineTextAlignment(.center) // Align text in case of multiline
+                Spacer() // Push the button towards the center vertically
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
     
@@ -156,22 +159,20 @@ struct InterfaceSettingsView: View {
             }
             
             Section(header: Text("Badges")) {
-                Toggle("Show Clip Badge", isOn: $cameraManager.showClipBadge)
+                Toggle("Clip Badge", isOn: $cameraManager.showClipBadge)
                     .tint(cameraManager.accentColor)
+                Toggle("Orientation Badge", isOn: $cameraManager.showOrientationBadge)
+                    .tint(cameraManager.accentColor)
+                Toggle("Minimal Orientation Badge", isOn: $cameraManager.minimalOrientationBadge)
+                    .tint(cameraManager.accentColor)
+                    .disabled(!cameraManager.showOrientationBadge)
                 FeatureToggle(
                     title: "Recording Timer",
                     status: "Coming Soon",
                     isOn: $cameraManager.showRecordingTimer,
                     statusColor: .purple, cameraManager: cameraManager
                 )
-            }
             
-            Section(header: Text("Orientation Badge")) {
-                Toggle("Show", isOn: $cameraManager.showOrientationBadge)
-                    .tint(cameraManager.accentColor)
-                Toggle("Minimal Style", isOn: $cameraManager.minimalOrientationBadge)
-                    .tint(cameraManager.accentColor)
-                    .disabled(!cameraManager.showOrientationBadge)
             }
             
             Section(header: Text("Theme")) {
@@ -187,6 +188,20 @@ struct InterfaceSettingsView: View {
     }
 }
 
+struct PhotoLibrarySettingsView: View {
+    @ObservedObject var cameraManager: CameraManager
+    var body: some View {
+        Form {
+            Section(header: Text("Photo Library")) {
+                Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
+                    .tint(cameraManager.accentColor)
+                Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
+                    .tint(cameraManager.accentColor)
+            }
+        }
+    }
+}
+    
 struct CaptureSettingsView: View {
     @ObservedObject var cameraManager: CameraManager
     
