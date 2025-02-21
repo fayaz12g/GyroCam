@@ -29,7 +29,7 @@ struct SettingsView: View {
     
     // MARK: - Subviews
     private func InterfaceSettingsSection() -> some View {
-        Section(header: Text("Interface")) {
+        Section(header: Text("Customization")) {
             NavigationLink(destination: InterfaceSettingsView(cameraManager: cameraManager)) {
                 SettingsRow(title: "Customize Interface", icon: "uiwindow.split.2x1")
             }
@@ -45,10 +45,10 @@ struct SettingsView: View {
                 SettingsRow(title: "Video Settings", icon: "camera.aperture")
             }
             NavigationLink(destination: ExposureSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Exposure Controls", icon: "camera.badge.ellipsis")
+                SettingsRow(title: "Camera Processing", icon: "camera.badge.ellipsis")
             }
             NavigationLink(destination: OrientationStitchingView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Video Processing", icon: "rotate.right")
+                SettingsRow(title: "Post Production", icon: "rotate.right")
             }
         }
     }
@@ -148,9 +148,6 @@ struct InterfaceSettingsView: View {
                     .tint(cameraManager.accentColor)
                 Toggle("Focus Bar", isOn: $cameraManager.showFocusBar)
                     .tint(cameraManager.accentColor)
-                Toggle("Auto Focus", isOn: $cameraManager.autoFocus)
-                    .tint(cameraManager.accentColor)
-                    .disabled(cameraManager.showFocusBar)
                 Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
                     .tint(cameraManager.accentColor)
                     .onChange(of: cameraManager.maximizePreview) { _, _ in
@@ -159,6 +156,14 @@ struct InterfaceSettingsView: View {
             }
             
             Section(header: Text("Badges")) {
+                Section(header: Text("Theme")) {
+                    HStack {
+                        Text("Accent Color")
+                        Spacer()
+                        ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
+                            .labelsHidden()
+                    }
+                }
                 Toggle("Clip Badge", isOn: $cameraManager.showClipBadge)
                     .tint(cameraManager.accentColor)
                 Toggle("Orientation Badge", isOn: $cameraManager.showOrientationBadge)
@@ -175,16 +180,8 @@ struct InterfaceSettingsView: View {
             
             }
             
-            Section(header: Text("Theme")) {
-                HStack {
-                    Text("Accent Color")
-                    Spacer()
-                    ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
-                        .labelsHidden()
-                }
-            }
         }
-        .navigationTitle("Interface Settings")
+        .navigationTitle("Customization")
     }
 }
 
@@ -199,6 +196,7 @@ struct PhotoLibrarySettingsView: View {
                     .tint(cameraManager.accentColor)
             }
         }
+        .navigationTitle("Photo Library")
     }
 }
     
@@ -262,6 +260,12 @@ struct ExposureSettingsView: View {
     
     var body: some View {
         Form {
+            Section(header: Text("Focus")) {
+                Toggle("Auto Focus", isOn: $cameraManager.autoFocus)
+                    .tint(cameraManager.accentColor)
+                    .disabled(cameraManager.showFocusBar)
+            }
+            
             Section(header: Text("Lighting")) {
                 Toggle("Flash", isOn: $cameraManager.isFlashOn)
                     .tint(cameraManager.accentColor)
@@ -275,31 +279,6 @@ struct ExposureSettingsView: View {
                     }
             }
             
-            Section(header: Text("Manual Controls")) {
-                Picker("ISO", selection: $cameraManager.manualISO) {
-                    ForEach(Array(stride(from: 50, through: 3200, by: 50)), id: \.self) { iso in
-                        Text("\(iso)").tag(Float(iso))
-                    }
-                }
-                .disabled(cameraManager.autoExposure)
-                
-//                Picker("Shutter Speed", selection: $cameraManager.manualShutterSpeed) {
-//                    ForEach(CameraManager.ShutterSpeed.allCases, id: \.self) { speed in
-//                        Text(speed.description).tag(speed.cmTime)
-//                    }
-//                }
-//                .disabled(cameraManager.autoExposure)
-            }
-        }
-        .navigationTitle("Exposure Settings")
-    }
-}
-
-struct OrientationStitchingView: View {
-    @ObservedObject var cameraManager: CameraManager
-    
-    var body: some View {
-        Form {
             Section(header: Text("Orientation")) {
                 Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
                     .tint(cameraManager.accentColor)
@@ -318,9 +297,34 @@ struct OrientationStitchingView: View {
                     cameraManager.configureSession()
                 }
             }
-
             
-            Section(header: Text("Video Processing")) {
+            Section(header: Text("Manual Controls")) {
+                Picker("ISO", selection: $cameraManager.manualISO) {
+                    ForEach(Array(stride(from: 50, through: 3200, by: 50)), id: \.self) { iso in
+                        Text("\(iso)").tag(Float(iso))
+                    }
+                }
+                .disabled(cameraManager.autoExposure)
+                
+//                Picker("Shutter Speed", selection: $cameraManager.manualShutterSpeed) {
+//                    ForEach(CameraManager.ShutterSpeed.allCases, id: \.self) { speed in
+//                        Text(speed.description).tag(speed.cmTime)
+//                    }
+//                }
+//                .disabled(cameraManager.autoExposure)
+            }
+        }
+        .navigationTitle("Camera Processing")
+    }
+}
+
+struct OrientationStitchingView: View {
+    @ObservedObject var cameraManager: CameraManager
+    
+    var body: some View {
+        Form {
+            
+            Section(header: Text("Stitching")) {
                 FeatureToggle(
                     title: "Auto Stitch",
                     status: "Beta",
@@ -329,7 +333,7 @@ struct OrientationStitchingView: View {
                 )
             }
         }
-        .navigationTitle("Video Processing")
+        .navigationTitle("Post Production")
     }
 }
 
