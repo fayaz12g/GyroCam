@@ -338,7 +338,6 @@ struct OrientationStitchingView: View {
     }
 }
 
-// MARK: - Reusable Components
 struct FeatureToggle: View {
     let title: String
     let status: String
