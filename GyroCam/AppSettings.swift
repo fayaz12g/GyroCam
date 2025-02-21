@@ -33,6 +33,8 @@ struct AppSettings: Codable {
     
     var lockLandscape: Bool = false
     
+    var isSavingVideo: Bool = false
+    
     var stabilizeVideo: CameraManager.StabilizationMode = .auto
     
     var showQuickSettings: Bool = true
@@ -74,3 +76,17 @@ struct AppSettings: Codable {
      }
  }
 
+enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
+    case twenty_four = 24
+    case thirty = 30
+    case sixty = 60
+    case oneHundredTwenty = 120
+    case twoHundredForty = 240
+    
+    var id: Int { rawValue }
+    var description: String { "\(rawValue)fps" }
+    
+    static func < (lhs: FrameRate, rhs: FrameRate) -> Bool {
+        return lhs.rawValue < rhs.rawValue
+    }
+}

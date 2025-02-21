@@ -5,23 +5,6 @@ import Photos
 import SwiftUI
 import CoreLocation
 
-
-enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
-    case twenty_four = 24
-    case thirty = 30
-    case sixty = 60
-    case oneHundredTwenty = 120
-    case twoHundredForty = 240
-    
-    var id: Int { rawValue }
-    var description: String { "\(rawValue)fps" }
-    
-    static func < (lhs: FrameRate, rhs: FrameRate) -> Bool {
-        return lhs.rawValue < rhs.rawValue
-    }
-}
-
-
 @MainActor
 class CameraManager: NSObject, ObservableObject {
     
@@ -31,6 +14,7 @@ class CameraManager: NSObject, ObservableObject {
     private var currentDevice: AVCaptureDevice?
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
+    var orientations: [String] = []
     
     public var loadLatestThumbnail: Bool = false
     
@@ -42,6 +26,14 @@ class CameraManager: NSObject, ObservableObject {
     private var lastKnownLocation: CLLocation?
     @Published var locationAuthorizationStatus: CLAuthorizationStatus = .notDetermined
     
+    // New rotation method
+    @MainActor private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
+    private var rotationObservation: NSKeyValueObservation?
+    private weak var previewLayer: AVCaptureVideoPreviewLayer?
+    
+    private var activeCameraDevice: AVCaptureDevice? {
+        return activeInput?.device
+    }
     
     enum StabilizationMode: String, CaseIterable, Codable {
         case off = "0"
@@ -50,7 +42,7 @@ class CameraManager: NSObject, ObservableObject {
         case cinematicExtended = "3"
         case auto = "Auto"
     }
-
+    
     
     enum ShutterSpeed: CaseIterable {
         case speed1_1000
@@ -110,13 +102,18 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.shouldStitchClips }
         set { settings.shouldStitchClips = newValue }
     }
-   
+    
     
     @MainActor var isProMode: Bool {
         get { settings.isProMode }
         set { settings.isProMode = newValue }
     }
     
+    
+    @MainActor var isSavingVideo: Bool {
+        get { settings.isSavingVideo }
+        set { settings.isSavingVideo = newValue }
+    }
     
     @MainActor var lockLandscape: Bool {
         get { settings.lockLandscape }
@@ -194,7 +191,7 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.showFocusBar }
         set {
             settings.showFocusBar = newValue
-        if newValue {
+            if newValue {
                 autoFocus = false
             }
         }
@@ -237,7 +234,7 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
     }
-
+    
     
     @MainActor var maximizePreview: Bool {
         get { settings.maximizePreview }
@@ -250,29 +247,29 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor var autoExposure: Bool {
-            get { settings.autoExposure }
-            set {
-                settings.autoExposure = newValue
-                configureSession()
-            }
+        get { settings.autoExposure }
+        set {
+            settings.autoExposure = newValue
+            configureSession()
         }
-        
-        @MainActor var manualISO: Float {
-            get { settings.manualISO }
-            set {
-                settings.manualISO = newValue
-                updateExposureSettings()
-            }
+    }
+    
+    @MainActor var manualISO: Float {
+        get { settings.manualISO }
+        set {
+            settings.manualISO = newValue
+            updateExposureSettings()
         }
-        
-        @MainActor var manualShutterSpeed: CMTime? {
-            get { CMTime(seconds: settings.manualShutterSpeed, preferredTimescale: 1/60) }
-            set {
-                settings.manualShutterSpeed = newValue.map(CMTimeGetSeconds) ?? (1/60)
-                updateExposureSettings()
-            }
+    }
+    
+    @MainActor var manualShutterSpeed: CMTime? {
+        get { CMTime(seconds: settings.manualShutterSpeed, preferredTimescale: 1/60) }
+        set {
+            settings.manualShutterSpeed = newValue.map(CMTimeGetSeconds) ?? (1/60)
+            updateExposureSettings()
         }
-        
+    }
+    
     
     @MainActor var isFlashOn: Bool {
         get { settings.isFlashOn }
@@ -280,49 +277,49 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     func toggleFlash() {
-            // For video torch:
-            guard let device = captureDevice, device.hasTorch else { return }
+        // For video torch:
+        guard let device = captureDevice, device.hasTorch else { return }
+        
+        do {
+            try device.lockForConfiguration()
             
-            do {
-                try device.lockForConfiguration()
-                
-                if device.torchMode == .off {
-                    // Turn it on
-                    try device.setTorchModeOn(level: 1.0)
-                    isFlashOn = true
-                } else {
-                    // Turn it off
-                    device.torchMode = .off
-                    isFlashOn = false
-                }
-                
-                device.unlockForConfiguration()
-            } catch {
-                print("Error toggling flash: \(error)")
+            if device.torchMode == .off {
+                // Turn it on
+                try device.setTorchModeOn(level: 1.0)
+                isFlashOn = true
+            } else {
+                // Turn it off
+                device.torchMode = .off
+                isFlashOn = false
             }
-        }
-    
-        private func updateExposureSettings() {
-            guard !autoExposure,
-                  let device = captureDevice else { return }
             
-            do {
-                try device.lockForConfiguration()
-                if device.isExposureModeSupported(.custom) {
-                    device.exposureMode = .custom
-                    device.setExposureModeCustom(
-                        duration: manualShutterSpeed ?? CMTime(seconds: 1/60, preferredTimescale: 1000000),
-                        iso: manualISO,
-                        completionHandler: nil
-                    )
-                }
-                device.unlockForConfiguration()
-            } catch {
-                print("Error updating exposure settings: \(error)")
-            }
+            device.unlockForConfiguration()
+        } catch {
+            print("Error toggling flash: \(error)")
         }
+    }
     
-
+    private func updateExposureSettings() {
+        guard !autoExposure,
+              let device = captureDevice else { return }
+        
+        do {
+            try device.lockForConfiguration()
+            if device.isExposureModeSupported(.custom) {
+                device.exposureMode = .custom
+                device.setExposureModeCustom(
+                    duration: manualShutterSpeed ?? CMTime(seconds: 1/60, preferredTimescale: 1000000),
+                    iso: manualISO,
+                    completionHandler: nil
+                )
+            }
+            device.unlockForConfiguration()
+        } catch {
+            print("Error updating exposure settings: \(error)")
+        }
+    }
+    
+    
     
     @MainActor @Published var isRecording = false
     @MainActor @Published var currentOrientation = "Portrait"
@@ -358,16 +355,16 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     func adjustFocus(to focusValue: Float) {
-           guard let device = captureDevice else { return }
-
-           do {
-               try device.lockForConfiguration()
-               device.setFocusModeLocked(lensPosition: focusValue, completionHandler: nil)
-               device.unlockForConfiguration()
-           } catch {
-               print("Error adjusting focus: \(error)")
-           }
-       }
+        guard let device = captureDevice else { return }
+        
+        do {
+            try device.lockForConfiguration()
+            device.setFocusModeLocked(lensPosition: focusValue, completionHandler: nil)
+            device.unlockForConfiguration()
+        } catch {
+            print("Error adjusting focus: \(error)")
+        }
+    }
     
     private var zoomTimer: Timer?
     
@@ -378,23 +375,23 @@ class CameraManager: NSObject, ObservableObject {
     
     func resetZoomTimer() {
         zoomTimer?.invalidate()
-//        zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
-//            self?.showZoomBar = false
-//        }
+        //        zoomTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
+        //            self?.showZoomBar = false
+        //        }
     }
     
     @MainActor func switchCamera() {
-            // Update to switch between front and back cameras using LensType
-            if currentLens == .frontWide {
-                // Switch to back camera (prefer wide if available)
-                currentLens = .wide
-            } else {
-                // Switch to front camera
-                currentLens = .frontWide
-            }
-            currentZoom = 1.0  // Reset zoom when switching cameras
-            configureSession()
+        // Update to switch between front and back cameras using LensType
+        if currentLens == .frontWide {
+            // Switch to back camera (prefer wide if available)
+            currentLens = .wide
+        } else {
+            // Switch to front camera
+            currentLens = .frontWide
         }
+        currentZoom = 1.0  // Reset zoom when switching cameras
+        configureSession()
+    }
     
     // Orientation handling
     private var previousOrientation: UIDeviceOrientation = .portrait
@@ -421,13 +418,13 @@ class CameraManager: NSObject, ObservableObject {
         }
         
         var position: AVCaptureDevice.Position {
-                    switch self {
-                    case .frontWide:
-                        return .front
-                    default:
-                        return .back
-                    }
-                }}
+            switch self {
+            case .frontWide:
+                return .front
+            default:
+                return .back
+            }
+        }}
     
     
     
@@ -444,26 +441,71 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     
+    private func calculateRenderSize(baseOrientation: String, maxWidth: CGFloat, maxHeight: CGFloat) -> CGSize {
+        if baseOrientation == "Portrait" {
+            return CGSize(width: min(maxWidth, maxHeight),
+                        height: max(maxWidth, maxHeight))
+        }
+        return CGSize(width: max(maxWidth, maxHeight),
+                    height: min(maxWidth, maxHeight))
+    }
+    
     private func stitchClips() {
+        self.isSavingVideo = true
+        guard !self.clipURLs.isEmpty, self.clipURLs.count == self.orientations.count else {
+            self.showError("Mismatch between clips (\(self.clipURLs.count)) and orientations (\(self.orientations.count))")
+            return
+        }
+        print("Starting stitch with \(clipURLs.count) clips")
+        print("Orientations count: \(orientations.count)")
+        
         Task(priority: .userInitiated) { [weak self] in
             guard let self = self, !self.clipURLs.isEmpty else { return }
+            
+            // 1. Gather clip metadata
             let clips = self.clipURLs
-            // 1. Determine base orientation from first clip
-            let firstAsset = AVURLAsset(url: self.clipURLs[0])
-            guard let firstVideoTrack = try? await firstAsset.loadTracks(withMediaType: .video).first else {
-                self.showError("Failed to load first clip")
-                return
+            var maxWidth: CGFloat = 0
+            var maxHeight: CGFloat = 0
+            var containsHDR = false
+            var baseOrientation: String = "Portrait"
+            
+            // First pass to gather metadata
+            for (index, url) in clips.enumerated() {
+                let asset = AVURLAsset(url: url)
+                guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first else { continue }
+                
+                let naturalSize = try await videoTrack.load(.naturalSize)
+                maxWidth = max(maxWidth, naturalSize.width)
+                maxHeight = max(maxHeight, naturalSize.height)
+                
+                // Check HDR capabilities
+                if let formatDescriptions = try? await videoTrack.load(.formatDescriptions) as? [CMFormatDescription] {
+                    //                    containsHDR = formatDescriptions.contains { CMFormatDescriptionGetMediaSubType($0) == kCVPixelFormatType_420YpCbCr10BiPlanarFullRange }
+                    containsHDR = isHDREnabled
+                }
+                
+                // Use stored orientation if available
+                if self.orientations.indices.contains(index) {
+                    let orientation = self.orientations[index]
+                    if index == 0 {
+                        baseOrientation = orientation
+                        print("Base orientation set to: \(baseOrientation)")
+                    }
+                }
             }
             
-            let baseTransform = try await firstVideoTrack.load(.preferredTransform)
-            let baseSize = try await firstVideoTrack.load(.naturalSize)
-            let baseOrientation = orientationFromTransform(baseTransform)
-            let isPortrait = baseOrientation.isPortrait
+            // 2. Determine output settings
+            let isLandscapeLocked = self.lockLandscape
+            let outputSize: CGSize
             
-            // 2. Create composition with base orientation
+            if baseOrientation == "Portrait" {
+                outputSize = CGSize(width: maxHeight, height: maxWidth)
+            } else {
+                outputSize = CGSize(width: maxWidth, height: maxHeight)
+            }
+            
+            // 3. Create composition
             let composition = AVMutableComposition()
-            let videoTracks = clips.compactMap { AVAsset(url: $0).tracks(withMediaType: .video).first }
-            
             guard let compositionVideoTrack = composition.addMutableTrack(
                 withMediaType: .video,
                 preferredTrackID: kCMPersistentTrackID_Invalid
@@ -472,53 +514,194 @@ class CameraManager: NSObject, ObservableObject {
                 return
             }
             
-            // 3. Create video composition instructions
+            // 4. Build instructions
             let videoComposition = AVMutableVideoComposition()
-            let instructions = try await createLayerInstructions(
-                clips: self.clipURLs,
-                baseOrientation: baseOrientation.orientation,
-                baseSize: baseSize,
-                compositionTrack: compositionVideoTrack
-            )
+            var instructions: [AVMutableVideoCompositionInstruction] = []
+            var insertTime = CMTime.zero
             
-            // 4. Configure video composition
-            videoComposition.instructions = instructions
-            videoComposition.renderSize = isPortrait ?
-                CGSize(width: baseSize.height, height: baseSize.width) :
-                baseSize
-            videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+            for (index, url) in clips.enumerated() {
+                let asset = AVURLAsset(url: url)
+                guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first,
+                      self.orientations.indices.contains(index) else { continue }
+                
+                let orientation = self.orientations[index]
+                
+                let assetDuration = try await asset.load(.duration)
+                let timeRange = CMTimeRange(start: .zero, duration: assetDuration)
+                
+                // Insert track
+                try compositionVideoTrack.insertTimeRange(timeRange, of: videoTrack, at: insertTime)
+                
+                // Create instruction
+                let instruction = AVMutableVideoCompositionInstruction()
+                instruction.timeRange = CMTimeRange(start: insertTime, duration: assetDuration)
+                
+                // Create layer instruction
+                let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionVideoTrack)
+                
+                // Get the clip's native transform
+                    var preferredTransform = try await videoTrack.load(.preferredTransform)
+                    
+                    let transform = calculateTransform(
+                        transform: preferredTransform,
+                        clipOrientation: orientation,
+                        baseOrientation: baseOrientation,
+//                        isLandscapeLocked: isLandscapeLocked,
+                        outputSize: outputSize,
+                        naturalSize: try await videoTrack.load(.naturalSize)
+//                        preferredTransform: preferredTransform // Add this
+                    )
+                    print(orientation, baseOrientation, isLandscapeLocked, transform)
+        
+                    layerInstruction.setTransform(preferredTransform, at: .zero)
+                    instruction.layerInstructions = [layerInstruction]
+                    instructions.append(instruction)
+                
+                insertTime = insertTime + assetDuration
+            }
             
-            // 5. Export configuration
-            guard let exporter = AVAssetExportSession(
-                asset: composition,
-                presetName: AVAssetExportPresetHighestQuality
-            ) else {
-                self.showError("Failed to create exporter")
+            guard !instructions.isEmpty else {
+                self.showError("No valid video instructions created")
                 return
             }
             
+            // 5. Configure video composition
+            videoComposition.instructions = instructions
+            let renderSize = calculateRenderSize(baseOrientation: baseOrientation,
+                                                 maxWidth: maxWidth,
+                                                 maxHeight: maxHeight)
+            videoComposition.renderSize = renderSize
+            videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+            
+            if containsHDR {
+                videoComposition.colorPrimaries = AVVideoColorPrimaries_ITU_R_2020
+                videoComposition.colorTransferFunction = AVVideoTransferFunction_ITU_R_2100_HLG
+                videoComposition.colorYCbCrMatrix = AVVideoYCbCrMatrix_ITU_R_2020
+            }
+            
+            
+            // 6. Export configuration
+            let preset = containsHDR ? AVAssetExportPresetHEVCHighestQuality : AVAssetExportPresetHighestQuality
+            guard let exporter = AVAssetExportSession(
+                asset: composition,
+                presetName: preset
+            ), exporter.supportedFileTypes.contains(.mov) else {
+                self.showError("Export format not supported")
+                return
+            }
+            
+            // Set file type based on HDR
+            let fileType: AVFileType = containsHDR ? .mov : .mp4
+            exporter.outputFileType = fileType
+            exporter.timeRange = CMTimeRange(start: .zero, duration: composition.duration)
+            
             let outputURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("stitched-\(UUID().uuidString)")
-                .appendingPathExtension("mp4")
+                .appendingPathExtension("mov")
             
             exporter.outputURL = outputURL
-            exporter.outputFileType = .mp4
+            exporter.outputFileType = .mov
             exporter.videoComposition = videoComposition
+            exporter.shouldOptimizeForNetworkUse = false
             
-            // 6. Perform export
-            await exporter.export()
+            // 7. Perform export
+            print("Exporting with settings:")
+            print("Size: \(videoComposition.renderSize)")
+            print("HDR: \(containsHDR ? "YES" : "NO")")
+            print("Frame duration: \(videoComposition.frameDuration.seconds)")
+            print("Instructions count: \(videoComposition.instructions.count)")
             
-            switch exporter.status {
-            case .completed:
-                self.saveFinalVideo(outputURL)
-                self.cleanupClips()
-            case .failed:
-                self.showError("Export failed: \(exporter.error?.localizedDescription ?? "")")
-            default: break
+            do {
+                if #available(iOS 18, *) {
+                    try await exporter.export(to: outputURL, as: fileType)
+                } else {
+                    await exporter.export()
+                }
+                
+                if exporter.status == .completed {
+                    self.saveFinalVideo(outputURL)
+                    self.cleanupClips()
+                } else {
+                    throw exporter.error ?? NSError(domain: "GyroCam", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown export error"])
+                }
+            } catch {
+                let nsError = error as NSError
+                let errorDetails: [String: Any] = [
+                    "Error": error.localizedDescription,
+                    "Code": nsError.code,
+                    "Domain": nsError.domain,
+                    "Status": exporter.status.rawValue
+                ]
+                print("Export failed with details: \(errorDetails)")
+                self.showError("Export failed: \(error.localizedDescription)")
+                
+                // Clean up failed export
+                try? FileManager.default.removeItem(at: outputURL)
             }
         }
     }
 
+    private func calculateTransform(
+        transform: CGAffineTransform,
+        clipOrientation: String,
+        baseOrientation: String,
+        outputSize: CGSize,
+        naturalSize: CGSize
+    ) -> CGAffineTransform {
+        
+        
+        if (clipOrientation == baseOrientation) &&
+            (naturalSize == outputSize) {
+            return transform
+        }
+            
+        if (clipOrientation != baseOrientation) &&
+            (naturalSize == outputSize) {
+            print("Applying 180° rotation only")
+            
+            // Calculate the translation to center the video
+            let translation = CGAffineTransform(translationX: naturalSize.width / 2, y: naturalSize.height / 2)
+            
+            // Apply the 180° rotation (π radians)
+            let rotation = CGAffineTransform(rotationAngle: .pi)
+            
+            // Translate back after rotating
+            let reverseTranslation = CGAffineTransform(translationX: -naturalSize.width / 2, y: -naturalSize.height / 2)
+            
+            // Combine the transforms: translation -> rotation -> reverse translation
+            return translation.concatenating(rotation).concatenating(reverseTranslation)
+        }
+        
+        // 2. Calculate scale to maintain base aspect ratio
+        let baseAspect = outputSize.width / outputSize.height
+        let clipAspect = naturalSize.width / naturalSize.height
+        
+        let scale: CGFloat
+        if baseAspect > clipAspect {
+            // Scale to fit width
+            scale = outputSize.width / naturalSize.width
+        } else {
+            // Scale to fit height
+            scale = outputSize.height / naturalSize.height
+        }
+        
+        // 3. Apply scaling
+        var transform = transform.scaledBy(x: scale, y: scale)
+        
+        // 4. Center in frame
+        let xOffset = (outputSize.width - (naturalSize.width * scale)) / 2
+        let yOffset = (outputSize.height - (naturalSize.height * scale)) / 2
+        transform = transform.translatedBy(x: xOffset, y: yOffset)
+        
+        return transform
+    }
+
+//    // Helper to compare sizes while ignoring orientation
+//    private func == (lhs: CGSize, rhs: CGSize) -> Bool {
+//        return (lhs.width == rhs.width && lhs.height == rhs.height) ||
+//               (lhs.width == rhs.height && lhs.height == rhs.width)
+//    }
+//    
     // Orientation helper function
     private func orientationFromTransform(_ transform: CGAffineTransform) -> (orientation: UIImage.Orientation, isPortrait: Bool) {
         let assetAngle = atan2(transform.b, transform.a)
@@ -532,13 +715,13 @@ class CameraManager: NSObject, ObservableObject {
         default:    return (.up, false)
         }
     }
-
+    
     
     // Create layer instructions for all clips
     private func createLayerInstructions(clips: [URL],
-                                       baseOrientation: UIImage.Orientation,
-                                       baseSize: CGSize,
-                                       compositionTrack: AVMutableCompositionTrack) async throws -> [AVVideoCompositionInstructionProtocol] {
+                                         baseOrientation: UIImage.Orientation,
+                                         baseSize: CGSize,
+                                         compositionTrack: AVMutableCompositionTrack) async throws -> [AVVideoCompositionInstructionProtocol] {
         var instructions: [AVMutableVideoCompositionInstruction] = []
         var currentTime = CMTime.zero
         
@@ -588,7 +771,7 @@ class CameraManager: NSObject, ObservableObject {
         
         return instructions
     }
-
+    
     private let videoDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
@@ -608,7 +791,7 @@ class CameraManager: NSObject, ObservableObject {
         let targetAngle = rotationMap[target] ?? 0
         return targetAngle - sourceAngle
     }
-
+    
     // Calculate scale to fill target size while maintaining aspect ratio
     private func scaleToFill(sourceSize: CGSize, targetSize: CGSize) -> CGSize {
         let widthRatio = targetSize.width / sourceSize.width
@@ -616,7 +799,7 @@ class CameraManager: NSObject, ObservableObject {
         let scale = max(widthRatio, heightRatio)
         return CGSize(width: scale, height: scale)
     }
-
+    
     @MainActor
     private func saveFinalVideo(_ url: URL) {
         PHPhotoLibrary.shared().performChanges {
@@ -631,6 +814,7 @@ class CameraManager: NSObject, ObservableObject {
                 if success {
                     print("Successfully saved stitched video")
                     try? FileManager.default.removeItem(at: url)
+                    self.isSavingVideo = false
                 } else {
                     print("Save error: \(error?.localizedDescription ?? "Unknown error")")
                     self.errorMessage = error?.localizedDescription ?? "Failed to save video"
@@ -638,17 +822,19 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
     }
-
+    
     @MainActor
     private func cleanupClips() {
         clipURLs.forEach { try? FileManager.default.removeItem(at: $0) }
         clipURLs.removeAll()
+        self.currentClipNumber = 1
+        self.orientations.removeAll()
     }
-
+    
     @MainActor
     private func showError(_ message: String) {
         errorMessage = message
-//        isExporting = false
+        //        isExporting = false
     }
     
     private func loadSettings() {
@@ -715,7 +901,7 @@ class CameraManager: NSObject, ObservableObject {
         session.beginConfiguration()
         defer {
             session.commitConfiguration()
-//            print("Active Stabilization: \(activeVideoStabilizationMode)")
+            //            print("Active Stabilization: \(activeVideoStabilizationMode)")
             print("Session configuration committed")
         }
         
@@ -730,7 +916,7 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor private func setupInputs() throws {
         session.inputs.forEach { session.removeInput($0) }
-
+        
         guard let device = getCurrentDevice() else {
             throw NSError(domain: "CameraManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Device unavailable"])
         }
@@ -738,7 +924,7 @@ class CameraManager: NSObject, ObservableObject {
         currentDevice = device
         currentCaptureDevice = device
         let input = try AVCaptureDeviceInput(device: device)
-
+        
         if session.canAddInput(input) {
             session.addInput(input)
             activeInput = input
@@ -772,81 +958,81 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor private func getCurrentDevice() -> AVCaptureDevice? {
-            let deviceType = currentLens.deviceType
-            let position = currentLens.position
+        let deviceType = currentLens.deviceType
+        let position = currentLens.position
+        
+        // Attempt to get the selected lens
+        guard let device = AVCaptureDevice.default(deviceType, for: .video, position: position) else {
+            // Fall back to wide angle if unavailable
+            let fallbackLens: LensType = position == .front ? .frontWide : .wide
+            let fallbackDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
             
-            // Attempt to get the selected lens
-            guard let device = AVCaptureDevice.default(deviceType, for: .video, position: position) else {
-                // Fall back to wide angle if unavailable
-                let fallbackLens: LensType = position == .front ? .frontWide : .wide
-                let fallbackDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
-                
-                DispatchQueue.main.async {
-                    if self.currentLens != fallbackLens {
-                        self.currentLens = fallbackLens
-                    }
+            DispatchQueue.main.async {
+                if self.currentLens != fallbackLens {
+                    self.currentLens = fallbackLens
                 }
-                return fallbackDevice
             }
-            return device
+            return fallbackDevice
         }
+        return device
+    }
     
     @MainActor var availableLenses: [LensType] {
-            var lenses: [LensType] = []
-            
-            // Check front camera
-            if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil {
-                lenses.append(.frontWide)
-            }
-            
-            // Check back cameras
-            if AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) != nil {
-                lenses.append(.ultraWide)
-            }
-            
-            // Wide angle is typically always available on back
-            if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil {
-                lenses.append(.wide)
-            }
-            
-            // Check telephoto
-            if AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: .back) != nil {
-                lenses.append(.telephoto)
-            }
-            
-            return lenses
+        var lenses: [LensType] = []
+        
+        // Check front camera
+        if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil {
+            lenses.append(.frontWide)
         }
+        
+        // Check back cameras
+        if AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) != nil {
+            lenses.append(.ultraWide)
+        }
+        
+        // Wide angle is typically always available on back
+        if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil {
+            lenses.append(.wide)
+        }
+        
+        // Check telephoto
+        if AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: .back) != nil {
+            lenses.append(.telephoto)
+        }
+        
+        return lenses
+    }
     
     @MainActor var availableFrameRates: [FrameRate] {
-            guard let device = currentDevice else { return [] }
+        guard let device = currentDevice else { return [] }
+        
+        var supportedRates: Set<FrameRate> = []
+        
+        // Check each format for supported frame rates
+        for format in device.formats {
+            let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+            let currentDimensions = currentFormat.resolution
             
-            var supportedRates: Set<FrameRate> = []
-            
-            // Check each format for supported frame rates
-            for format in device.formats {
-                let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
-                let currentDimensions = currentFormat.resolution
-                
-                // Only consider formats matching our current resolution
-                guard dimensions.width == currentDimensions.width &&
-                      dimensions.height == currentDimensions.height else {
-                    continue
-                }
-                
-                // Get the maximum frame rate for this format
-                let maxRate = Int(format.maxFrameRate)
-                
-                // Add all supported frame rates up to the maximum
-                FrameRate.allCases.forEach { frameRate in
-                    if frameRate.rawValue <= maxRate {
-                        supportedRates.insert(frameRate)
-                    }
-                }
+            // Only consider formats matching our current resolution
+            guard dimensions.width == currentDimensions.width &&
+                    dimensions.height == currentDimensions.height else {
+                continue
             }
             
-            // Return sorted array of supported rates
-            return Array(supportedRates).sorted()
+            // Get the maximum frame rate for this format
+            let maxRate = Int(format.maxFrameRate)
+            
+            // Add all supported frame rates up to the maximum
+            FrameRate.allCases.forEach { frameRate in
+                if frameRate.rawValue <= maxRate {
+                    supportedRates.insert(frameRate)
+                }
+            }
         }
+        
+        // Return sorted array of supported rates
+        return Array(supportedRates).sorted()
+    }
     
     private func mapStabilizationMode(_ mode: StabilizationMode) -> AVCaptureVideoStabilizationMode {
         switch mode {
@@ -864,11 +1050,11 @@ class CameraManager: NSObject, ObservableObject {
         defer { device.unlockForConfiguration() }
         
         // Check if the stabilization mode is supported
-            if device.activeFormat.isVideoStabilizationModeSupported(mapStabilizationMode(stabilizeVideo)) {
-                print("Stabilization mode \(stabilizeVideo.rawValue) is supported.")
-            } else {
-                print("Stabilization mode \(stabilizeVideo.rawValue) is NOT supported.")
-            }
+        if device.activeFormat.isVideoStabilizationModeSupported(mapStabilizationMode(stabilizeVideo)) {
+            print("Stabilization mode \(stabilizeVideo.rawValue) is supported.")
+        } else {
+            print("Stabilization mode \(stabilizeVideo.rawValue) is NOT supported.")
+        }
         
         
         let targetFormat = try findBestFormat(for: device)
@@ -956,7 +1142,6 @@ class CameraManager: NSObject, ObservableObject {
             
             DispatchQueue.main.async {
                 self.currentOrientation = newOrientation.description
-                self.updateVideoOrientation(newOrientation)
             }
         }
     }
@@ -981,36 +1166,19 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
-            session.beginConfiguration()
-            defer { session.commitConfiguration() }
-        
-            
-            guard let connection = movieOutput.connection(with: .video) else { return }
-            
-            let videoOrientation: AVCaptureVideoOrientation
-            switch orientation {
-            case .portrait: videoOrientation = .portrait
-            case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
-            case .landscapeLeft: videoOrientation = .landscapeRight
-            case .landscapeRight: videoOrientation = .landscapeLeft
-            default: videoOrientation = .portrait
-            }
-            
-            connection.videoOrientation = videoOrientation
-            
-            if connection.isVideoMirroringSupported {
-                connection.isVideoMirrored = (currentLens == .frontWide)
-            }
-        }
     
     @MainActor func startRecording() {
         
         if !isRestarting {
-               clipURLs.removeAll()
-               stitchingGroup = DispatchGroup()
-           }
-           stitchingGroup?.enter()
+            clipURLs.removeAll()
+            stitchingGroup = DispatchGroup()
+//            currentClipNumber = 1 // this ~works~ but isn't good
+            AudioServicesPlaySystemSound(1117)
+        } else {
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.impactOccurred()
+        }
+        stitchingGroup?.enter()
         
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
@@ -1018,36 +1186,41 @@ class CameraManager: NSObject, ObservableObject {
         
         movieOutput.startRecording(to: tempURL, recordingDelegate: self)
         isRecording = true
-        if !isRestarting {
-            AudioServicesPlaySystemSound(1117)
-        }
-        else{
-            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-            impactFeedback.impactOccurred()
-        }
-//        startLocationUpdates()
+        //        startLocationUpdates()
         print("▶️ Started recording clip #\(currentClipNumber)")
+        print("Starting recording with orientation: \(self.previousOrientation.description)")
+        if self.shouldStitchClips {
+            DispatchQueue.main.async {
+                self.orientations.append(self.previousOrientation.description)
+                print("Orientations array as follows:")
+                print(self.orientations)
+            }
+        }
     }
     
     @MainActor func stopRecording(completion: (() -> Void)? = nil) {
         stopCompletion = completion
-            stopLocationUpdates()
-            movieOutput.stopRecording()
-            isRecording = false
-            
-            if !isRestarting {
-                stitchingGroup?.notify(queue: .main) { [weak self] in
-                    guard let self = self else { return }
-                    if self.shouldStitchClips && !self.clipURLs.isEmpty {
-                        self.stitchClips()
-                    }
-                    self.stitchingGroup = nil
+        stopLocationUpdates()
+        movieOutput.stopRecording()
+        isRecording = false
+        
+        
+        if !isRestarting {
+            stitchingGroup?.notify(queue: .main) { [weak self] in
+                guard let self = self else { return }
+                if self.shouldStitchClips && !self.clipURLs.isEmpty {
+                    self.stitchClips()
                 }
+                else {
+                    currentClipNumber = 1
+                }
+                self.stitchingGroup = nil
             }
+        }
+        
         print("⏹ Stopped recording clip #\(currentClipNumber)")
         
         if !isRestarting {
-            self.currentClipNumber = 1 // reset
             AudioServicesPlaySystemSound(1118)
         }
     }
@@ -1064,17 +1237,19 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
     
     @MainActor
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        
+        // Immediately trigger completion to allow next recording
+        stopCompletion?()
+        stopCompletion = nil
+        
         if let error = error {
                 self.errorMessage = "Recording failed: \(error.localizedDescription)"
             }
-        
-            
-            // Immediately trigger completion to allow next recording
-            stopCompletion?()
-            stopCompletion = nil
             
         if self.shouldStitchClips {
-                   self.clipURLs.append(outputFileURL)
+            DispatchQueue.main.async {
+                self.clipURLs.append(outputFileURL)
+            }
         } else {
             
             // Capture necessary data for background processing
@@ -1150,7 +1325,7 @@ extension AVCaptureDevice.Format {
     }
 }
 
-
+// Location
 extension CameraManager: @preconcurrency CLLocationManagerDelegate {
     func requestLocationAccess() {
         locationManager.requestWhenInUseAuthorization()
@@ -1179,3 +1354,4 @@ extension CameraManager: @preconcurrency CLLocationManagerDelegate {
         locationManager.stopUpdatingLocation()
     }
 }
+
