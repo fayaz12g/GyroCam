@@ -97,31 +97,33 @@ struct OnboardingPage: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            if let customIcon = customIcon {
-                if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
-                    customIcon
-                        .resizable()
-                        .renderingMode(.template)
-                        .frame(width: 120, height: 120)
-                        .foregroundColor(cameraManager.accentColor)
-                } else {
-                    customIcon
-                        .resizable()
-                        .frame(width: 120, height: 120)
-                        .foregroundColor(.clear)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                            .mask(
-                                Image(systemName: iconName)
-                                    .font(.system(size: 60))
-                            )
-                        )
-                
-                }
+            if let icon = customIcon {
+                        if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+                            icon
+                                .resizable()
+                                .renderingMode(.template)
+                                .frame(width: 120, height: 120)
+                                .foregroundColor(cameraManager.accentColor)
+                        } else {
+                            icon
+                                .resizable()
+                                .renderingMode(.template)
+                                .frame(width: 120, height: 120)
+                                .foregroundColor(.clear)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    .mask(
+                                        icon
+                                            .resizable()
+                                            .renderingMode(.template)
+                                            .frame(width: 120, height: 120)
+                                    )
+                                )
+                        }
 
             } else {
                 if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
