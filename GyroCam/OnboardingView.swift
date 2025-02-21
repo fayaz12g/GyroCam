@@ -70,9 +70,6 @@ struct OnboardingView: View {
                 
                 PermissionsPage(permissionsManager: permissionsManager, cameraManager: cameraManager)
                                     .tag(4)
-                if (UserDefaults.standard.bool(forKey: "hasSeenOnboarding") && !permissionsManager.allPermissionsGranted) {
-                    Text("It seems one of your permissions has been denied or revoked. Please navigate to settings to grant them.")
-                    .font(.headline)}
                 
                             }
                             .tabViewStyle(PageTabViewStyle())
@@ -213,11 +210,20 @@ struct PermissionsPage: View {
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                     .padding(.top, 3)
-                Text("One more thing. These permissions are required for the app to function properly.")
-                    .font(.body)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 5)
+                
+                if (UserDefaults.standard.bool(forKey: "hasSeenOnboarding") && !permissionsManager.allPermissionsGranted) {
+                    Text("It seems one of your permissions has been denied or revoked. Please navigate to settings to grant them.")
+                        .font(.headline)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 5)
+                } else {
+                    
+                    Text("One more thing. These permissions are required for the app to function properly.")
+                        .font(.body)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 5)
+                }
             }
 
             // Permission Rows
