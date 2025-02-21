@@ -3,15 +3,40 @@
 ## Alpha Releases
 
 ### Alpha 013 (Current)
-## Added new camera gestures:
+
+**Changelog**
+- Renamed headers to be more aligned with proper descriptions
+
+**Settings**
+- Added new 'About' submenu containing the version number and a brief description
+- Major restructure of the settings view
+- An alert now pops up to display when default settings have been restored
+
+**App Icon**
+- Further changes have been made, reintroducing the color from previous iterations
+- The app icon now incorporates the color against a rainbow background, with a consistent shadow in dark mode
+
+**Onboarding**
+- Centered the permissions page
+- Change the color of the permissions page to accent color if seen before
+- Fixed a clipping issue with the lock icon
+
+**Bug Fixes**
+- Removed a plethora of on change warnings to conform to iOS 17+
+- Fixed issues involving location manager
+- Load Latest thumbnail is now called on Photo Library Button after recording is saved
+
+
+### Alpha 012
+**Added new camera gestures**
 - Drag across the screen to adjust focus while auto focus is off
 - Hold down to switch lenses in a new picker, now in a square format with rotation and device theme conformity
 
-## Recording Pulse Effect:
+**Recording Pulse Effect**
 - Changed the pulse effect to only display while recording
 - Updated the pulse effect to be faster and start from the center
 
-## Other:
+**Other**
 - Added a new toggle to show/hide quick settings
 - The zoom bar now moves at an exponentially increasing rate (such that 1x to 2x is the same as 5x to 10x)
 - Added a new torch option to the quick settings bar and settings page. This toggles the camera flash
@@ -21,42 +46,17 @@
 - Added animations for the focal bar, zoom bar, and quick settings menu disappearing
 
 
-**App Icon**  
-- Reintroduced classic color scheme  
-- Enhanced dark mode compatibility  
-- Added dynamic shadow consistency  
-
-### Alpha 012
-**Camera Gestures**  
-- Drag gesture for manual focus control  
-- Long-press lens selector with theme-adaptive UI  
-
-**Recording Effects**  
-- Pulse animation now exclusive to active recording  
-- Centered pulse origin with faster animation  
-
-**System Improvements**  
-- Toggle for Quick Settings visibility  
-- Exponential zoom scaling (1x→2x = 5x→10x)  
-- Flash toggle in Quick Settings  
-- Removed unstable shutter speed feature  
-- Unified rotation handling in photo library  
-- Animated UI transitions for controls  
-
 ### Alpha 011
-**Visual Identity**  
-- Minimalist logo redesign  
-- New rainbow-themed app icon  
-
-**Focus System**  
-- Dedicated Focus Bar implementation  
-- Tap-to-focus functionality  
-- Mutual exclusion between auto/manual focus  
-- Continuous auto-focus tracking  
-
-**Zoom Controls**  
-- Official pinch-to-zoom gestures  
-- Production-ready zoom bar  
+- **Logo Update:** Updated the app logo, removing the camera icon for a cleaner look.
+- **Orientation Badge:** Added context menu parity to hide the orientation badge for better UI customization.
+- **Onboarding View:** Refined the onboarding experience with new content describing camera controls to help users understand their functionality.
+- **Zoom Bar:** The zoom bar is now fully functional and has been brought out of beta.
+- **Pinch-to-Zoom Gestures:** Implemented pinch-to-zoom gestures for intuitive zoom control, working seamlessly with the zoom bar.
+- **Focus Bar:** Introduced a new Focus Bar, enabling manual focus controls for advanced users.
+- **Focus and Auto Focus Logic:** Added logic to make manual focus and auto focus mutually exclusive, ensuring a smoother experience when adjusting focus.
+- **Tap-to-Focus:** Added a tap-to-focus system, allowing users to tap the screen to set focus when auto focus is off.
+- **Continuous Auto Focus:** Introduced a continuous auto focus system that tracks and adjusts focus automatically.
+- **Auto Exposure Controls:** Added auto exposure control, with manual shutter speed and ISO options available for future functionality (shells only, no active functionality yet).
 
 ### Alpha 010
 **Onboarding**  
