@@ -41,7 +41,16 @@ class CameraManager: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     private var lastKnownLocation: CLLocation?
     @Published var locationAuthorizationStatus: CLAuthorizationStatus = .notDetermined
+
     
+    enum StabilizationMode: String, CaseIterable, Codable {
+        case off = "0"
+        case standard = "1"
+        case cinematic = "2"
+        case cinematicExtended = "3"
+        case auto = "Auto"
+    }
+
     
     enum ShutterSpeed: CaseIterable {
         case speed1_1000
@@ -114,6 +123,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.lockLandscape = newValue }
     }
     
+    @MainActor var stabilizeVideo: CameraManager.StabilizationMode {
+        get { settings.stabilizeVideo }
+        set { settings.stabilizeVideo = newValue }
+    }
+    
     @MainActor var currentFormat: CameraManager.VideoFormat {
         get { settings.currentFormat }
         set { settings.currentFormat = newValue }
@@ -143,6 +157,7 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.preserveAspectRatios }
         set { settings.preserveAspectRatios = newValue }
     }
+    
     
     // Header
     @MainActor var showClipBadge: Bool {
@@ -434,9 +449,9 @@ class CameraManager: NSObject, ObservableObject {
             guard let self = self, !self.clipURLs.isEmpty else { return }
             let clips = self.clipURLs
             // 1. Determine base orientation from first clip
-            let firstAsset = AVAsset(url: self.clipURLs[0])
+            let firstAsset = AVURLAsset(url: self.clipURLs[0])
             guard let firstVideoTrack = try? await firstAsset.loadTracks(withMediaType: .video).first else {
-                await self.showError("Failed to load first clip")
+                self.showError("Failed to load first clip")
                 return
             }
             
@@ -453,7 +468,7 @@ class CameraManager: NSObject, ObservableObject {
                 withMediaType: .video,
                 preferredTrackID: kCMPersistentTrackID_Invalid
             ) else {
-                await self.showError("Failed to create video track")
+                self.showError("Failed to create video track")
                 return
             }
             
@@ -478,7 +493,7 @@ class CameraManager: NSObject, ObservableObject {
                 asset: composition,
                 presetName: AVAssetExportPresetHighestQuality
             ) else {
-                await self.showError("Failed to create exporter")
+                self.showError("Failed to create exporter")
                 return
             }
             
@@ -498,7 +513,7 @@ class CameraManager: NSObject, ObservableObject {
                 self.saveFinalVideo(outputURL)
                 self.cleanupClips()
             case .failed:
-                await self.showError("Export failed: \(exporter.error?.localizedDescription ?? "")")
+                self.showError("Export failed: \(exporter.error?.localizedDescription ?? "")")
             default: break
             }
         }
@@ -527,8 +542,8 @@ class CameraManager: NSObject, ObservableObject {
         var instructions: [AVMutableVideoCompositionInstruction] = []
         var currentTime = CMTime.zero
         
-        for (index, url) in clips.enumerated() {
-            let asset = AVAsset(url: url)
+        for (_, url) in clips.enumerated() {
+            let asset = AVURLAsset(url: url)
             guard let videoTrack = try await asset.loadTracks(withMediaType: .video).first else { continue }
             
             let clipTransform = try await videoTrack.load(.preferredTransform)
@@ -695,10 +710,12 @@ class CameraManager: NSObject, ObservableObject {
         errorMessage = message
     }
     
+    
     @MainActor func configureSession() {
         session.beginConfiguration()
         defer {
             session.commitConfiguration()
+//            print("Active Stabilization: \(activeVideoStabilizationMode)")
             print("Session configuration committed")
         }
         
@@ -727,20 +744,6 @@ class CameraManager: NSObject, ObservableObject {
             activeInput = input
         }
         
-        // Camera Control
-        
-        // Create a control to adjust the device's video zoom factor.
-        let systemZoomSlider = AVCaptureSystemZoomSlider(device: device) { zoomFactor in
-            // Calculate and display a zoom value.
-            let displayZoom = device.displayVideoZoomFactorMultiplier * zoomFactor
-            // Update the user interface.
-        }
-
-
-        // Create a control to adjust the device's exposure bias.
-        let systemBiasSlider = AVCaptureSystemExposureBiasSlider(device: device)
-        
-        
         
         if let audioDevice = AVCaptureDevice.default(for: .audio) {
             let audioInput = try AVCaptureDeviceInput(device: audioDevice)
@@ -758,6 +761,7 @@ class CameraManager: NSObject, ObservableObject {
         if session.canAddOutput(movieOutput) {
             session.addOutput(movieOutput)
         }
+        
     }
     
     private func startSession() {
@@ -844,11 +848,28 @@ class CameraManager: NSObject, ObservableObject {
             return Array(supportedRates).sorted()
         }
     
+    private func mapStabilizationMode(_ mode: StabilizationMode) -> AVCaptureVideoStabilizationMode {
+        switch mode {
+        case .off: return .off
+        case .standard: return .standard
+        case .cinematic: return .cinematic
+        case .cinematicExtended: return .cinematicExtended
+        case .auto: return .auto
+        }
+    }
     @MainActor private func configureDeviceFormat() throws {
         guard let device = currentDevice else { return }
         
         try device.lockForConfiguration()
         defer { device.unlockForConfiguration() }
+        
+        // Check if the stabilization mode is supported
+            if device.activeFormat.isVideoStabilizationModeSupported(mapStabilizationMode(stabilizeVideo)) {
+                print("Stabilization mode \(stabilizeVideo.rawValue) is supported.")
+            } else {
+                print("Stabilization mode \(stabilizeVideo.rawValue) is NOT supported.")
+            }
+        
         
         let targetFormat = try findBestFormat(for: device)
         device.activeFormat = targetFormat
@@ -963,6 +984,7 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
             session.beginConfiguration()
             defer { session.commitConfiguration() }
+        
             
             guard let connection = movieOutput.connection(with: .video) else { return }
             
@@ -1031,7 +1053,7 @@ class CameraManager: NSObject, ObservableObject {
     }
 }
 
-extension CameraManager: AVCaptureFileOutputRecordingDelegate {
+extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
     private func getNextClipNumber() -> String {
         let defaults = UserDefaults.standard
         let currentNumber = defaults.integer(forKey: "GyroCamClipNumber")

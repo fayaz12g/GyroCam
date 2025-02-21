@@ -25,6 +25,22 @@ struct CameraPreview: UIViewRepresentable {
         previewLayer.frame = view.bounds
         view.layer.addSublayer(previewLayer)
         
+        if let connection = previewLayer.connection, connection.isVideoStabilizationSupported {
+            switch cameraManager.stabilizeVideo {
+            case .off:
+                connection.preferredVideoStabilizationMode = .off
+            case .standard:
+                connection.preferredVideoStabilizationMode = .standard
+            case .cinematic:
+                connection.preferredVideoStabilizationMode = .cinematic
+            case .cinematicExtended:
+                connection.preferredVideoStabilizationMode = .cinematicExtended
+            case .auto:
+                connection.preferredVideoStabilizationMode = .auto
+            }
+        }
+
+        
         // Add gesture recognizers
         let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator,
                                                     action: #selector(Coordinator.handlePinch(_:)))
@@ -89,6 +105,7 @@ struct CameraPreview: UIViewRepresentable {
         
         @MainActor @objc func autoFocusChanged() {
             updateFocusMode()
+            updateFocusValueFromDevice()
         }
         
         @MainActor func updateFocusMode() {
@@ -120,6 +137,24 @@ struct CameraPreview: UIViewRepresentable {
                 device.unlockForConfiguration()
             } catch {
                 print("Error updating focus mode: \(error)")
+            }
+        }
+        
+        @MainActor func updateFocusValueFromDevice() {
+                    guard let device = cameraManager.captureDevice else { return }
+                    cameraManager.focusValue = Float(device.lensPosition)
+                }
+
+        @MainActor func updateFocusValue(to value: Float) {
+            guard let device = cameraManager.captureDevice else { return }
+            do {
+                try device.lockForConfiguration()
+                device.setFocusModeLocked(lensPosition: value) { _ in
+                    self.cameraManager.focusValue = value
+                }
+                device.unlockForConfiguration()
+            } catch {
+                print("Error adjusting focus: \(error)")
             }
         }
         
@@ -203,16 +238,6 @@ struct CameraPreview: UIViewRepresentable {
             cameraManager.switchCamera()
         }
         
-        @MainActor func updateFocusValue(to value: Float) {
-            guard let device = cameraManager.captureDevice else { return }
-            do {
-                try device.lockForConfiguration()
-                device.setFocusModeLocked(lensPosition: value) { _ in }
-                device.unlockForConfiguration()
-            } catch {
-                print("Error adjusting focus: \(error)")
-            }
-        }
         
         @objc @MainActor func handlePan(_ gesture: UIPanGestureRecognizer) {
             guard !cameraManager.autoFocus else { return }
@@ -501,17 +526,6 @@ extension AVCaptureVideoOrientation {
         case .landscapeRight: return "Landscape Right"
         @unknown default: return "Unknown"
         }
-    }
-    
-}
-
-extension CameraManager {
-    func getAvailableLenses() -> [AVCaptureDevice.DeviceType] {
-        // Return array of available lens types for your device
-        return [.builtInWideAngleCamera, .builtInUltraWideCamera, .builtInTelephotoCamera]
-            .filter { type in
-                AVCaptureDevice.default(type, for: .video, position: .back) != nil
-            }
     }
     
 }

@@ -14,6 +14,20 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Alpha Releases")) {
                 
+            VersionEntry(cameraManager: cameraManager, version: "Alpha 014", changes: [
+                ChangeEntry(title: "Focus", details: [
+                    "The focus bar now has a tappable circle handle that turns on auto focus",
+                ]),
+                ChangeEntry(title: "Stablization", details: [
+                    "Stabilization added to settings",
+                    "Switch between no stabilization, standard, cinematic, and extreme, or auto",
+                ]),
+                ChangeEntry(title: "Bux Fixes", details: [
+                    "Fixed more warnings for deprecated syntax"
+                ]),
+            ])
+
+                    
                 VersionEntry(cameraManager: cameraManager, version: "Alpha 013", changes: [
                     ChangeEntry(title: "Changelog", details: [
                         "Renamed headers to be more aligned with proper descriptions",

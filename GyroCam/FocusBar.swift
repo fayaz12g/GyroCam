@@ -1,4 +1,3 @@
-//
 //  FocusBar.swift
 //  GyroCam
 //
@@ -10,6 +9,7 @@ import SwiftUI
 struct FocusBar: View {
     @ObservedObject var cameraManager: CameraManager
     @Environment(\.colorScheme) var colorScheme
+    @State private var continuousFocusMode: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -29,33 +29,66 @@ struct FocusBar: View {
                 // Focus Level Circle
                 Circle()
                     .frame(width: 40, height: 40)
-                    .foregroundColor(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white)
+                    .foregroundColor(continuousFocusMode ? Color.yellow : (colorScheme == .dark ? Color.black.opacity(0.7) : Color.white))
                     .overlay(
-                        Text("\(String(format: "%.1f", cameraManager.focusValue))f")
+                        Text(continuousFocusMode ? "AUTO" : "\(String(format: "%.1f", (cameraManager.focusValue * 10)))f")
                             .font(.system(size: 12, weight: .bold))
                     )
                     .rotationEffect(rotationAngle)
-                    .animation(.easeInOut(duration: 0.2), value: cameraManager.currentOrientation)
+                    .animation(.easeInOut(duration: 0.2), value: cameraManager.focusValue)  // Animate focus value changes
                     .shadow(radius: 3)
                     .offset(x: position)
                     .gesture(
+                        TapGesture()
+                            .onEnded {
+                                continuousFocusMode.toggle()
+                                
+                                if continuousFocusMode {
+                                    // Enable continuous autofocus
+                                    if let device = cameraManager.captureDevice {
+                                        do {
+                                            try device.lockForConfiguration()
+                                            device.focusMode = .continuousAutoFocus
+                                            device.unlockForConfiguration()
+                                        } catch {
+                                            print("Error setting continuous autofocus: \(error)")
+                                        }
+                                    }
+                                } else {
+                                    // Disable continuous autofocus and switch to manual
+                                    if let device = cameraManager.captureDevice {
+                                        do {
+                                            try device.lockForConfiguration()
+                                            device.focusMode = .locked
+                                            device.setFocusModeLocked(lensPosition: cameraManager.focusValue) { _ in }
+                                            device.unlockForConfiguration()
+                                        } catch {
+                                            print("Error locking focus: \(error)")
+                                        }
+                                    }
+                                }
+                            }
+                    )
+                    .gesture(
                         DragGesture()
                             .onChanged { value in
-                                // Calculate new focus based on drag position
-                                let dragPosition = min(max(0, value.location.x - 20), barWidth)
-                                let newFocus = minFocus + (dragPosition / barWidth) * (maxFocus - minFocus)
-                                
-                                // Update cameraManager's focus level
-                                cameraManager.focusValue = Float(newFocus)
-                                
-                                // Update the actual focus on the capture device
-                                if let device = cameraManager.captureDevice {
-                                    do {
-                                        try device.lockForConfiguration()
-                                        device.setFocusModeLocked(lensPosition: Float(newFocus)) { _ in }
-                                        device.unlockForConfiguration()
-                                    } catch {
-                                        print("Error adjusting focus: \(error)")
+                                if !continuousFocusMode {
+                                    // Calculate new focus based on drag position
+                                    let dragPosition = min(max(0, value.location.x - 20), barWidth)
+                                    let newFocus = minFocus + (dragPosition / barWidth) * (maxFocus - minFocus)
+                                    
+                                    // Update cameraManager's focus level
+                                    cameraManager.focusValue = Float(newFocus)
+                                    
+                                    // Update the actual focus on the capture device
+                                    if let device = cameraManager.captureDevice {
+                                        do {
+                                            try device.lockForConfiguration()
+                                            device.setFocusModeLocked(lensPosition: Float(newFocus)) { _ in }
+                                            device.unlockForConfiguration()
+                                        } catch {
+                                            print("Error adjusting focus: \(error)")
+                                        }
                                     }
                                 }
                             }
@@ -63,7 +96,14 @@ struct FocusBar: View {
             }
         }
         .frame(height: 40)
+        .onChange(of: cameraManager.focusValue) { _, newValue in
+            // Update circle position as autofocus changes
+            if continuousFocusMode {
+                cameraManager.focusValue = newValue  // Update value as autofocus sets it
+            }
+        }
     }
+    
     private var rotationAngle: Angle {
         switch cameraManager.currentOrientation {
         case "Landscape Left": return .degrees(90)
@@ -73,4 +113,3 @@ struct FocusBar: View {
         }
     }
 }
-

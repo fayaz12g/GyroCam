@@ -33,6 +33,8 @@ struct AppSettings: Codable {
     
     var lockLandscape: Bool = false
     
+    var stabilizeVideo: CameraManager.StabilizationMode = .auto
+    
     var showQuickSettings: Bool = true
     var isFlashOn: Bool = false
     

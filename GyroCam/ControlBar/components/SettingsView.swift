@@ -46,7 +46,7 @@ struct SettingsView: View {
                 SettingsRow(title: "Exposure Controls", icon: "camera.badge.ellipsis")
             }
             NavigationLink(destination: OrientationStitchingView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Orientation & Stitching", icon: "rotate.right")
+                SettingsRow(title: "Video Processing", icon: "rotate.right")
             }
         }
     }
@@ -254,6 +254,10 @@ struct ExposureSettingsView: View {
                         cameraManager.toggleFlash()
                     }
                 Toggle("Auto Exposure", isOn: $cameraManager.autoExposure)
+                    .tint(cameraManager.accentColor)
+                    .onChange(of: cameraManager.autoExposure) { _, _ in
+                        cameraManager.configureSession()
+                    }
             }
             
             Section(header: Text("Manual Controls")) {
@@ -283,7 +287,23 @@ struct OrientationStitchingView: View {
         Form {
             Section(header: Text("Orientation")) {
                 Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
+                    .tint(cameraManager.accentColor)
             }
+            
+            Section(header: Text("Stabilization Mode")) {
+                Picker("Stabilization Mode", selection: $cameraManager.stabilizeVideo) {
+                    ForEach(CameraManager.StabilizationMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue)
+                            .tag(mode)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle()) // Optional: Use segmented control for a nice UI
+                .tint(cameraManager.accentColor)
+                .onChange(of: cameraManager.stabilizeVideo) { _, _ in
+                    cameraManager.configureSession()
+                }
+            }
+
             
             Section(header: Text("Video Processing")) {
                 FeatureToggle(
@@ -294,7 +314,7 @@ struct OrientationStitchingView: View {
                 )
             }
         }
-        .navigationTitle("Orientation & Stitching")
+        .navigationTitle("Video Processing")
     }
 }
 
