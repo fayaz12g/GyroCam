@@ -31,7 +31,7 @@ struct AboutView: View {
                         .padding(.vertical, 8)
                 }
             }
-            .navigationTitle("Privacy Policy")
+            .navigationTitle("About")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

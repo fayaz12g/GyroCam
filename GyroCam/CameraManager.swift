@@ -32,7 +32,8 @@ class CameraManager: NSObject, ObservableObject {
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
     
-
+    public var loadLatestThumbnail: Bool = false
+    
     private var clipURLs: [URL] = []
     private var stitchingGroup: DispatchGroup?
     
@@ -494,8 +495,8 @@ class CameraManager: NSObject, ObservableObject {
             
             switch exporter.status {
             case .completed:
-                await self.saveFinalVideo(outputURL)
-                await self.cleanupClips()
+                self.saveFinalVideo(outputURL)
+                self.cleanupClips()
             case .failed:
                 await self.showError("Export failed: \(exporter.error?.localizedDescription ?? "")")
             default: break
@@ -608,7 +609,7 @@ class CameraManager: NSObject, ObservableObject {
             options.shouldMoveFile = true
             options.originalFilename = "GRC-\(self.videoDateFormatter.string(from: Date()))"
             
-            _ = PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: options)
+            PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: options)
             
         } completionHandler: { success, error in
             DispatchQueue.main.async {
@@ -1022,6 +1023,7 @@ class CameraManager: NSObject, ObservableObject {
                 }
             }
         print("⏹ Stopped recording clip #\(currentClipNumber)")
+        
         if !isRestarting {
             self.currentClipNumber = 1 // reset
             AudioServicesPlaySystemSound(1118)
@@ -1090,6 +1092,7 @@ extension CameraManager: AVCaptureFileOutputRecordingDelegate {
                                 if success {
                                     try? FileManager.default.removeItem(at: outputFileURL)
                                     print("✅ Saved \(clipName)")
+                                    self?.loadLatestThumbnail.toggle()
                                 } else {
                                     self?.setErrorMessage(error?.localizedDescription ?? "Save failed")
                                 }
@@ -1126,7 +1129,7 @@ extension AVCaptureDevice.Format {
 }
 
 
-extension CameraManager: CLLocationManagerDelegate {
+extension CameraManager: @preconcurrency CLLocationManagerDelegate {
     func requestLocationAccess() {
         locationManager.requestWhenInUseAuthorization()
     }

@@ -68,7 +68,7 @@ struct PhotoLibraryButton: View {
             PhotoLibraryView(cameraManager: cameraManager)
         }
         .onAppear(perform: loadLatestThumbnail)
-        .onChange(of: cameraManager.isRecording) { _, _ in
+        .onChange(of: cameraManager.loadLatestThumbnail) { _, _ in
             // make this more efficient, tie to right after save
             loadLatestThumbnail()
         }
@@ -76,7 +76,7 @@ struct PhotoLibraryButton: View {
         
     }
     
-    private func loadLatestThumbnail() {
+    public func loadLatestThumbnail() {
         PHPhotoLibrary.requestAuthorization { status in
             guard status == .authorized else { return }
             

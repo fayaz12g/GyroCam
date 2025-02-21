@@ -78,7 +78,7 @@ struct OnboardingView: View {
                     .foregroundColor(.white)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background((currentPage == 4 && permissionsManager.allPermissionsGranted) ? Color.blue : Color.gray)
+                    .background((currentPage == 4 && permissionsManager.allPermissionsGranted) ? Color.accentColor : Color.gray)
                     .cornerRadius(10)
                     .padding(.horizontal)
             }
@@ -155,19 +155,20 @@ struct PermissionsPage: View {
     
     var body: some View {
         VStack(spacing: 30) {
+            Spacer()
             // Icon and Header
             VStack {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 50))
-                    .foregroundColor(.clear) // Clear color to let the gradient show
+                    .foregroundColor(.clear)
                     .background(
                         LinearGradient(
-                            gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                            gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [Color.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                         .mask(
-                            Image(systemName: "lock.shield.fill") // Apply the mask to the icon
+                            Image(systemName: "lock.shield.fill")
                                 .font(.system(size: 60))
                         )
                     )
@@ -175,13 +176,14 @@ struct PermissionsPage: View {
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
+                    .padding(.top, 3)
                 Text("One more thing. These permissions are required for the app to function properly.")
                     .font(.body)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.top, 5)
             }
-            
+
             // Permission Rows
             VStack(spacing: 20) {
                 PermissionRow(
@@ -236,7 +238,7 @@ struct PermissionRow: View {
                 ZStack {
                     Circle()
                         .stroke(granted ? LinearGradient(
-                            gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                            gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [Color.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ) :  LinearGradient(
@@ -251,7 +253,7 @@ struct PermissionRow: View {
                         Circle()
                             .fill(
                                 granted ? LinearGradient(
-                                    gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                    gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [Color.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ) :  LinearGradient(
@@ -304,7 +306,8 @@ class PermissionsManager: NSObject, ObservableObject, CLLocationManagerDelegate 
     
     func checkPermissionsStatus() {
         // Location
-        locationPermissionGranted = CLLocationManager.authorizationStatus() == .authorizedWhenInUse || CLLocationManager.authorizationStatus() == .authorizedAlways
+        let locationManager = CLLocationManager()
+        _ = locationManager.authorizationStatus == .authorizedWhenInUse || locationManager.authorizationStatus == .authorizedAlways
         
         // Camera
         cameraPermissionGranted = AVCaptureDevice.authorizationStatus(for: .video) == .authorized

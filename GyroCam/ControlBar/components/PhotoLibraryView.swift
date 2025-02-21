@@ -184,7 +184,7 @@ struct VideoThumbnailView: View {
                 loadVideoInfo()
             }
         }
-        .onChange(of: cameraManager.isProMode) { newValue in
+        .onChange(of: cameraManager.isProMode) { _, newValue in
             if newValue && cameraManager.preserveAspectRatios {
                 loadVideoBadges()
                 loadVideoInfo()

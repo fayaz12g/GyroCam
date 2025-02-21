@@ -19,10 +19,22 @@ struct ChangelogView: View {
                         "Renamed headers to be more aligned with proper descriptions",
                     ]),
                     ChangeEntry(title: "Settings", details: [
+                        "Major restructure of the settings view",
                         "Added new 'about' submenu containing version number and brief description",
+                        "An alert now pops up to display when default settings have been restored"
                     ]),
                     ChangeEntry(title: "App Icon", details: [
                         "Once again more changes have been made, this time reintroducing the color from previous iterations, as well as incorporating it agaisnt the rainbow back, witht the shadow consstent in dark mode.",
+                    ]),
+                    ChangeEntry(title: "Onboarding View", details: [
+                        "Centered the permissions page",
+                        "Change the color of the permissions page to accent color if seen before",
+                        "Fixed a clipping issue with the lock icon"
+                    ]),
+                    ChangeEntry(title: "Bux Fixes", details: [
+                        "Fixed a plethora of on change warnings to conform to iOS 17+",
+                        "Fixed warnings involving loctaion manager",
+                        "Load Latest thumbnail is now called on Photo Library Button after recording is saved",
                     ]),
                 ])
                 

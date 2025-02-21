@@ -514,8 +514,4 @@ extension CameraManager {
             }
     }
     
-    func switchToLens(_ lens: AVCaptureDevice.DeviceType) {
-        guard let device = AVCaptureDevice.default(lens, for: .video, position: .back) else { return }
-        // Implement lens switching logic here
-    }
 }

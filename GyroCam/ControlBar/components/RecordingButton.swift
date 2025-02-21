@@ -48,7 +48,7 @@ struct RecordingButton: View {
                     animate = true
                 }
             }
-            .onChange(of: isRecording) { newValue in
+            .onChange(of: isRecording) { _, newValue in
                 // Toggle animation based on isRecording state
                 if newValue {
                     withAnimation {
