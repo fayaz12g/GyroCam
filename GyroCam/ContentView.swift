@@ -7,11 +7,12 @@ struct ContentView: View {
     @State private var focusValue: Float = 0.5
     @State private var clipNumber = 1
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    @StateObject private var permissionsManager = PermissionsManager()
     
     var body: some View {
         Group {
-            if showOnboarding {
-                OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding)
+            if showOnboarding || !permissionsManager.allPermissionsGranted {
+                OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding, setPage: !permissionsManager.allPermissionsGranted ? 4 : 0)
             } else {
                 NavigationView {
                     ZStack {

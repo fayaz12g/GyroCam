@@ -15,9 +15,19 @@ import Photos
 struct OnboardingView: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var showOnboarding: Bool
-    @State private var currentPage = 0
+    var setPage: Int?
+    @State private var currentPage: Int
     @State private var permissionsGranted = [false, false, false, false]
     @StateObject private var permissionsManager = PermissionsManager()
+    
+    
+    init(cameraManager: CameraManager, showOnboarding: Binding<Bool>, setPage: Int? = nil) {
+            self.cameraManager = cameraManager
+            self._showOnboarding = showOnboarding
+            self.setPage = setPage
+            // Initialize currentPage to setPage if provided, otherwise default to 0
+            self._currentPage = State(initialValue: setPage ?? 0)
+        }
     
     var body: some View {
         VStack {
@@ -58,8 +68,12 @@ struct OnboardingView: View {
                 )
                 .tag(3)
                 
-                PermissionsPage(permissionsManager: permissionsManager)
+                PermissionsPage(permissionsManager: permissionsManager, cameraManager: cameraManager)
                                     .tag(4)
+                if (UserDefaults.standard.bool(forKey: "hasSeenOnboarding") && !permissionsManager.allPermissionsGranted) {
+                    Text("It seems one of your permissions has been denied or revoked. Please navigate to settings to grant them.")
+                    .font(.headline)}
+                
                             }
                             .tabViewStyle(PageTabViewStyle())
                             .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
@@ -82,8 +96,8 @@ struct OnboardingView: View {
                                     .frame(maxWidth: .infinity)
                                     .background(
                                         currentPage == 4 ?
-                                        (permissionsManager.allPermissionsGranted ? Color.accentColor : Color.gray) :
-                                            Color.accentColor
+                                        (permissionsManager.allPermissionsGranted ? cameraManager.accentColor : Color.gray) :
+                                            cameraManager.accentColor
                                     )
                                     .cornerRadius(10)
                                     .padding(.horizontal)
@@ -173,6 +187,7 @@ struct OnboardingPage: View {
 
 struct PermissionsPage: View {
     @ObservedObject var permissionsManager: PermissionsManager
+    @ObservedObject var cameraManager: CameraManager
     
     var body: some View {
         VStack(spacing: 30) {
@@ -184,7 +199,7 @@ struct PermissionsPage: View {
                     .foregroundColor(.clear)
                     .background(
                         LinearGradient(
-                            gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [Color.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
+                            gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -211,28 +226,28 @@ struct PermissionsPage: View {
                     title: "Location",
                     description: "We need your location to offer location-based video settings.",
                     granted: permissionsManager.locationPermissionGranted,
-                    action: permissionsManager.requestLocationPermission
+                    action: permissionsManager.requestLocationPermission, cameraManager: cameraManager
                 )
                 
                 PermissionRow(
                     title: "Camera",
                     description: "This app needs access to your camera for recording videos.",
                     granted: permissionsManager.cameraPermissionGranted,
-                    action: permissionsManager.requestCameraPermission
+                    action: permissionsManager.requestCameraPermission, cameraManager: cameraManager
                 )
                 
                 PermissionRow(
                     title: "Microphone",
                     description: "The microphone is required for audio recording along with the video.",
                     granted: permissionsManager.microphonePermissionGranted,
-                    action: permissionsManager.requestMicrophonePermission
+                    action: permissionsManager.requestMicrophonePermission, cameraManager: cameraManager
                 )
                 
                 PermissionRow(
                     title: "Photo Library",
                     description: "Access to your photo library is necessary to save your videos.",
                     granted: permissionsManager.photoLibraryPermissionGranted,
-                    action: permissionsManager.requestPhotoLibraryPermission
+                    action: permissionsManager.requestPhotoLibraryPermission, cameraManager: cameraManager
                 )
             }
             
@@ -247,19 +262,20 @@ struct PermissionRow: View {
     let description: String
     let granted: Bool
     let action: () -> Void
+    @ObservedObject var cameraManager: CameraManager
     
     var body: some View {
         HStack {
             // Circular Checkbox
             Button(action: {
-//                if !granted {
+                if !granted {
                     action()
-//                }
+                }
             }) {
                 ZStack {
                     Circle()
                         .stroke(granted ? LinearGradient(
-                            gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [Color.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
+                            gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ) :  LinearGradient(
@@ -274,7 +290,7 @@ struct PermissionRow: View {
                         Circle()
                             .fill(
                                 granted ? LinearGradient(
-                                    gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [Color.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                    gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ) :  LinearGradient(
@@ -306,7 +322,6 @@ struct PermissionRow: View {
 }
 
 
-// Permissions Manager
 class PermissionsManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager = CLLocationManager()
     
@@ -321,55 +336,107 @@ class PermissionsManager: NSObject, ObservableObject, CLLocationManagerDelegate 
     
     override init() {
         super.init()
-        checkPermissionsStatus()
         locationManager.delegate = self
+        checkPermissionsStatus()
     }
     
     func checkPermissionsStatus() {
         // Location
-        let locationManager = CLLocationManager()
-        _ = locationManager.authorizationStatus == .authorizedWhenInUse || locationManager.authorizationStatus == .authorizedAlways
+        let status = locationManager.authorizationStatus
+        locationPermissionGranted = (status == .authorizedWhenInUse || status == .authorizedAlways)
         
         // Camera
-        cameraPermissionGranted = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+        let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        cameraPermissionGranted = (cameraStatus == .authorized)
         
         // Microphone
-        microphonePermissionGranted = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+        let microphoneStatus = AVCaptureDevice.authorizationStatus(for: .audio)
+        microphonePermissionGranted = (microphoneStatus == .authorized)
         
         // Photo Library
-        photoLibraryPermissionGranted = PHPhotoLibrary.authorizationStatus() == .authorized
+        let photoStatus = PHPhotoLibrary.authorizationStatus()
+        photoLibraryPermissionGranted = (photoStatus == .authorized)
     }
     
     func requestLocationPermission() {
-        locationManager.requestWhenInUseAuthorization()
+        let status = locationManager.authorizationStatus
+        switch status {
+        case .denied, .restricted:
+            // Open settings if permission was previously denied
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(url)
+                }
+            }
+        default:
+            locationManager.requestWhenInUseAuthorization()
+        }
     }
     
     func requestCameraPermission() {
-        AVCaptureDevice.requestAccess(for: .video) { granted in
-            DispatchQueue.main.async {
-                self.cameraPermissionGranted = granted
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .denied, .restricted:
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(url)
+                }
             }
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    self.cameraPermissionGranted = granted
+                }
+            }
+        default:
+            break
         }
     }
     
     func requestMicrophonePermission() {
-        AVCaptureDevice.requestAccess(for: .audio) { granted in
-            DispatchQueue.main.async {
-                self.microphonePermissionGranted = granted
+        let status = AVCaptureDevice.authorizationStatus(for: .audio)
+        switch status {
+        case .denied, .restricted:
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(url)
+                }
             }
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .audio) { granted in
+                DispatchQueue.main.async {
+                    self.microphonePermissionGranted = granted
+                }
+            }
+        default:
+            break
         }
     }
     
     func requestPhotoLibraryPermission() {
-        PHPhotoLibrary.requestAuthorization { status in
-            DispatchQueue.main.async {
-                self.photoLibraryPermissionGranted = status == .authorized
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .denied, .restricted:
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(url)
+                }
             }
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization { status in
+                DispatchQueue.main.async {
+                    self.photoLibraryPermissionGranted = status == .authorized
+                }
+            }
+        default:
+            break
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        locationPermissionGranted = status == .authorizedWhenInUse || status == .authorizedAlways
+        DispatchQueue.main.async {
+            self.locationPermissionGranted = (status == .authorizedWhenInUse || status == .authorizedAlways)
+        }
     }
 }
 
