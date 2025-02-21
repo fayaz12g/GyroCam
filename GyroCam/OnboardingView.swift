@@ -59,34 +59,41 @@ struct OnboardingView: View {
                 .tag(3)
                 
                 PermissionsPage(permissionsManager: permissionsManager)
-                    .tag(4)
-            }
-            .tabViewStyle(PageTabViewStyle())
-            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-            
-            Spacer()
-            
-            Button(action: {
-                if currentPage == 4 && permissionsManager.allPermissionsGranted {
-                   UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                   showOnboarding = false
-                   cameraManager.setupFreshStart()
-               }
-            }) {
-                Text("Finish")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background((currentPage == 4 && permissionsManager.allPermissionsGranted) ? Color.accentColor : Color.gray)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
-            }
-            .disabled(!(currentPage == 4 && permissionsManager.allPermissionsGranted))
-            .padding(.bottom, 20)
-        }
-    }
-}
+                                    .tag(4)
+                            }
+                            .tabViewStyle(PageTabViewStyle())
+                            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                if currentPage < 4 {
+                                    currentPage += 1 // Navigate to next page
+                                } else {
+                                    UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+                                    showOnboarding = false
+                                    cameraManager.setupFreshStart()
+                                }
+                            }) {
+                                Text(currentPage < 4 ? "Next" : "Finish")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(
+                                        currentPage == 4 ?
+                                        (permissionsManager.allPermissionsGranted ? Color.accentColor : Color.gray) :
+                                            Color.accentColor
+                                    )
+                                    .cornerRadius(10)
+                                    .padding(.horizontal)
+                            }
+                            .disabled(currentPage == 4 && !permissionsManager.allPermissionsGranted)
+                            .padding(.bottom, 20)
+                        }
+                    }
+                }
+
 
 struct OnboardingPage: View {
     @ObservedObject var cameraManager: CameraManager
@@ -245,9 +252,9 @@ struct PermissionRow: View {
         HStack {
             // Circular Checkbox
             Button(action: {
-                if !granted {
+//                if !granted {
                     action()
-                }
+//                }
             }) {
                 ZStack {
                     Circle()
