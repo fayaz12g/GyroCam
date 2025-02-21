@@ -108,6 +108,18 @@ struct OnboardingPage: View {
                     customIcon
                         .resizable()
                         .frame(width: 120, height: 120)
+                        .foregroundColor(.clear)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            .mask(
+                                Image(systemName: iconName)
+                                    .font(.system(size: 60))
+                            )
+                        )
                 
                 }
 
@@ -119,7 +131,7 @@ struct OnboardingPage: View {
                 } else {
                     Image(systemName: iconName)
                         .font(.system(size: 60))
-                        .foregroundColor(.clear) // Clear color to let the gradient show
+                        .foregroundColor(.clear)
                         .background(
                             LinearGradient(
                                 gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
