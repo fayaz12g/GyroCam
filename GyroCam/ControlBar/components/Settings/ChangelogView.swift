@@ -14,6 +14,11 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Alpha Releases")) {
                 
+            VersionEntry(cameraManager: cameraManager, version: "Alpha 015", changes: [
+                ChangeEntry(title: "Misc.", details: [
+                    "TBD",
+                ]),
+            ])
             VersionEntry(cameraManager: cameraManager, version: "Alpha 014", changes: [
                 ChangeEntry(title: "Focus", details: [
                     "The focus bar now has a tappable circle handle that turns on auto focus",
@@ -24,6 +29,14 @@ struct ChangelogView: View {
                 ]),
                 ChangeEntry(title: "Bux Fixes", details: [
                     "Fixed more warnings for deprecated syntax"
+                ]),
+                ChangeEntry(title: "Other", details: [
+                    "Onboarding gyro cam logo now has matching color scheme",
+                    "Light mode background reverted to white",
+                    "Moved some settings around",
+                    "Onboarding button shows next until the last page",
+                    "Centered onboarding button",
+                    "Updated permissions handling to navigate to settings and open onboarding on revoke"
                 ]),
             ])
 
