@@ -55,7 +55,9 @@ struct SettingsView: View {
     private func PhotoLibrarySection() -> some View {
         Section(header: Text("Photo Library")) {
             Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
+                .tint(cameraManager.accentColor)
             Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
+                .tint(cameraManager.accentColor)
         }
     }
     
@@ -138,26 +140,37 @@ struct InterfaceSettingsView: View {
         Form {
             Section(header: Text("UI Elements")) {
                 Toggle("Quick Settings", isOn: $cameraManager.showQuickSettings)
+                    .tint(cameraManager.accentColor)
                 Toggle("Zoom Bar", isOn: $cameraManager.showZoomBar)
+                    .tint(cameraManager.accentColor)
                 Toggle("Focus Bar", isOn: $cameraManager.showFocusBar)
+                    .tint(cameraManager.accentColor)
                 Toggle("Auto Focus", isOn: $cameraManager.autoFocus)
+                    .tint(cameraManager.accentColor)
                     .disabled(cameraManager.showFocusBar)
                 Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
+                    .tint(cameraManager.accentColor)
+                    .onChange(of: cameraManager.maximizePreview) { _, _ in
+                        cameraManager.configureSession()
+                    }
             }
             
             Section(header: Text("Badges")) {
                 Toggle("Show Clip Badge", isOn: $cameraManager.showClipBadge)
+                    .tint(cameraManager.accentColor)
                 FeatureToggle(
                     title: "Recording Timer",
                     status: "Coming Soon",
                     isOn: $cameraManager.showRecordingTimer,
-                    statusColor: .purple
+                    statusColor: .purple, cameraManager: cameraManager
                 )
             }
             
             Section(header: Text("Orientation Badge")) {
                 Toggle("Show", isOn: $cameraManager.showOrientationBadge)
+                    .tint(cameraManager.accentColor)
                 Toggle("Minimal Style", isOn: $cameraManager.minimalOrientationBadge)
+                    .tint(cameraManager.accentColor)
                     .disabled(!cameraManager.showOrientationBadge)
             }
             
@@ -185,20 +198,33 @@ struct CaptureSettingsView: View {
                         Text(format.rawValue).tag(format)
                     }
                 }
-                
+                .onChange(of: cameraManager.currentFormat) { _, _ in
+                    cameraManager.configureSession()
+                }
+
                 Picker("Frame Rate", selection: $cameraManager.currentFPS) {
                     ForEach(cameraManager.availableFrameRates) { fps in
                         Text(fps.description).tag(fps)
                     }
                 }
+                .onChange(of: cameraManager.currentFPS) { _, _ in
+                    cameraManager.configureSession()
+                    }
             }
             
             Section(header: Text("Advanced")) {
                 Toggle("Enable HDR", isOn: $cameraManager.isHDREnabled)
+                    .tint(cameraManager.accentColor)
+                    .onChange(of: cameraManager.isHDREnabled) { _, _ in
+                        cameraManager.configureSession()
+                    }
                 Picker("Camera Lens", selection: $cameraManager.currentLens) {
                     ForEach(cameraManager.availableLenses, id: \.self) { lens in
                         Text(lens.rawValue).tag(lens)
                     }
+                }
+                .onChange(of: cameraManager.currentLens) { _, _ in
+                                            cameraManager.configureSession()
                 }
             }
         }
@@ -223,6 +249,10 @@ struct ExposureSettingsView: View {
         Form {
             Section(header: Text("Lighting")) {
                 Toggle("Flash", isOn: $cameraManager.isFlashOn)
+                    .tint(cameraManager.accentColor)
+                    .onChange(of: cameraManager.isFlashOn) { _, _ in
+                        cameraManager.toggleFlash()
+                    }
                 Toggle("Auto Exposure", isOn: $cameraManager.autoExposure)
             }
             
@@ -260,7 +290,7 @@ struct OrientationStitchingView: View {
                     title: "Auto Stitch",
                     status: "Beta",
                     isOn: $cameraManager.shouldStitchClips,
-                    statusColor: .red
+                    statusColor: .red, cameraManager: cameraManager
                 )
             }
         }
@@ -274,6 +304,7 @@ struct FeatureToggle: View {
     let status: String
     @Binding var isOn: Bool
     let statusColor: Color
+    @ObservedObject var cameraManager: CameraManager
     
     var body: some View {
         HStack {
@@ -282,6 +313,7 @@ struct FeatureToggle: View {
             Text(status)
                 .badgeModifier(backgroundColor: statusColor)
             Toggle("", isOn: $isOn)
+                .tint(cameraManager.accentColor)
         }
     }
 }
