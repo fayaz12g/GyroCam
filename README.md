@@ -17,7 +17,15 @@ GyroCam revolutionizes mobile videography by automatically handling device orien
 Key Innovation:  
 ✅ **Orientation Lock** - Maintains natural perspective during complex movements  
 ✅ **Seamless Restart** - Instant recording continuation after rotation  
-✅ **Clip Stitching** (Beta) - Automatically combines related clips during export
+
+---
+
+### ✂️ New Seamless Stitching Mode
+
+Introducing the **Seamless Stitching** feature! This advanced mode eliminates gaps between clips, outputting a single continuous video where every device flip is pre-edited for you. The result? A perfectly smooth, uninterrupted final clip that automatically handles your orientation changes without missing a beat.
+
+This revolutionary update combines every clip into one length-perfect recording, so you no longer need to manually edit or align clips. Just capture and let **GyroCam** handle the rest!
+
 
 ---
 
