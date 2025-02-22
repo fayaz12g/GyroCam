@@ -25,7 +25,7 @@ struct OrientationHeader: View {
     
     private var verticalOffset: CGFloat {
         switch currentOrientation {
-        case "Landscape Left", "Landscape Right": return 32
+        case "Landscape Left", "Landscape Right": return 45
         case "Upside Down": return 12
         default: return 0
         }

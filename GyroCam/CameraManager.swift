@@ -520,9 +520,12 @@ class CameraManager: NSObject, ObservableObject {
                 // Insert audio
                 try compAudioTrack.insertTimeRange(segment, of: audioTrack, at: insertTime)
                 
+                
+                let num = (self.orientationChanges.first?.orientation == "Landscape Left") ? 1 : 0
+
                 // Create rotation transform
                 let transform: CGAffineTransform
-                if index % 2 == 1 {
+                if index % 2 == num {
                     let centerX = naturalSize.width / 2
                     let centerY = naturalSize.height / 2
                     transform = CGAffineTransform(translationX: centerX, y: centerY)
@@ -583,7 +586,8 @@ class CameraManager: NSObject, ObservableObject {
         PHPhotoLibrary.shared().performChanges {
             let options = PHAssetResourceCreationOptions()
             options.shouldMoveFile = true
-            options.originalFilename = "GRC-\(self.videoDateFormatter.string(from: Date()))"
+//            options.originalFilename = "GRC-\(self.videoDateFormatter.string(from: Date()))" // uncomment to bring date in name
+            options.originalFilename = self.getNextClipNumber()
             
             PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: options)
             
@@ -593,6 +597,7 @@ class CameraManager: NSObject, ObservableObject {
                     print("Successfully saved stitched video")
                     try? FileManager.default.removeItem(at: url)
                     self.isSavingVideo = false
+                    self.loadLatestThumbnail.toggle()
                 } else {
                     print("Save error: \(error?.localizedDescription ?? "Unknown error")")
                     self.errorMessage = error?.localizedDescription ?? "Failed to save video"
@@ -1091,7 +1096,7 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
                             options.originalFilename = clipName
                             options.shouldMoveFile = true
                             
-                            _ = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: outputFileURL)?.placeholderForCreatedAsset
+                            PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: outputFileURL, options: options)
                         }) { success, error in
                             DispatchQueue.main.async {
                                 if success {

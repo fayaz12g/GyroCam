@@ -11,9 +11,6 @@ import AVFoundation
 // Add Codable conformance to all necessary enums first
 extension AVCaptureDevice.Position: Codable {}  // Add this
 
-
-
-// Add these if they don't exist in your code
 extension CameraManager.VideoFormat: Codable {}
 extension FrameRate: Codable {}
 extension CameraManager.LensType: Codable {}

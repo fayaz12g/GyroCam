@@ -341,6 +341,11 @@ struct OrientationStitchingView: View {
                 Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
                     .tint(cameraManager.accentColor)
                     .disabled(cameraManager.shouldStitchClips)
+                    .onChange(of: cameraManager.lockLandscape) { _, newValue in
+                        if newValue {
+                            cameraManager.currentOrientation = "Landscape Left"
+                        }
+                    }
             }
         }
         .navigationTitle("Output")

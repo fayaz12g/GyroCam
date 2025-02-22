@@ -46,7 +46,6 @@ struct OnboardingView: View {
                             items: [
                                 "Automatic rotation handling",
                                 "Perfect portrait/landscape videos",
-                                "Smart clip stitching (Beta)",
                                 "Professional-grade stabilization"
                             ]
                         ),
@@ -75,7 +74,7 @@ struct OnboardingView: View {
                             title: "Orientation Intelligence",
                             items: [
                                 "Real-time gyro monitoring",
-                                "Auto-restart on rotation",
+                                "Auto-restarts recording on rotation",
                                 "Face up/down detection",
                                 "Landscape lock override"
                             ]
@@ -87,7 +86,7 @@ struct OnboardingView: View {
                                 "4K UHD up to 240fps",
                                 "Multi-lens switching",
                                 "HDR10+ support",
-                                "Low-light optimization"
+                                "HEVC Dolby Vision support"
                             ]
                         )
                     ]
@@ -105,22 +104,11 @@ struct OnboardingView: View {
                             iconName: "folder",
                             title: "Organization",
                             items: [
-                                "Automatic orientation tagging",
-                                "Smart scene grouping",
-                                "Batch operations",
+                                "Automatic orientation-based clipping",
+                                "Stitching support with lossless video",
                                 "Metadata visualization"
                             ]
                         ),
-                        FeatureSection(
-                            iconName: "scissors",
-                            title: "Editing Tools",
-                            items: [
-                                "Clip stitching (Beta)",
-                                "Orientation-preserving trim",
-                                "Export settings wizard",
-                                "Quick social media presets"
-                            ]
-                        )
                     ]
                 )
                 .tag(2)
@@ -220,19 +208,19 @@ struct OnboardingPage: View {
     
     
     var body: some View {
-        VStack(spacing: 25) {
+        VStack(spacing: 15) {
             if let icon = customIcon {
                 if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
                     icon
                         .resizable()
                         .renderingMode(.template)
-                        .frame(width: 120, height: 120)
+                        .frame(width: 110, height: 110)
                         .foregroundColor(cameraManager.accentColor)
                 } else {
                     icon
                         .resizable()
                         .renderingMode(.template)
-                        .frame(width: 120, height: 120)
+                        .frame(width: 110, height: 110)
                         .foregroundColor(.clear)
                         .background(
                             LinearGradient(
@@ -244,7 +232,7 @@ struct OnboardingPage: View {
                                 icon
                                     .resizable()
                                     .renderingMode(.template)
-                                    .frame(width: 120, height: 120)
+                                    .frame(width: 150, height: 150)
                             )
                         )
                 }
@@ -271,9 +259,12 @@ struct OnboardingPage: View {
                         )
                     
                 }
-                
             }
             
+            Text(title)
+                .font(.largeTitle)
+                .foregroundColor(.primary)
+                .padding(.bottom, 20)
             
             VStack(alignment: .leading, spacing: 20) {
                 ForEach(features) { section in
@@ -287,7 +278,7 @@ struct OnboardingPage: View {
     
     private func featureSection(section: FeatureSection) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 12) {
+            HStack(spacing: 8) {
                 Image(systemName: section.iconName)
                     .font(.title3)
                     .foregroundColor(cameraManager.accentColor)
@@ -298,7 +289,7 @@ struct OnboardingPage: View {
                     .foregroundColor(.primary)
             }
             
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 7) {
                 ForEach(section.items, id: \.self) { item in
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "circle.fill")
@@ -313,7 +304,7 @@ struct OnboardingPage: View {
                     }
                 }
             }
-            .padding(.leading, 20)
+            .padding(.leading, 25)
         }
     }
 }

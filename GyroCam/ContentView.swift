@@ -8,7 +8,7 @@ struct ContentView: View {
     @State private var clipNumber = 1
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
     @StateObject private var permissionsManager = PermissionsManager()
-    @State private var forceOnboarding = !PermissionsManager().allPermissionsGranted
+    @State private var forceOnboarding = (!PermissionsManager().allPermissionsGranted && (UserDefaults.standard.bool(forKey: "hasSeenOnboarding")))
     
     var body: some View {
         Group {

@@ -82,7 +82,7 @@ struct ControlsView: View {
             }
 
         }
-        .fullScreenCover(isPresented: $showingSettings) {
+        .sheet(isPresented: $showingSettings) {
             SettingsView(cameraManager: cameraManager, isPresented: $showingSettings)
         }
     }

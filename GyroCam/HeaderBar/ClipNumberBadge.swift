@@ -21,7 +21,7 @@ struct ClipNumberBadge: View {
     
     private var verticalOffset: CGFloat {
         switch currentOrientation {
-        case "Landscape Left", "Landscape Right": return 32
+        case "Landscape Left", "Landscape Right": return 8
         case "Upside Down": return 12
         default: return 0
         }
@@ -33,7 +33,7 @@ struct ClipNumberBadge: View {
                 Spacer()
                 
                 Text("Clip #\(number)")
-                    .font(.caption.weight(.bold))
+                    .font(.caption.weight(.semibold))
                     .foregroundColor(colorScheme == .dark ? .white : .black)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
