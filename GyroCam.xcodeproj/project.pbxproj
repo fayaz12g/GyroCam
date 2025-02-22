@@ -6,16 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXContainerItemProxy section */
-		F45584DD2D40BF27005461E0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F45584C42D40BF26005461E0 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F45584CB2D40BF26005461E0;
-			remoteInfo = GyroCam;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXCopyFilesBuildPhase section */
 		F4A0FC4F2D5006E4000DCC1A /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -31,7 +21,6 @@
 
 /* Begin PBXFileReference section */
 		F45584CC2D40BF26005461E0 /* GyroCam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GyroCam.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F45584DC2D40BF27005461E0 /* GyroCamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GyroCamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -63,13 +52,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F45584D92D40BF27005461E0 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -85,7 +67,6 @@
 			isa = PBXGroup;
 			children = (
 				F45584CC2D40BF26005461E0 /* GyroCam.app */,
-				F45584DC2D40BF27005461E0 /* GyroCamTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -116,26 +97,6 @@
 			productReference = F45584CC2D40BF26005461E0 /* GyroCam.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F45584DB2D40BF27005461E0 /* GyroCamTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F45584F32D40BF27005461E0 /* Build configuration list for PBXNativeTarget "GyroCamTests" */;
-			buildPhases = (
-				F45584D82D40BF27005461E0 /* Sources */,
-				F45584D92D40BF27005461E0 /* Frameworks */,
-				F45584DA2D40BF27005461E0 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				F45584DE2D40BF27005461E0 /* PBXTargetDependency */,
-			);
-			name = GyroCamTests;
-			packageProductDependencies = (
-			);
-			productName = GyroCamTests;
-			productReference = F45584DC2D40BF27005461E0 /* GyroCamTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -148,10 +109,6 @@
 				TargetAttributes = {
 					F45584CB2D40BF26005461E0 = {
 						CreatedOnToolsVersion = 16.2;
-					};
-					F45584DB2D40BF27005461E0 = {
-						CreatedOnToolsVersion = 16.2;
-						TestTargetID = F45584CB2D40BF26005461E0;
 					};
 				};
 			};
@@ -170,20 +127,12 @@
 			projectRoot = "";
 			targets = (
 				F45584CB2D40BF26005461E0 /* GyroCam */,
-				F45584DB2D40BF27005461E0 /* GyroCamTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		F45584CA2D40BF26005461E0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F45584DA2D40BF27005461E0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -200,22 +149,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		F45584D82D40BF27005461E0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		F45584DE2D40BF27005461E0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F45584CB2D40BF26005461E0 /* GyroCam */;
-			targetProxy = F45584DD2D40BF27005461E0 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F45584EE2D40BF27005461E0 /* Debug */ = {
@@ -415,44 +349,6 @@
 			};
 			name = Release;
 		};
-		F45584F42D40BF27005461E0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V4662QC35T;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCamTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GyroCam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GyroCam";
-			};
-			name = Debug;
-		};
-		F45584F52D40BF27005461E0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V4662QC35T;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCamTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GyroCam.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GyroCam";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -470,15 +366,6 @@
 			buildConfigurations = (
 				F45584F12D40BF27005461E0 /* Debug */,
 				F45584F22D40BF27005461E0 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F45584F32D40BF27005461E0 /* Build configuration list for PBXNativeTarget "GyroCamTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F45584F42D40BF27005461E0 /* Debug */,
-				F45584F52D40BF27005461E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
