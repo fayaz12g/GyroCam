@@ -14,6 +14,19 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Alpha Releases")) {
                 
+            VersionEntry(cameraManager: cameraManager, version: "Alpha 016", changes: [
+                ChangeEntry(title: "Video Saving", details: [
+                    "Videos now save with apprirpirate GRC filenames.",
+                    "Saved videos now contain location metadata.",
+                ]),
+                ChangeEntry(title: "Onboarding", details: [
+                    "Tweaked text in oboarding"
+                ]),
+                ChangeEntry(title: "Other", details: [
+                    "Adjusted badge locations"
+                ]),
+            ])
+                    
             VersionEntry(cameraManager: cameraManager, version: "Alpha 015", changes: [
                 ChangeEntry(title: "Onboarding", details: [
                     "Restructure with titles, sub bullets, and more symbols.",

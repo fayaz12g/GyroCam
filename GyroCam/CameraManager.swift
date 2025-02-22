@@ -583,13 +583,19 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor
     private func saveFinalVideo(_ url: URL) {
+        // Capture location before entering photo library changes
+        let currentLocation = lastKnownLocation
+        
         PHPhotoLibrary.shared().performChanges {
+            let creationRequest = PHAssetCreationRequest.forAsset()
+            creationRequest.location = currentLocation
+            creationRequest.creationDate = Date()
+            
             let options = PHAssetResourceCreationOptions()
             options.shouldMoveFile = true
-//            options.originalFilename = "GRC-\(self.videoDateFormatter.string(from: Date()))" // uncomment to bring date in name
             options.originalFilename = self.getNextClipNumber()
             
-            PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: options)
+            creationRequest.addResource(with: .video, fileURL: url, options: options)
             
         } completionHandler: { success, error in
             DispatchQueue.main.async {
@@ -999,7 +1005,7 @@ class CameraManager: NSObject, ObservableObject {
         
         movieOutput.startRecording(to: tempURL, recordingDelegate: self)
         isRecording = true
-        //        startLocationUpdates()
+        startLocationUpdates()
         print("▶️ Started recording clip #\(currentClipNumber)")
         print("Starting recording with orientation: \(self.previousOrientation.description)")
         if self.shouldStitchClips {
@@ -1067,6 +1073,7 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
             
             // Capture necessary data for background processing
             let clipName = getNextClipNumber()
+            let currentLocation = lastKnownLocation
             let metadata = [
                 "CreatedByApp": "GyroCam",
                 "LensType": currentLens.rawValue,
@@ -1076,7 +1083,7 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
                 "DeviceModel": UIDevice.current.modelName,
                 "GPSHorizontalAccuracy": lastKnownLocation?.horizontalAccuracy ?? 0,
                 "GPSAltitude": lastKnownLocation?.altitude ?? 0
-            ] as [String : Any]
+                    ] as [String : Any]
             
             // Move saving to background queue
             DispatchQueue.global(qos: .background).async { [weak self] in
@@ -1092,11 +1099,19 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
                         }
                         
                         PHPhotoLibrary.shared().performChanges({
+                            let creationRequest = PHAssetCreationRequest.forAsset()
+                            creationRequest.location = currentLocation // Set location here
+                            creationRequest.creationDate = Date()
+                            
                             let options = PHAssetResourceCreationOptions()
                             options.originalFilename = clipName
                             options.shouldMoveFile = true
                             
-                            PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: outputFileURL, options: options)
+                            creationRequest.addResource(
+                                with: .video,
+                                fileURL: outputFileURL,
+                                options: options
+                            )
                         }) { success, error in
                             DispatchQueue.main.async {
                                 if success {
