@@ -15,17 +15,18 @@ import Photos
 struct OnboardingView: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var showOnboarding: Bool
+    @Binding var forceOnboarding: Bool
     var setPage: Int?
     @State private var currentPage: Int
     @State private var permissionsGranted = [false, false, false, false]
     @StateObject private var permissionsManager = PermissionsManager()
     
     
-    init(cameraManager: CameraManager, showOnboarding: Binding<Bool>, setPage: Int? = nil) {
+    init(cameraManager: CameraManager, showOnboarding: Binding<Bool>, forceOnboarding: Binding<Bool>, setPage: Int? = nil) {
             self.cameraManager = cameraManager
             self._showOnboarding = showOnboarding
+            self._forceOnboarding = forceOnboarding
             self.setPage = setPage
-            // Initialize currentPage to setPage if provided, otherwise default to 0
             self._currentPage = State(initialValue: setPage ?? 0)
         }
     
@@ -174,10 +175,11 @@ struct OnboardingView: View {
             
             Button(action: {
                 if currentPage < 4 {
-                    currentPage += 1 // Navigate to next page
+                    currentPage += 1
                 } else {
                     UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
                     showOnboarding = false
+                    forceOnboarding = false
                     cameraManager.setupFreshStart()
                 }
             }) {

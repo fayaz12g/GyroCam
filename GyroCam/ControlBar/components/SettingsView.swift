@@ -7,11 +7,12 @@ struct SettingsView: View {
     @Binding var isPresented: Bool
     @Environment(\.presentationMode) var presentationMode
     @State private var showOnboarding = false
+    @State private var forceOnboarding = false
     @State private var showReset = false
     
     var body: some View {
         if showOnboarding {
-            OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding)
+            OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding)
         } else {
             NavigationStack {
                 Form {

@@ -452,10 +452,11 @@ class CameraManager: NSObject, ObservableObject {
     
     
     private func stitchClips() {
-        print("⏳ Starting stitch process...")
-        print("📐 Base orientation: \(self.orientationChanges.first?.orientation ?? "unknown")")
+        print("⏳ [1] Starting stitch process")
         self.isSavingVideo = true
+        
         guard let clipURL = self.clipURLs.first else {
+            print("❌ [1.1] No clips to stitch")
             self.showError("No video to stitch")
             return
         }
@@ -464,106 +465,91 @@ class CameraManager: NSObject, ObservableObject {
             guard let self = self else { return }
             
             let asset = AVURLAsset(url: clipURL)
-            guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first else {
-                self.showError("No video track found")
+            guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first,
+                  let audioTrack = try? await asset.loadTracks(withMediaType: .audio).first else {
+                await self.showError("Missing video/audio track")
                 return
             }
             
             // Get video properties
-            let originalTransform = try await videoTrack.load(.preferredTransform)
             let naturalSize = try await videoTrack.load(.naturalSize)
             let assetDuration = try await asset.load(.duration)
+            let frameRate = try await videoTrack.load(.nominalFrameRate)
             
-            // Log original video properties
-           print("📏 Natural size: \(naturalSize)")
-           print("🔄 Original transform: \(originalTransform)")
-           print("⏱ Total duration: \(CMTimeGetSeconds(assetDuration))s")
-            
-            // Determine base orientation from initial change
-            let baseOrientation = self.orientationChanges.first?.orientation ?? "Portrait"
-            let outputSize = self.calculateOutputSize(baseOrientation: baseOrientation, naturalSize: naturalSize)
-            
-            // Log output size
-           print("🎯 Target output size: \(outputSize)")
-            
-            
-            // Create composition
+            // Create composition with audio
             let composition = AVMutableComposition()
-            guard let compositionVideoTrack = composition.addMutableTrack(
-                withMediaType: .video,
-                preferredTrackID: kCMPersistentTrackID_Invalid
-            ) else {
-                self.showError("Failed to create composition track")
+            guard let compVideoTrack = composition.addMutableTrack(withMediaType: .video,
+                                                                  preferredTrackID: kCMPersistentTrackID_Invalid),
+                  let compAudioTrack = composition.addMutableTrack(withMediaType: .audio,
+                                                                  preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                await self.showError("Failed to create composition tracks")
                 return
             }
             
-            // Insert entire video into composition
-            try compositionVideoTrack.insertTimeRange(
-                CMTimeRange(start: .zero, duration: assetDuration),
-                of: videoTrack,
-                at: .zero
-            )
+            // Build segments properly
+            var segments: [CMTimeRange] = []
+            var prevTime = CMTime.zero
+            for change in self.orientationChanges {
+                let time = CMTime(seconds: change.time, preferredTimescale: 600)
+                if time > prevTime {
+                    segments.append(CMTimeRange(start: prevTime, end: time))
+                    prevTime = time
+                }
+            }
+            segments.append(CMTimeRange(start: prevTime, end: assetDuration))
             
-            // Prepare video composition instructions
+            // Remove zero-length segments
+            let validSegments = segments.filter { $0.duration.seconds > 0 }
+            
+            
+            // Create video composition
             let videoComposition = AVMutableVideoComposition()
+            videoComposition.renderSize = naturalSize
+            videoComposition.frameDuration = CMTime(value: 1, timescale: Int32(frameRate))
+//            videoComposition.colorPrimaries = colorPrimaries
+//            videoComposition.colorTransferFunction = videoTrack.transferFunction
+//            videoComposition.colorYCbCrMatrix = videoTrack.colorSpace
+            
             var instructions: [AVMutableVideoCompositionInstruction] = []
-            var previousTime = CMTime.zero
+            var insertTime = CMTime.zero
             
-            // Log orientation changes
-            print("🧭 Orientation changes:")
-            self.orientationChanges.forEach { print("- \($0.time)s: \($0.orientation)") }
-            
-            // Process each orientation segment
-            for i in 0..<self.orientationChanges.count {
-                let currentChange = self.orientationChanges[i]
-                let nextTime = (i < self.orientationChanges.count - 1) ?
-                    CMTime(seconds: self.orientationChanges[i+1].time, preferredTimescale: 600) :
-                    assetDuration
+            for (index, segment) in validSegments.enumerated() {
+                // Insert video
+                try compVideoTrack.insertTimeRange(segment, of: videoTrack, at: insertTime)
                 
-                let timeRange = CMTimeRange(start: previousTime, end: nextTime)
-                let orientation = currentChange.orientation
+                // Insert audio
+                try compAudioTrack.insertTimeRange(segment, of: audioTrack, at: insertTime)
                 
-                // Calculate transform for this segment
-                let transform = self.calculateSegmentTransform(
-                    originalTransform: originalTransform,
-                    naturalSize: naturalSize,
-                    segmentOrientation: orientation,
-                    baseOrientation: baseOrientation,
-                    outputSize: outputSize
-                )
+                // Create rotation transform
+                let transform: CGAffineTransform
+                if index % 2 == 1 {
+                    let centerX = naturalSize.width / 2
+                    let centerY = naturalSize.height / 2
+                    transform = CGAffineTransform(translationX: centerX, y: centerY)
+                        .rotated(by: .pi)
+                        .translatedBy(x: -centerX, y: -centerY)
+                } else {
+                    transform = .identity
+                }
                 
                 // Create instruction
                 let instruction = AVMutableVideoCompositionInstruction()
-                instruction.timeRange = timeRange
+                instruction.timeRange = CMTimeRange(start: insertTime, duration: segment.duration)
                 
-                let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionVideoTrack)
+                let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compVideoTrack)
                 layerInstruction.setTransform(transform, at: .zero)
                 instruction.layerInstructions = [layerInstruction]
-                
                 instructions.append(instruction)
-                previousTime = nextTime
                 
-                print("✂️ Segment \(i+1):")
-                print("   ⌚️ Time range: \(CMTimeGetSeconds(timeRange.start))s - \(CMTimeGetSeconds(timeRange.end))s")
-                print("   🧭 Orientation: \(orientation)")
-                print("   ➡️ Transform: \(transform)")
+                insertTime = CMTimeAdd(insertTime, segment.duration)
             }
             
             videoComposition.instructions = instructions
-            videoComposition.renderSize = outputSize
-            videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
-            
-            // Log final video composition
-            print("🎞 Video composition:")
-            print("   📏 Render size: \(videoComposition.renderSize)")
-            print("   📜 Instructions count: \(videoComposition.instructions.count)")
             
             // Configure exporter
-            guard let exporter = AVAssetExportSession(
-                asset: composition,
-                presetName: AVAssetExportPresetHighestQuality
-            ) else {
-                self.showError("Export session creation failed")
+            guard let exporter = AVAssetExportSession(asset: composition,
+                                                     presetName: AVAssetExportPresetHEVCHighestQuality) else {
+                await self.showError("Export failed")
                 return
             }
             
@@ -574,128 +560,23 @@ class CameraManager: NSObject, ObservableObject {
             exporter.outputURL = outputURL
             exporter.outputFileType = .mov
             exporter.videoComposition = videoComposition
+            exporter.shouldOptimizeForNetworkUse = false
             
-            print("🛠 Exporter configuration:")
-            print("   📏 Render size: \(videoComposition.renderSize)")
-            print("   🎞 Video composition: \(exporter.videoComposition != nil ? "SET" : "MISSING")")
-            print("   📁 Output URL: \(outputURL)")
-            
-            // Export
             await exporter.export()
             
             if exporter.status == .completed {
-                self.saveFinalVideo(outputURL)
-                self.cleanupClips()
-            } else {
-                self.showError("Export failed: \(exporter.error?.localizedDescription ?? "Unknown error")")
+                await self.saveFinalVideo(outputURL)
+                await self.cleanupClips()
             }
         }
     }
-
-    private func calculateOutputSize(baseOrientation: String, naturalSize: CGSize) -> CGSize {
-        let isBaseLandscape = baseOrientation.contains("Landscape")
-        let baseWidth = isBaseLandscape ?
-            max(naturalSize.width, naturalSize.height) :
-            min(naturalSize.width, naturalSize.height)
-        let baseHeight = isBaseLandscape ?
-            min(naturalSize.width, naturalSize.height) :
-            max(naturalSize.width, naturalSize.height)
-        
-        // Ensure even dimensions for video encoder compatibility
-        return CGSize(
-            width: (Int(baseWidth) % 2 == 0) ? baseWidth : baseWidth + 1,
-            height: (Int(baseHeight) % 2 == 0) ? baseHeight : baseHeight + 1
-        )
-    }
-
-    private func calculateSegmentTransform(
-        originalTransform: CGAffineTransform,
-        naturalSize: CGSize,
-        segmentOrientation: String,
-        baseOrientation: String,
-        outputSize: CGSize
-    ) -> CGAffineTransform {
-        // 1. Calculate needed rotation
-        let rotationAngle = rotationBetween(segmentOrientation, baseOrientation)
-        
-        // 2. Create rotation transform
-        let rotationTransform = CGAffineTransform(rotationAngle: rotationAngle)
-        
-        // 3. Combine with original transform
-        var transform = originalTransform.concatenating(rotationTransform)
-        
-        // 4. Calculate scale to fill output size while maintaining aspect ratio
-        let transformedSize = naturalSize.applying(transform)
-        let scale = min(
-            outputSize.width / abs(transformedSize.width),
-            outputSize.height / abs(transformedSize.height)
-        )
-        
-        // 5. Apply scaling centered in frame
-        transform = transform.scaledBy(x: scale, y: scale)
-        
-        // 6. Calculate translation to center in output frame
-        let translatedSize = naturalSize.applying(transform)
-        let xOffset = (outputSize.width - translatedSize.width) / 2
-        let yOffset = (outputSize.height - translatedSize.height) / 2
-        
-        return transform.translatedBy(x: xOffset, y: yOffset)
-    }
-
-    private func rotationBetween(_ from: String, _ to: String) -> CGFloat {
-        let orientationMap: [String: CGFloat] = [
-            "Portrait": 0,
-            "LandscapeRight": .pi/2,
-            "LandscapeLeft": -.pi/2,
-            "PortraitUpsideDown": .pi
-        ]
-        
-        guard let fromAngle = orientationMap[from],
-              let toAngle = orientationMap[to] else { return 0 }
-        
-        // Calculate shortest rotation path
-        let rotation = toAngle - fromAngle
-        return rotation
-    }
-
-    
-
-    private func scaleTransform(_ transform: CGAffineTransform, naturalSize: CGSize, outputSize: CGSize) -> CGAffineTransform {
-        // Calculate scale to fill output size
-        let scaledSize = naturalSize.applying(transform)
-        let scaleX = outputSize.width / scaledSize.width
-        let scaleY = outputSize.height / scaledSize.height
-        let scale = min(scaleX, scaleY)
-        return transform.scaledBy(x: scale, y: scale)
-    }
-    
+   
     private let videoDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
         return formatter
     }()
     
-    // Calculate rotation needed between two orientations
-    private func rotationBetween(_ target: UIImage.Orientation, _ source: UIImage.Orientation) -> CGFloat {
-        let rotationMap: [UIImage.Orientation: CGFloat] = [
-            .up: 0,
-            .right: .pi/2,
-            .down: .pi,
-            .left: 3 * .pi/2
-        ]
-        
-        let sourceAngle = rotationMap[source] ?? 0
-        let targetAngle = rotationMap[target] ?? 0
-        return targetAngle - sourceAngle
-    }
-    
-    // Calculate scale to fill target size while maintaining aspect ratio
-    private func scaleToFill(sourceSize: CGSize, targetSize: CGSize) -> CGSize {
-        let widthRatio = targetSize.width / sourceSize.width
-        let heightRatio = targetSize.height / sourceSize.height
-        let scale = max(widthRatio, heightRatio)
-        return CGSize(width: scale, height: scale)
-    }
     
     @MainActor
     private func saveFinalVideo(_ url: URL) {
@@ -731,7 +612,6 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor
     private func showError(_ message: String) {
         errorMessage = message
-        //        isExporting = false
     }
     
     private func loadSettings() {
@@ -768,7 +648,7 @@ class CameraManager: NSObject, ObservableObject {
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 5 // Update every 5 meters
+        locationManager.distanceFilter = 5
         
     }
     

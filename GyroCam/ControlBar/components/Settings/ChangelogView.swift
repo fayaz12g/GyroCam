@@ -18,6 +18,7 @@ struct ChangelogView: View {
                 ChangeEntry(title: "Onboarding", details: [
                     "Restructure with titles, sub bullets, and more symbols.",
                     "Improved the clutter of page three as well as verbiage in other pages.",
+                    "Fixed an issue where the finish button did not work after reinstating priveleges"
                 ]),
                 ChangeEntry(title: "Settings", details: [
                     "The settinsg view has changed from a sheet to a full screen page.",
