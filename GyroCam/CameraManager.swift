@@ -105,12 +105,10 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.shouldStitchClips = newValue }
     }
     
-    
     @MainActor var isProMode: Bool {
         get { settings.isProMode }
         set { settings.isProMode = newValue }
     }
-    
     
     @MainActor var isSavingVideo: Bool {
         get { settings.isSavingVideo }
@@ -1041,9 +1039,33 @@ class CameraManager: NSObject, ObservableObject {
             
             DispatchQueue.main.async {
                 self.currentOrientation = newOrientation.description
+                self.updateVideoOrientation(newOrientation)
             }
         }
     }
+    
+    @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
+                session.beginConfiguration()
+                defer { session.commitConfiguration() }
+            
+                
+                guard let connection = movieOutput.connection(with: .video) else { return }
+                
+                let videoOrientation: AVCaptureVideoOrientation
+                switch orientation {
+                case .portrait: videoOrientation = .portrait
+                case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
+                case .landscapeLeft: videoOrientation = .landscapeRight
+                case .landscapeRight: videoOrientation = .landscapeLeft
+                default: videoOrientation = .portrait
+                }
+                
+                connection.videoOrientation = videoOrientation
+                
+                if connection.isVideoMirroringSupported {
+                    connection.isVideoMirrored = (currentLens == .frontWide)
+                }
+            }
     
     @MainActor private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
         guard isRecording else { return }
