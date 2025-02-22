@@ -4,6 +4,7 @@ import AVFoundation
 // MARK: - Main Settings View
 struct SettingsView: View {
     @ObservedObject var cameraManager: CameraManager
+    @Binding var isPresented: Bool
     @Environment(\.presentationMode) var presentationMode
     @State private var showOnboarding = false
     @State private var showReset = false
@@ -12,7 +13,7 @@ struct SettingsView: View {
         if showOnboarding {
             OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding)
         } else {
-            NavigationView {
+            NavigationStack {
                 Form {
                     // Main Settings Sections
                     CaptureSettingsSection()
@@ -105,7 +106,6 @@ struct SettingsView: View {
         .listRowBackground(Color.clear)
     }
     
-    // MARK: - Components
     private func DoneButton() -> some ToolbarContent {
         ToolbarItem(placement: .navigationBarTrailing) {
             Button("Done") { presentationMode.wrappedValue.dismiss() }

@@ -19,6 +19,9 @@ struct ChangelogView: View {
                     "Restructure with titles, sub bullets, and more symbols.",
                     "Improved the clutter of page three as well as verbiage in other pages.",
                 ]),
+                ChangeEntry(title: "Settings", details: [
+                    "The settinsg view has changed from a sheet to a full screen page.",
+                ]),
                 ChangeEntry(title: "Stitching", details: [
                     "Expiremental stitching updates",
                     "New saving dots for stitch saving",
