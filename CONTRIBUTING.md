@@ -1,19 +1,18 @@
 # Contributing to GyroCam
 
-We welcome contributions! Please follow these guidelines:
+Starting February 24th, the day after the Swift Student Challenge closes, I'll welcome contributions! Please follow these guidelines:
 
 ## Getting Started
 1. Fork the repository
 2. Clone your fork locally
 3. Create feature branch: `git checkout -b feature/your-feature`
-4. Install dependencies using Swift Package Manager
+4. Implement your changes
 5. Test changes using Xcode previews
 
 ## Development Requirements
 - Xcode 16+ 
 - Swift 5.9+
 - iOS 18 SDK
-- SwiftLint installed
 
 ## How to Contribute
 
@@ -26,27 +25,20 @@ We welcome contributions! Please follow these guidelines:
   - Console logs if available
 
 ### Feature Requests
-- Check [Roadmap](GyroCam/UpcomingFeaturesView.swift) first
+- Check [Roadmap](ROADMAP.md) first
 - Describe use case clearly
 - Include mockups if applicable
 
 ### Code Contributions
 1. Ensure tests pass
-2. Update documentation
+2. Update documentation and changelogs
 3. Follow SwiftUI patterns
-4. Use `@ViewBuilder` for complex components
-5. Maintain 70%+ test coverage for new code
+4. Minimize warnings!
 
 ## Coding Standards
-- 4-space indentation
 - MARK comments for sections
-- Type-first protocol conformance
-- Prefer structs over classes
-- Document public APIs
-- Use SwiftLint rules:
-  - 120 character line limit
-  - Explicit self references
-  - No force unwrapping
+- Make it modular
+- Don't use the same code block in multiple areas (use functions)
 
 ## Pull Requests
 1. Reference related issue
@@ -66,6 +58,6 @@ We welcome contributions! Please follow these guidelines:
 - No harassment tolerated
 
 ## License
-By contributing, you agree your contributions will be licensed under the project's MIT License.
+By contributing, you agree your contributions will be licensed under the project's nonexistent License.
 
-Need help? Open a discussion ticket!
+Need help? Open an issue!
