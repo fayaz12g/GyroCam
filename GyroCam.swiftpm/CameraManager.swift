@@ -1045,7 +1045,7 @@ class CameraManager: NSObject, ObservableObject {
     }
 }
 
-extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
+extension CameraManager: AVCaptureFileOutputRecordingDelegate {
     private func getNextClipNumber() -> String {
         let defaults = UserDefaults.standard
         let currentNumber = defaults.integer(forKey: "GyroCamClipNumber")
@@ -1154,7 +1154,7 @@ extension AVCaptureDevice.Format {
 }
 
 // Location
-extension CameraManager: @preconcurrency CLLocationManagerDelegate {
+extension CameraManager: CLLocationManagerDelegate {
     func requestLocationAccess() {
         locationManager.requestWhenInUseAuthorization()
     }
