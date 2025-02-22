@@ -286,10 +286,6 @@ struct ExposureSettingsView: View {
                     }
             }
             
-            Section(header: Text("Orientation")) {
-                Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
-                    .tint(cameraManager.accentColor)
-            }
             
             Section(header: Text("Stabilization Mode")) {
                 Picker("Stabilization Mode", selection: $cameraManager.stabilizeVideo) {
@@ -332,12 +328,19 @@ struct OrientationStitchingView: View {
         Form {
             
             Section(header: Text("Stitching")) {
-                FeatureToggle(
-                    title: "Auto Stitch",
-                    status: "Beta",
-                    isOn: $cameraManager.shouldStitchClips,
-                    statusColor: .red, cameraManager: cameraManager
-                )
+                Toggle("Stitch Clips", isOn: $cameraManager.shouldStitchClips)
+                    .tint(cameraManager.accentColor)
+                    .onChange(of: cameraManager.shouldStitchClips) { _, newValue in
+                        if newValue {
+                            cameraManager.lockLandscape = true
+                        }
+                    }
+                
+            }
+            Section(header: Text("Orientation")) {
+                Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
+                    .tint(cameraManager.accentColor)
+                    .disabled(cameraManager.shouldStitchClips)
             }
         }
         .navigationTitle("Output")

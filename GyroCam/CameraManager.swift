@@ -467,7 +467,7 @@ class CameraManager: NSObject, ObservableObject {
             let asset = AVURLAsset(url: clipURL)
             guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first,
                   let audioTrack = try? await asset.loadTracks(withMediaType: .audio).first else {
-                await self.showError("Missing video/audio track")
+                self.showError("Missing video/audio track")
                 return
             }
             
@@ -482,7 +482,7 @@ class CameraManager: NSObject, ObservableObject {
                                                                   preferredTrackID: kCMPersistentTrackID_Invalid),
                   let compAudioTrack = composition.addMutableTrack(withMediaType: .audio,
                                                                   preferredTrackID: kCMPersistentTrackID_Invalid) else {
-                await self.showError("Failed to create composition tracks")
+                self.showError("Failed to create composition tracks")
                 return
             }
             
@@ -549,7 +549,7 @@ class CameraManager: NSObject, ObservableObject {
             // Configure exporter
             guard let exporter = AVAssetExportSession(asset: composition,
                                                      presetName: AVAssetExportPresetHEVCHighestQuality) else {
-                await self.showError("Export failed")
+                self.showError("Export failed")
                 return
             }
             
@@ -565,8 +565,8 @@ class CameraManager: NSObject, ObservableObject {
             await exporter.export()
             
             if exporter.status == .completed {
-                await self.saveFinalVideo(outputURL)
-                await self.cleanupClips()
+                self.saveFinalVideo(outputURL)
+                self.cleanupClips()
             }
         }
     }
@@ -868,7 +868,7 @@ class CameraManager: NSObject, ObservableObject {
         let targetResolution = currentFormat.resolution
         let targetFPS = currentFPS.rawValue
         
-        return try device.formats
+        return device.formats
             .filter { format in
                 let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
                 let hasHDR = isHDREnabled ? format.supportedColorSpaces.contains(.HLG_BT2020) : true

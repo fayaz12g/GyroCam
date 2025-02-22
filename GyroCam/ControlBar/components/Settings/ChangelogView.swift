@@ -22,10 +22,15 @@ struct ChangelogView: View {
                 ]),
                 ChangeEntry(title: "Settings", details: [
                     "The settinsg view has changed from a sheet to a full screen page.",
+                    "Lock landscape has been moved to output seettings.",
+                    "Stitch clips now requires lock landscape to be on.",
                 ]),
                 ChangeEntry(title: "Stitching", details: [
-                    "Expiremental stitching updates",
-                    "New saving dots for stitch saving",
+                    "Stitching now works with SEAMLESS integration",
+                    "Stitching is no longer in beta"
+                ]),
+                ChangeEntry(title: "Recording Button", details: [
+                    "A new saving indicator displays on the recording button",
                 ]),
             ])
             VersionEntry(cameraManager: cameraManager, version: "Alpha 014", changes: [
