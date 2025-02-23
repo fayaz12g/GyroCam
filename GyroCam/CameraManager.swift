@@ -1012,20 +1012,17 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor func startRecording() {
-        if !isRestarting {
-            stitchingGroup = DispatchGroup()
-           recordingStartTime = Date()
-           orientationChanges.removeAll()
-           // Record initial orientation
-           let initialOrientation = previousOrientation.description
-           orientationChanges.append((time: 0.0, orientation: initialOrientation))
-            if playSounds {
-                AudioServicesPlaySystemSound(1117)
-            }
-        } else {
-            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-            impactFeedback.impactOccurred()
+       
+       stitchingGroup = DispatchGroup()
+       recordingStartTime = Date()
+       orientationChanges.removeAll()
+       // Record initial orientation
+       let initialOrientation = previousOrientation.description
+       orientationChanges.append((time: 0.0, orientation: initialOrientation))
+       if playSounds {
+           AudioServicesPlaySystemSound(1117)
         }
+        
         stitchingGroup?.enter()
         
         let tempURL = FileManager.default.temporaryDirectory

@@ -28,7 +28,7 @@ struct ControlsView: View {
                     action: {
                         if cameraManager.playHaptics {
                             if cameraManager.isRecording {
-                                triggerHaptic(style: .heavy)
+                                triggerHaptic(style: .medium)
                                 cameraManager.stopRecording()
                             } else {
                                 triggerHaptic(style: .medium)
