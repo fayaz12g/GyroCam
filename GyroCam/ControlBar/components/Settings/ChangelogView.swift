@@ -12,8 +12,28 @@ struct ChangelogView: View {
     
     var body: some View {
         Form {
-            Section(header: header("Alpha Releases")) {
+            Section(header: header("Beta Releases")) {
                 
+                VersionEntry(cameraManager: cameraManager, version: "Beta 1", changes: [
+                    ChangeEntry(title: "Sounds", details: [
+                        "Added a new looping sound when saving stitched video.",
+                    ]),
+                    ChangeEntry(title: "Haptics", details: [
+                        "Added haptics to record button, settings button, toggles, photo library button, and saving loop.",
+                        "For now haptics require you to interact with the record button first. A better solution will be implemented later."
+                    ]),
+                    ChangeEntry(title: "Settings", details: [
+                        "Added a setting to turn haptics off.",
+                        "Added a setting to turn sounds off.",
+                    ]),
+                    ChangeEntry(title: "Versioning", details: [
+                        "Brought the app into Beta releases.",
+                    ]),
+                ])
+            }
+                
+            Section(header: header("Alpha Releases")) {
+                        
             VersionEntry(cameraManager: cameraManager, version: "Alpha 016", changes: [
                 ChangeEntry(title: "Video Saving", details: [
                     "Videos now save with apprirpirate GRC filenames.",

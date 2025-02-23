@@ -40,6 +40,9 @@ struct AppSettings: Codable {
     var shouldStitchClips: Bool = false
     
     
+    var playHaptics: Bool = true
+    var playSounds: Bool = true
+    
     // exposure
     var autoExposure: Bool = true
     var manualISO: Float = 100

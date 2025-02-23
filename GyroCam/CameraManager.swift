@@ -241,6 +241,17 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.maximizePreview = newValue }
     }
     
+    
+    @MainActor var playSounds: Bool {
+        get { settings.playSounds }
+        set { settings.playSounds = newValue }
+    }
+    
+    @MainActor var playHaptics: Bool {
+        get { settings.playHaptics }
+        set { settings.playHaptics = newValue }
+    }
+    
     @MainActor var accentColor: Color {
         get { settings.accentColor }
         set { settings.accentColor = newValue }
@@ -992,7 +1003,9 @@ class CameraManager: NSObject, ObservableObject {
            // Record initial orientation
            let initialOrientation = previousOrientation.description
            orientationChanges.append((time: 0.0, orientation: initialOrientation))
-            AudioServicesPlaySystemSound(1117)
+            if playSounds {
+                AudioServicesPlaySystemSound(1117)
+            }
         } else {
             let impactFeedback = UIImpactFeedbackGenerator(style: .light)
             impactFeedback.impactOccurred()
@@ -1040,7 +1053,9 @@ class CameraManager: NSObject, ObservableObject {
         print("⏹ Stopped recording clip #\(currentClipNumber)")
         
         if !isRestarting {
-            AudioServicesPlaySystemSound(1118)
+            if playSounds {
+                AudioServicesPlaySystemSound(1118)
+            }
         }
     }
 }

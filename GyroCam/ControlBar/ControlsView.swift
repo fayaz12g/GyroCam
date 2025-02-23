@@ -26,12 +26,14 @@ struct ControlsView: View {
                     isRecording: $cameraManager.isRecording,
                     cameraManager: cameraManager,
                     action: {
-                        if cameraManager.isRecording {
-                            triggerHaptic(style: .heavy)
-                            cameraManager.stopRecording()
-                        } else {
-                            triggerHaptic(style: .medium)
-                            cameraManager.startRecording()
+                        if cameraManager.playHaptics {
+                            if cameraManager.isRecording {
+                                triggerHaptic(style: .heavy)
+                                cameraManager.stopRecording()
+                            } else {
+                                triggerHaptic(style: .medium)
+                                cameraManager.startRecording()
+                            }
                         }
                     }
                 )
@@ -45,7 +47,9 @@ struct ControlsView: View {
                     
                     // Settings Button (Right)
                     Button {
-                        triggerHaptic(style: .light)
+                        if cameraManager.playHaptics {
+                            triggerHaptic(style: .light)
+                        }
                         withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.7)) {
                             showingSettings.toggle()
                         }
@@ -65,7 +69,6 @@ struct ControlsView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 30)
             
-            // Remove if block to animate properly so it doesnt dissapear immediatly
             ZStack {
                 QuickSettingsView(cameraManager: cameraManager, showSettings: $showingSettings)
                     .matchedGeometryEffect(id: "quickSettings", in: animationNamespace)
@@ -77,7 +80,7 @@ struct ControlsView: View {
                     .offset(x: 20)
                     .zIndex(1)
                     .opacity(!cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting ? 1 : 0) // Control visibility
-                    .scaleEffect(!cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting ? 1 : 0.5, anchor: .topTrailing) // Optional: Add scaling
+                    .scaleEffect(!cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting ? 1 : 0.5, anchor: .topTrailing)
                     .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
             }
 

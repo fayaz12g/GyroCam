@@ -35,6 +35,9 @@ struct SettingsView: View {
             NavigationLink(destination: InterfaceSettingsView(cameraManager: cameraManager)) {
                 SettingsRow(title: "Interface", icon: "uiwindow.split.2x1")
             }
+            NavigationLink(destination: SoundsAndHapticsSettingsView(cameraManager: cameraManager)) {
+                SettingsRow(title: "Sounds and Haptics", icon: "speaker.badge.exclamationmark")
+            }
             NavigationLink(destination: PhotoLibrarySettingsView(cameraManager: cameraManager)) {
                 SettingsRow(title: "Photo Library", icon: "photo.stack")
             }
@@ -206,6 +209,25 @@ struct PhotoLibrarySettingsView: View {
         .navigationTitle("Photo Library")
     }
 }
+
+struct SoundsAndHapticsSettingsView: View {
+    @ObservedObject var cameraManager: CameraManager
+    var body: some View {
+        Form {
+            Section(header: Text("Sounds")) {
+                Toggle("Play Sound Effects", isOn: $cameraManager.playSounds)
+                    .tint(cameraManager.accentColor)
+            }
+            Section(header: Text("Haptics")) {
+                Toggle("Play Haptics", isOn: $cameraManager.playHaptics)
+                    .tint(cameraManager.accentColor)
+            }
+                
+        }
+        .navigationTitle("Sounds & Haptics")
+    }
+}
+
     
 struct CaptureSettingsView: View {
     @ObservedObject var cameraManager: CameraManager

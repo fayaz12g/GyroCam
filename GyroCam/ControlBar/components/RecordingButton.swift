@@ -1,58 +1,5 @@
 import SwiftUI
-import MediaPlayer
-
-// Volume Button Observer class to handle volume button events
-class VolumeButtonObserver: ObservableObject {
-    private var volumeView: MPVolumeView?
-    private var initialVolume: Float = 0.0
-    var onVolumeButtonPress: (() -> Void)?
-    
-    init() {
-        // Hide the system volume overlay
-        volumeView = MPVolumeView(frame: CGRect(x: -1000, y: -1000, width: 1, height: 1))
-        
-        // Store initial volume
-        initialVolume = AVAudioSession.sharedInstance().outputVolume
-        
-        // Start observing volume changes
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleVolumeChange),
-            name: NSNotification.Name(rawValue: "AVSystemController_SystemVolumeDidChangeNotification"),
-            object: nil
-        )
-    }
-    
-    @objc private func handleVolumeChange(_ notification: Notification) {
-        // Reset volume to initial value to prevent actual volume changes
-        try? AVAudioSession.sharedInstance().setActive(true)
-        let volumeValue = AVAudioSession.sharedInstance().outputVolume
-        
-        if volumeValue != initialVolume {
-            onVolumeButtonPress?()
-            
-            // Reset volume to initial value
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                MPVolumeView.setVolume(self.initialVolume)
-            }
-        }
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-}
-
-// Extension to set volume programmatically
-extension MPVolumeView {
-    static func setVolume(_ volume: Float) {
-        let volumeView = MPVolumeView()
-        let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            slider?.value = volume
-        }
-    }
-}
+import AVFAudio
 
 struct RecordingButton: View {
     @Binding var isRecording: Bool
@@ -60,11 +7,30 @@ struct RecordingButton: View {
     var action: () -> Void
     @State private var animate = false
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var volumeObserver = VolumeButtonObserver()
     
     var body: some View {
         Button(action: {
-            triggerRecording()
+            
+            // get the haptics working
+            do {
+                let audioSession = AVAudioSession.sharedInstance()
+                try audioSession.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth, .allowAirPlay])
+                try audioSession.setMode(.videoRecording)
+                try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+                try audioSession.setAllowHapticsAndSystemSoundsDuringRecording(true)
+            } catch {
+                print("Error configuring AVAudioSession: \(error)")
+            }
+            
+            // Haptic feedback before action
+            let generator = UIImpactFeedbackGenerator(style: isRecording ? .heavy : .medium)
+            generator.prepare()
+            
+            action() // Perform the recording action
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                generator.impactOccurred()
+            }
         }) {
             ZStack {
                 // White outline circle
@@ -92,20 +58,18 @@ struct RecordingButton: View {
                 
                 // Saving video animation
                 if cameraManager.isSavingVideo {
-                    SavingDotsView(color: cameraManager.accentColor)
+                    SavingDotsView(cameraManager: cameraManager, color: cameraManager.accentColor)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
             .onAppear {
+                // Ensure animation starts if already recording onAppear
                 if isRecording {
                     animate = true
                 }
-                // Set up volume button handler
-                volumeObserver.onVolumeButtonPress = {
-                    triggerRecording()
-                }
             }
             .onChange(of: isRecording) { _, newValue in
+                // Toggle animation based on isRecording state
                 if newValue {
                     withAnimation {
                         animate = true
@@ -114,35 +78,30 @@ struct RecordingButton: View {
                     animate = false
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: cameraManager.isSavingVideo)
+            .animation(.easeInOut(duration: 0.3), value: cameraManager.isSavingVideo) // Animate the entire ZStack
             .contentShape(Circle())
         }
         .buttonStyle(RecordingButtonStyle())
         .onAppear {
+            
+            // Initialize animate to true on first appearance
             animate = isRecording
         }
         .onDisappear {
+            // Stop the animation when the view disappears
             animate = false
-        }
-    }
-    
-    private func triggerRecording() {
-        // Haptic feedback before action
-        let generator = UIImpactFeedbackGenerator(style: isRecording ? .heavy : .medium)
-        generator.prepare()
-        
-        action() // Perform the recording action
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            generator.impactOccurred()
         }
     }
 }
 
-
 struct SavingDotsView: View {
+    @ObservedObject var cameraManager: CameraManager
     let color: Color
     @State private var rotation = 0.0
+    
+    // Create feedback generators that persist
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .soft)
+    @State private var feedbackTimer: Timer?
     
     var body: some View {
         GeometryReader { geometry in
@@ -167,9 +126,28 @@ struct SavingDotsView: View {
         .frame(width: 70, height: 70)
         .rotationEffect(.degrees(rotation))
         .onAppear {
+            // Start rotation animation
             withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
                 rotation = 360
             }
+            
+            // Prepare haptic feedback
+            impactFeedback.prepare()
+            
+            // Create timer for continuous haptic feedback
+            feedbackTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
+                if cameraManager.playHaptics {
+                    impactFeedback.impactOccurred(intensity: 1.0)
+                }
+                if cameraManager.playSounds {
+                    AudioServicesPlaySystemSound(1117)
+                }
+            }
+        }
+        .onDisappear {
+            // Clean up timer when view disappears
+            feedbackTimer?.invalidate()
+            feedbackTimer = nil
         }
     }
 }

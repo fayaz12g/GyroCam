@@ -36,8 +36,20 @@ struct PhotoLibraryButton: View {
         }
     }
     
+    
+    private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            generator.impactOccurred()
+        }
+    }
+    
     var body: some View {
         Button {
+            if cameraManager.playHaptics {
+                triggerHaptic(style: .light)
+            }
             showingPhotoLibrary = true
         } label: {
             Group {
@@ -69,7 +81,6 @@ struct PhotoLibraryButton: View {
         }
         .onAppear(perform: loadLatestThumbnail)
         .onChange(of: cameraManager.loadLatestThumbnail) { _, _ in
-            // make this more efficient, tie to right after save
             loadLatestThumbnail()
         }
 
