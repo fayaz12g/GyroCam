@@ -1020,7 +1020,7 @@ class CameraManager: NSObject, ObservableObject {
        let initialOrientation = previousOrientation.description
        orientationChanges.append((time: 0.0, orientation: initialOrientation))
        if playSounds {
-           AudioServicesPlaySystemSound(1117)
+            AudioServicesPlaySystemSound(1117)
         }
         
         stitchingGroup?.enter()
