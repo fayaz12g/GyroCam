@@ -98,43 +98,70 @@ struct SavingDotsView: View {
     @ObservedObject var cameraManager: CameraManager
     let color: Color
     @State private var rotation = 0.0
+    @State private var displayedDuration: Double = 0
     
-    // Create feedback generators that persist
+    // Feedback and timers
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .soft)
     @State private var feedbackTimer: Timer?
+    @State private var countdownTimer: Timer?  // New timer for countdown
     
     var body: some View {
-        GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height)
-            let dotCount = 8
-            let dotSize = size * 0.1
-            let radius = size * 0.4
-            
-            ForEach(0..<dotCount, id: \.self) { index in
-                let angle = (2 * .pi * Double(index)) / Double(dotCount)
-                let xOffset = cos(angle) * radius
-                let yOffset = sin(angle) * radius
+        ZStack {
+            GeometryReader { geometry in
+                let size = min(geometry.size.width, geometry.size.height)
+                let dotCount = 8
+                let dotSize = size * 0.1
+                let radius = size * 0.4
                 
-                Circle()
-                    .fill(color)
-                    .frame(width: dotSize, height: dotSize)
-                    .offset(x: xOffset + (size/2 - dotSize/2),
-                            y: yOffset + (size/2 - dotSize/2))
-                    .opacity(1.0 - Double(index) * 0.1)
+                ForEach(0..<dotCount, id: \.self) { index in
+                    let angle = (2 * .pi * Double(index)) / Double(dotCount)
+                    let xOffset = cos(angle) * radius
+                    let yOffset = sin(angle) * radius
+                    
+                    Circle()
+                        .fill(color)
+                        .frame(width: dotSize, height: dotSize)
+                        .offset(x: xOffset + (size/2 - dotSize/2),
+                                y: yOffset + (size/2 - dotSize/2))
+                        .opacity(1.0 - Double(index) * 0.1)
+                }
             }
+            .frame(width: 70, height: 70)
+            .rotationEffect(.degrees(rotation))
+            
+            Text(String(format: "%.1f", displayedDuration))
+                .foregroundColor(.white)
+                .font(.system(size: 24, weight: .bold))
+                .monospacedDigit()
         }
         .frame(width: 70, height: 70)
-        .rotationEffect(.degrees(rotation))
+        .onChange(of: cameraManager.exportDuration) { _, newValue in
+            // dont do it during cleanup
+            if newValue != 0 {
+                displayedDuration = cameraManager.exportDuration + 2
+            }
+        }
         .onAppear {
-            // Start rotation animation
+            // Initialize with current duration
+            displayedDuration = cameraManager.exportDuration
+            
+            // Start smooth countdown timer
+            countdownTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+                withAnimation(.linear(duration: 0.1)) {
+                    displayedDuration = max(displayedDuration - 0.1, 0)
+                }
+                if displayedDuration <= 0 {
+                    timer.invalidate()
+                }
+            }
+            
+            // Rotation animation
             withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
                 rotation = 360
             }
             
-            // Prepare haptic feedback
+            // Haptic setup
             impactFeedback.prepare()
-            
-            // Create timer for continuous haptic feedback
             feedbackTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
                 if cameraManager.playHaptics {
                     impactFeedback.impactOccurred(intensity: 1.0)
@@ -145,9 +172,8 @@ struct SavingDotsView: View {
             }
         }
         .onDisappear {
-            // Clean up timer when view disappears
+            countdownTimer?.invalidate()
             feedbackTimer?.invalidate()
-            feedbackTimer = nil
         }
     }
 }

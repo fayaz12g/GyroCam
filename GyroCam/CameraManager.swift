@@ -17,6 +17,7 @@ class CameraManager: NSObject, ObservableObject {
     var orientations: [String] = [] // delete this later
     private var recordingStartTime: Date?
     private var orientationChanges: [(time: TimeInterval, orientation: String)] = []
+    var exportDuration: Double = 0.0
     
     public var loadLatestThumbnail: Bool = false
     
@@ -490,9 +491,9 @@ class CameraManager: NSObject, ObservableObject {
             // Create composition with audio
             let composition = AVMutableComposition()
             guard let compVideoTrack = composition.addMutableTrack(withMediaType: .video,
-                                                                  preferredTrackID: kCMPersistentTrackID_Invalid),
+                                                                   preferredTrackID: kCMPersistentTrackID_Invalid),
                   let compAudioTrack = composition.addMutableTrack(withMediaType: .audio,
-                                                                  preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                                                                   preferredTrackID: kCMPersistentTrackID_Invalid) else {
                 self.showError("Failed to create composition tracks")
                 return
             }
@@ -517,9 +518,9 @@ class CameraManager: NSObject, ObservableObject {
             let videoComposition = AVMutableVideoComposition()
             videoComposition.renderSize = naturalSize
             videoComposition.frameDuration = CMTime(value: 1, timescale: Int32(frameRate))
-//            videoComposition.colorPrimaries = colorPrimaries
-//            videoComposition.colorTransferFunction = videoTrack.transferFunction
-//            videoComposition.colorYCbCrMatrix = videoTrack.colorSpace
+            //            videoComposition.colorPrimaries = colorPrimaries
+            //            videoComposition.colorTransferFunction = videoTrack.transferFunction
+            //            videoComposition.colorYCbCrMatrix = videoTrack.colorSpace
             
             var instructions: [AVMutableVideoCompositionInstruction] = []
             var insertTime = CMTime.zero
@@ -533,7 +534,7 @@ class CameraManager: NSObject, ObservableObject {
                 
                 
                 let num = (self.orientationChanges.first?.orientation == "Landscape Left") ? 1 : 0
-
+                
                 // Create rotation transform
                 let transform: CGAffineTransform
                 if index % 2 == num {
@@ -562,7 +563,7 @@ class CameraManager: NSObject, ObservableObject {
             
             // Configure exporter
             guard let exporter = AVAssetExportSession(asset: composition,
-                                                     presetName: AVAssetExportPresetHEVCHighestQuality) else {
+                                                      presetName: AVAssetExportPresetHEVCHighestQuality) else {
                 self.showError("Export failed")
                 return
             }
@@ -575,53 +576,67 @@ class CameraManager: NSObject, ObservableObject {
             exporter.outputFileType = .mov
             exporter.videoComposition = videoComposition
             exporter.shouldOptimizeForNetworkUse = false
+            exportDuration = CMTimeGetSeconds(composition.duration)
+            
+            print("📤 [10] Starting export")
+            print("   📍 Output URL: \(outputURL)")
+            print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
+            print("   ⏳ Estimated duration: \(exportDuration))s")
+            
             
             await exporter.export()
             
+            
             if exporter.status == .completed {
-                self.saveFinalVideo(outputURL)
-                self.cleanupClips()
+                print("✅ [11.1] Export succeeded")
+                await MainActor.run {
+                    self.saveFinalVideo(outputURL)
+                    self.cleanupClips()
+                    print("🧹 [12] Cleanup completed")
+                }
             }
+
         }
     }
-   
-    private let videoDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd-HHmmss"
-        return formatter
-    }()
-    
-    
-    @MainActor
-    private func saveFinalVideo(_ url: URL) {
-        // Capture location before entering photo library changes
-        let currentLocation = lastKnownLocation
         
-        PHPhotoLibrary.shared().performChanges {
-            let creationRequest = PHAssetCreationRequest.forAsset()
-            creationRequest.location = currentLocation
-            creationRequest.creationDate = Date()
+        private let videoDateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyyMMdd-HHmmss"
+            return formatter
+        }()
+        
+        
+        @MainActor
+        private func saveFinalVideo(_ url: URL) {
+            // Capture location before entering photo library changes
+            let currentLocation = lastKnownLocation
             
-            let options = PHAssetResourceCreationOptions()
-            options.shouldMoveFile = true
-            options.originalFilename = self.getNextClipNumber()
-            
-            creationRequest.addResource(with: .video, fileURL: url, options: options)
-            
-        } completionHandler: { success, error in
-            DispatchQueue.main.async {
-                if success {
-                    print("Successfully saved stitched video")
-                    try? FileManager.default.removeItem(at: url)
-                    self.isSavingVideo = false
-                    self.loadLatestThumbnail.toggle()
-                } else {
-                    print("Save error: \(error?.localizedDescription ?? "Unknown error")")
-                    self.errorMessage = error?.localizedDescription ?? "Failed to save video"
+            PHPhotoLibrary.shared().performChanges {
+                let creationRequest = PHAssetCreationRequest.forAsset()
+                creationRequest.location = currentLocation
+                creationRequest.creationDate = Date()
+                
+                let options = PHAssetResourceCreationOptions()
+                options.shouldMoveFile = true
+                options.originalFilename = self.getNextClipNumber()
+                
+                creationRequest.addResource(with: .video, fileURL: url, options: options)
+                
+            } completionHandler: { success, error in
+                DispatchQueue.main.async {
+                    if success {
+                        print("Successfully saved stitched video")
+                        try? FileManager.default.removeItem(at: url)
+                        self.isSavingVideo = false
+                        self.loadLatestThumbnail.toggle()
+                    } else {
+                        print("Save error: \(error?.localizedDescription ?? "Unknown error")")
+                        self.errorMessage = error?.localizedDescription ?? "Failed to save video"
+                    }
                 }
             }
         }
-    }
+    
     
     @MainActor
     private func cleanupClips() {
@@ -629,6 +644,7 @@ class CameraManager: NSObject, ObservableObject {
         clipURLs.removeAll()
         orientationChanges.removeAll()
         currentClipNumber = 1
+        exportDuration = 0.0
     }
     
     @MainActor
@@ -1184,14 +1200,24 @@ extension CameraManager: @preconcurrency CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         lastKnownLocation = location
     }
-    
-    @MainActor func startLocationUpdates() {
-        guard CLLocationManager.locationServicesEnabled() else {
-            setErrorMessage("Location services unavailable")
-            return
+
+    @MainActor
+    func startLocationUpdates() {
+        
+        // Check the authorization status to avoid unresponsivness
+        let status = locationManager.authorizationStatus
+        switch status {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .restricted, .denied:
+            setErrorMessage("Location services restricted or denied")
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.startUpdatingLocation()
+        @unknown default:
+            setErrorMessage("Unknown location authorization status")
         }
-        locationManager.startUpdatingLocation()
     }
+
     
     func stopLocationUpdates() {
         locationManager.stopUpdatingLocation()

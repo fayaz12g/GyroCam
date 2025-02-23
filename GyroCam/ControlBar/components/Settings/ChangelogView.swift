@@ -26,6 +26,9 @@ struct ChangelogView: View {
                         "Added a setting to turn haptics off.",
                         "Added a setting to turn sounds off.",
                     ]),
+                    ChangeEntry(title: "Saving Button", details: [
+                        "The saving button now shows a double progress countdown while saving.",
+                    ]),
                     ChangeEntry(title: "Versioning", details: [
                         "Brought the app into Beta releases.",
                     ]),
