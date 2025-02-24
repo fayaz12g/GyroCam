@@ -24,7 +24,8 @@ struct ChangelogView: View {
                     ChangeEntry(title: "Photo Library", details: [
                         "The video display now displays as a sheet.",
                         "The photo library has a partiy done button to settings.",
-                        "The grid view now shows library date sorting akin to masonry view."
+                        "The grid view now shows library date sorting akin to masonry view.",
+                        "The grid view now shows badges, pro mode info, and duration for landscape videos."
                     ]),
                     ChangeEntry(title: "Internal Structure", details: [
                         "Stitched and normal clips now use the same saving function.",
