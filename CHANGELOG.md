@@ -1,8 +1,80 @@
 # GyroCam Version History
 
+## Beta Releases
+
+### Beta 1 (Current)
+
+**Sounds**
+- Added a new looping sound when saving stitched video.
+
+**Save Button**
+- A new double timer counts down while saving to show progress.
+
+**Haptics**
+- Added haptics to record button, settings button, toggles, photo library button, and saving loop.
+- For now haptics require you to interact with the record button first. A better solution will be implemented later.
+
+**Settings**
+- Added a setting to turn haptics off.
+- Added a setting to turn sounds off.
+
+**Versioning**
+- Brought the app into Beta releases.
+
 ## Alpha Releases
 
-### Alpha 013 (Current)
+### Alpha 016 (Current)
+
+**Video Saving**
+- Videos now save with appropriate GRC filenames.
+- Saved videos now contain location metadata.
+
+**Onboarding**
+- "Tweaked text in onboarding
+
+**Other**
+- "Adjusted badge locations
+
+### Alpha 015 (Current)
+
+### Onboarding
+- Restructure with titles, sub bullets, and more symbols.
+- Improved the clutter of page three as well as verbiage in other pages.
+- Fixed an issue where the finish button did not work after reinstating privileges.
+
+### Settings
+- The settings view has changed from a sheet to a full-screen page.
+
+### Stitching
+- Stitching now works with SEAMLESS integration.
+- Stitching is now on by default and no longer says beta.
+
+### Recording Button
+- A new saving indicator displays on the recording button.
+
+
+### Alpha 014 (Current)
+
+**Focus**
+- The focus bar now has a tappable circle handle that turns on auto focus
+
+**Stabilization**
+- Stabilization added to settings
+- Switch between no stabilization, standard, cinematic, and extreme, or auto
+
+**Bug Fixes**
+- Fixed more warnings for deprecated syntax
+
+**Other**
+- Onboarding gyro cam logo now has matching color scheme
+- Light mode background reverted to white
+- Moved some settings around
+- Onboarding button shows next until the last page
+- Centered onboarding button
+- Updated permissions handling to navigate to settings and open onboarding on revoke
+
+  
+### Alpha 013
 
 **Changelog**
 - Renamed headers to be more aligned with proper descriptions
