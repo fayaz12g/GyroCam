@@ -1,1 +1,5 @@
-theme: jekyll-theme-minimal
+theme: jekyll-theme-architect
+
+title: GyroCam
+description: Download Now
+show_downloads: true
