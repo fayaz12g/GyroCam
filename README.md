@@ -103,8 +103,6 @@ We welcome issues and PRs! Please review our:
   *An app by Fayaz*
 </div>
 
----
-
 <script>
   // Ignore this section if you are viewing on GitHub (but you should go to fayaz.one/GyroCam)
   fetch('https://api.github.com/repos/fayaz12g/GyroCam/releases/latest')
