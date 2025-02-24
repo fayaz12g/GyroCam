@@ -10,6 +10,12 @@
 
 ---
 
+## Demo Video 🎥
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/q6XoJlkMB5Q" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+---
+
 ## About GyroCam 🧭
 
 GyroCam revolutionizes mobile videography by automatically handling device orientation changes. Our unique **Auto-Orientation System** stops and restarts recording every time you rotate your device, ensuring perfect portrait/landscape alignment in every clip.
