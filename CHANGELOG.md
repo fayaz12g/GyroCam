@@ -2,6 +2,36 @@
 
 ## Beta Releases
 
+### Beta 2 (0.1.2 - Current)
+
+- **Haptics**:
+  - Fixed an issue where haptics were tied to the record button.
+
+- **Optical Zoom**:
+  - Optical zoom now shows the correct multiplier based on device.
+
+- **Photo Library**:
+  - The video display now displays as a sheet.
+  - The photo library has a partially done button to settings.
+  - The grid view now shows library date sorting akin to masonry view.
+  - The grid view now shows badges, pro mode info, and duration for landscape videos.
+
+- **Internal Structure**:
+  - Stitched and normal clips now use the same saving function.
+  - Removed more redundant code such as error logging.
+  - Separated enumerators to AppSettings.
+  - Added folders for PhotoLibrary and Bars.
+  - Separated structs from within `PhotoLibraryView` into their own files.
+
+- **More Info Views**:
+  - About view now pulls versioning info directly from the app.
+  - Header bars positioning were fixed for the About view and Privacy Policy.
+  - The changelog button was renamed to fit the header (version history).
+  - Roadmap renamed back to upcoming features.
+  - Upcoming features edited to reflect the GitHub issues closer, along with new section titles.
+  - Minor verbiage changed in settings views for stitching navigation menu.
+
+
 ### Beta 1 (Current)
 
 **Sounds**
