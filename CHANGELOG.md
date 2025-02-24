@@ -23,7 +23,7 @@
 
 ## Alpha Releases
 
-### Alpha 016 (Current)
+### Alpha 016
 
 **Video Saving**
 - Videos now save with appropriate GRC filenames.
@@ -35,7 +35,7 @@
 **Other**
 - "Adjusted badge locations
 
-### Alpha 015 (Current)
+### Alpha 015 
 
 ### Onboarding
 - Restructure with titles, sub bullets, and more symbols.
@@ -53,7 +53,7 @@
 - A new saving indicator displays on the recording button.
 
 
-### Alpha 014 (Current)
+### Alpha 014 
 
 **Focus**
 - The focus bar now has a tappable circle handle that turns on auto focus
