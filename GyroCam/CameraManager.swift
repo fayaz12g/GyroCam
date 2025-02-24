@@ -581,7 +581,7 @@ class CameraManager: NSObject, ObservableObject {
             print("📤 [10] Starting export")
             print("   📍 Output URL: \(outputURL)")
             print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
-            print("   ⏳ Estimated duration: \(exportDuration))s")
+            print("   ⏳ Video duration: \(exportDuration)s")
             
             
             await exporter.export()
