@@ -1,4 +1,4 @@
-# Welcome to GyroCam
+# GyroCam
 *Spoilers: I let DeepSeek AI write the markdown cause its so much faster, I just gave him my code and said to write it*
 
 <div align="center">
