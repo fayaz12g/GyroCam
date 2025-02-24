@@ -73,12 +73,14 @@ This revolutionary update combines every clip into one length-perfect recording,
 ### Sideloading Instructions:
 1. If you are on GitHub, download latest IPA from [here](https://github.com/fayaz12g/GyroCam/releases/latest)
    Alternativly, if you are on the site, click the button below:
+   
    <a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest IPA</a>
-2. Install [Sideloadly](https://sideloadly.io/)
-3. Connect iOS device & trust computer
-4. Drag IPA into Sideloadly
-5. Enter Apple ID (app-specific password recommended)
-6. Click Start!
+   
+3. Install [Sideloadly](https://sideloadly.io/)
+4. Connect iOS device & trust computer
+5. Drag IPA into Sideloadly
+6. Enter Apple ID (app-specific password recommended)
+7. Click Start!
 
 *Note: Requires free developer account (7-day signing) or paid account for year-long install*
 
