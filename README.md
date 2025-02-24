@@ -90,5 +90,5 @@ We welcome issues and PRs! Please review our:
 ---
 
 <div align="center">
-  *Made with 🔄📸🔄 by Fayaz*
+  *An app by Fayaz*
 </div>
