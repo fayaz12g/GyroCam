@@ -2,7 +2,7 @@
 *Spoilers: I let DeepSeek AI write the markdown cause its so much faster, I just gave him my code and said to write it*
 
 <div align="center">
-  <img src="GyroCam/Assets.xcassets/gyro_icon.imageset/gyro_icon.svg" width="200" height="200" alt="GyroCam Logo">
+  <img src="faviconset/favicon.svg" width="200" height="200" alt="GyroCam Logo">
 </div>
 
 **The Smart Orientation-Conscious Camera App**  
