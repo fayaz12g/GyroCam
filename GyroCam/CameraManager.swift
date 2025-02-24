@@ -410,11 +410,12 @@ class CameraManager: NSObject, ObservableObject {
     private let recordingQueue = DispatchQueue(label: "recording.queue")
     public var isRestarting = false
     
+
     enum LensType: String, CaseIterable {
         case frontWide = "Front"
         case ultraWide = "0.5x"
         case wide = "1x"
-        case telephoto = "3x"
+        case telephoto = "Tele"
         
         var deviceType: AVCaptureDevice.DeviceType {
             switch self {
@@ -518,9 +519,6 @@ class CameraManager: NSObject, ObservableObject {
             let videoComposition = AVMutableVideoComposition()
             videoComposition.renderSize = naturalSize
             videoComposition.frameDuration = CMTime(value: 1, timescale: Int32(frameRate))
-            //            videoComposition.colorPrimaries = colorPrimaries
-            //            videoComposition.colorTransferFunction = videoTrack.transferFunction
-            //            videoComposition.colorYCbCrMatrix = videoTrack.colorSpace
             
             var instructions: [AVMutableVideoCompositionInstruction] = []
             var insertTime = CMTime.zero
@@ -561,41 +559,45 @@ class CameraManager: NSObject, ObservableObject {
             
             videoComposition.instructions = instructions
             
-            // Configure exporter
-            guard let exporter = AVAssetExportSession(asset: composition,
-                                                      presetName: AVAssetExportPresetHEVCHighestQuality) else {
-                self.showError("Export failed")
-                return
-            }
-            
-            let outputURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("stitched-\(UUID().uuidString)")
-                .appendingPathExtension("mov")
-            
-            exporter.outputURL = outputURL
-            exporter.outputFileType = .mov
-            exporter.videoComposition = videoComposition
-            exporter.shouldOptimizeForNetworkUse = false
-            exportDuration = CMTimeGetSeconds(composition.duration)
-            
-            print("📤 [10] Starting export")
-            print("   📍 Output URL: \(outputURL)")
-            print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
-            print("   ⏳ Video duration: \(exportDuration)s")
-            
-            
-            await exporter.export()
-            
-            
-            if exporter.status == .completed {
-                print("✅ [11.1] Export succeeded")
-                await MainActor.run {
-                    self.saveFinalVideo(outputURL)
-                    self.cleanupClips()
-                    print("🧹 [12] Cleanup completed")
-                }
-            }
+            // export and save video
+            await exportVideo(composition: composition, videoComposition: videoComposition)
 
+        }
+    }
+    
+    private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
+        // Configure exporter
+        guard let exporter = AVAssetExportSession(asset: composition,
+                                                  presetName: AVAssetExportPresetHEVCHighestQuality) else {
+            self.showError("Export failed")
+            return
+        }
+        
+        let outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("stitched-\(UUID().uuidString)")
+            .appendingPathExtension("mov")
+        
+        exporter.outputURL = outputURL
+        exporter.outputFileType = .mov
+        exporter.videoComposition = videoComposition
+        exporter.shouldOptimizeForNetworkUse = false
+        exportDuration = CMTimeGetSeconds(composition.duration)
+        
+        print("📤 [10] Starting export")
+        print("   📍 Output URL: \(outputURL)")
+        print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
+        print("   ⏳ Video duration: \(exportDuration)s")
+        
+        
+        await exporter.export()
+        
+        if exporter.status == .completed {
+            print("✅ [11.1] Export succeeded")
+            await MainActor.run {
+                self.saveFinalVideo(outputURL)
+                self.cleanupClips()
+                print("🧹 [12] Cleanup completed")
+            }
         }
     }
         
@@ -805,18 +807,18 @@ class CameraManager: NSObject, ObservableObject {
             lenses.append(.ultraWide)
         }
         
-        // Wide angle is typically always available on back
+        // Wide angle
         if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil {
             lenses.append(.wide)
         }
         
-        // Check telephoto
         if AVCaptureDevice.default(.builtInTelephotoCamera, for: .video, position: .back) != nil {
             lenses.append(.telephoto)
         }
-        
+
         return lenses
     }
+
     
     @MainActor var availableFrameRates: [FrameRate] {
         guard let device = currentDevice else { return [] }
@@ -1061,15 +1063,14 @@ class CameraManager: NSObject, ObservableObject {
                 }
                 self.stitchingGroup = nil
             }
-        }
-        
-        print("⏹ Stopped recording clip #\(currentClipNumber)")
-        
-        if !isRestarting {
+            
             if playSounds {
                 AudioServicesPlaySystemSound(1118)
             }
         }
+        
+        print("⏹ Stopped recording clip #\(currentClipNumber)")
+        
     }
 }
 
