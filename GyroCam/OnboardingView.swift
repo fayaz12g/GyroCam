@@ -36,7 +36,7 @@ struct OnboardingView: View {
                 // Page 0 - Welcome
                 OnboardingPage(
                     cameraManager: cameraManager,
-                    customIcon: Image("newlogo"),
+                    customIcon: Image("gyro_icon"),
                     iconName: "",
                     title: "Welcome to GyroCam",
                     features: [

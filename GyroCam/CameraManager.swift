@@ -656,7 +656,7 @@ class CameraManager: NSObject, ObservableObject {
     
     private func startSession() {
         guard !session.isRunning else { return }
-        DispatchQueue.main.async { [weak self] in
+        DispatchQueue.global(qos: .background).async { [weak self] in
             self?.session.startRunning()
         }
     }

@@ -193,3 +193,36 @@ enum ShutterSpeed: CaseIterable {
         }
     }
 }
+
+enum VideoBadgeType: Identifiable, CaseIterable {
+    case hdr
+    case cinematic
+    case highFrameRate
+    case timelapse
+    case hevc
+    case hdrFallback
+    
+    var id: Self { self }
+    
+    var icon: String {
+        switch self {
+        case .hdr: return "mountain.2"
+        case .hdrFallback: return "tv.fill"
+        case .cinematic: return "film"
+        case .highFrameRate: return "timer"
+        case .timelapse: return "timelapse"
+        case .hevc: return "h.square"
+        }
+    }
+    
+    var label: String {
+        switch self {
+        case .hdr: return "HDR"
+        case .hdrFallback: return "Dolby Vision"
+        case .cinematic: return "Cinematic"
+        case .highFrameRate: return "Slo-Mo"
+        case .timelapse: return "Timelapse"
+        case .hevc: return "HEVC"
+        }
+    }
+}

@@ -14,6 +14,27 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Beta Releases")) {
                 
+                VersionEntry(cameraManager: cameraManager, version: "Beta 2", changes: [
+                    ChangeEntry(title: "Haptics", details: [
+                        "Fixed an issue where haptics were tied to the record button."
+                    ]),
+                    ChangeEntry(title: "Optical Zoom", details: [
+                        "Optical zoom now shows the correct multiplier based on device."
+                    ]),
+                    ChangeEntry(title: "Photo Library", details: [
+                        "The video display now displays as a sheet.",
+                        "The photo library has a partiy done button to settings.",
+                        "The grid view now shows library date sorting akin to masonry view."
+                    ]),
+                    ChangeEntry(title: "Internal Structure", details: [
+                        "Stitched and normal clips now use the same saving function.",
+                        "Removed more redundant code such as error logging.",
+                        "Seperated enumerators to AppSettings.",
+                        "Added folders for PhotoLibrary and Bars.",
+                        "Seperated structs from within PhotoLibraryView into their own files."
+                    ]),
+                ])
+                
                 VersionEntry(cameraManager: cameraManager, version: "Beta 1", changes: [
                     ChangeEntry(title: "Sounds", details: [
                         "Added a new looping sound when saving stitched video.",
