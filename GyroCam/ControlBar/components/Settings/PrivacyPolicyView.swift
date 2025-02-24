@@ -72,9 +72,9 @@ struct PrivacyPolicyView: View {
                         .padding(.vertical, 8)
                 }
             }
-            .navigationTitle("Privacy Policy")
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationTitle("Privacy Policy")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func header(_ text: String) -> some View {

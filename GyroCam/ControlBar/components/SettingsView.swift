@@ -67,10 +67,10 @@ struct SettingsView: View {
                 SettingsRow(title: "Privacy Policy", icon: "hand.raised.fill")
             }
             NavigationLink(destination: ChangelogView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Changelog", icon: "clock.badge.checkmark")
+                SettingsRow(title: "Version History", icon: "clock.badge.checkmark")
             }
             NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Roadmap", icon: "road.lanes.curved.right")
+                SettingsRow(title: "Upcoming Features", icon: "road.lanes.curved.right")
             }
             VStack {
                 Spacer() // Push the button towards the center vertically

@@ -34,6 +34,14 @@ struct ChangelogView: View {
                         "Added folders for PhotoLibrary and Bars.",
                         "Seperated structs from within PhotoLibraryView into their own files."
                     ]),
+                    ChangeEntry(title: "More Info Views", details: [
+                        "About view now pulls versioning info directly from the app.",
+                        "Header bars positioning were fixed for the About view and Privacy Policy.",
+                        "The changelog button was renamed to fit the header (version history).",
+                        "Roadmap renamed back to upcoming features.",
+                        "Upcoming features edited to reflect the GitHub issues closer, alongwith new section titles.",
+                        "Minor verbiage changed in settings views for stitching navigation menu.",
+                    ]),
                 ])
                 
                 VersionEntry(cameraManager: cameraManager, version: "Beta 1", changes: [

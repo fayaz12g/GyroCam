@@ -26,8 +26,8 @@ struct AboutView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: header("About this App")) {
-                    Text("Gyrocam is created by a sole contributor, Fayaz Shaikh. It was developed over the course of a few weeks, heavily leaning into DeepSeek as a source to quickly learn the SwiftUI APIs. It began development on January 26th 2025, while the very next day I dislocated my shoulder, leading to slower development than anticipated. I just gained the ability to use a keyboard again in the past week and have been pushing constant updates, though I am also a full time undergrad student, and anticipating surgery soon. Some helpful info for you:")
+                Section(header: header("About This App")) {
+                    Text("GyroCam is created by a sole contributor, Fayaz Shaikh. It was developed over the course of a few weeks, heavily leaning into DeepSeek as a source to quickly learn the SwiftUI APIs. It began development around January 26th 2025, while the very next day I dislocated my shoulder, leading to slower development than anticipated. I just gained the ability to use a keyboard again in the past week and have been pushing constant updates, though I am also a full time undergrad student, and anticipating surgery soon. Some helpful info for you:")
                         .padding(.vertical, 8)
                     
                     Text("App Version: Beta")
@@ -48,9 +48,9 @@ struct AboutView: View {
                         .padding(.vertical, 8)
                 }
             }
-            .navigationTitle("About")
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .navigationTitle("About")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func header(_ text: String) -> some View {
