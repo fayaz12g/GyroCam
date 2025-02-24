@@ -117,5 +117,3 @@ We welcome issues and PRs! Please review our:
     })
     .catch(error => console.error('Error fetching latest release:', error));
 </script>
-
----
