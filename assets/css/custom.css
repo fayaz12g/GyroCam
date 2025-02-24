@@ -1,0 +1,24 @@
+/* Default light mode */
+body {
+    background-color: white;
+    color: black;
+  }
+  
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #1e1e1e;
+      color: white;
+    }
+  
+    /* Adjust additional elements as needed */
+    header, footer {
+      background-color: #333;
+      color: white;
+    }
+  
+    a {
+      color: #3498db; /* Optional: customize link color for dark mode */
+    }
+  }
+  

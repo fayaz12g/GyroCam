@@ -6,3 +6,20 @@ show_downloads: true
 
 google_analytics: GTM-MMC2BRPW
 
+# Add your custom CSS
+markdown: kramdown
+sass:
+  style: compressed
+
+plugins:
+  - jekyll-sitemap
+
+# Custom stylesheet
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+      css: "/GyroCam/assets/css/custom.css"
