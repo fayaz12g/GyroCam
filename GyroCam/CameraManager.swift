@@ -604,8 +604,7 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    @MainActor private func setupInputs() throws {
-        
+    public func configureHaptics() {
         DispatchQueue.main.async {
             // get the haptics working
             do {
@@ -619,7 +618,9 @@ class CameraManager: NSObject, ObservableObject {
                 print("Error configuring AVAudioSession: \(error)")
             }
         }
-        
+    }
+    
+    @MainActor private func setupInputs() throws {
         session.inputs.forEach { session.removeInput($0) }
         
         guard let device = getCurrentDevice() else {

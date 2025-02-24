@@ -9,6 +9,7 @@ struct ControlsView: View {
     @State private var isQuickSettingsVisible = false
     @Environment(\.colorScheme) var colorScheme
     @Namespace private var animationNamespace
+    @State private var hapticsConfigured = false;
 
     var body: some View {
         ZStack {
@@ -16,7 +17,7 @@ struct ControlsView: View {
                 if !cameraManager.isRecording && !cameraManager.isRestarting {
                     
                     // Photo Library Button (Left)
-                    PhotoLibraryButton(cameraManager: cameraManager)
+                    PhotoLibraryButton(cameraManager: cameraManager, hapticsConfigured: hapticsConfigured)
                         .padding(.leading, 35)
                 }
                 
@@ -31,6 +32,10 @@ struct ControlsView: View {
                             cameraManager.stopRecording()
                         } else {
                             cameraManager.startRecording()
+                        }
+                        if !hapticsConfigured {
+                            cameraManager.configureHaptics()
+                            hapticsConfigured = true
                         }
                         DispatchQueue.main.async {
                             if cameraManager.playHaptics {
@@ -49,6 +54,10 @@ struct ControlsView: View {
                     
                     // Settings Button (Right)
                     Button {
+                        if !hapticsConfigured {
+                            cameraManager.configureHaptics()
+                            hapticsConfigured = true
+                        }
                         if cameraManager.playHaptics {
                             triggerHaptic(style: .light)
                         }
