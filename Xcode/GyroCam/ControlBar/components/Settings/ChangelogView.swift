@@ -42,6 +42,9 @@ struct ChangelogView: View {
                         "Upcoming features edited to reflect the GitHub issues closer, alongwith new section titles.",
                         "Minor verbiage changed in settings views for stitching navigation menu.",
                     ]),
+                    ChangeEntry(title: "Other Fixes", details: [
+                        "Fixed bug #18: Confirmation of reset defaults was bugged."
+                    ]),
                 ])
                 
                 VersionEntry(cameraManager: cameraManager, version: "Beta 1", changes: [
