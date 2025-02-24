@@ -1,4 +1,4 @@
-# Welcome to GyroCam 🔄📸
+# Welcome to GyroCam
 *Spoilers: I let DeepSeek AI write the markdown cause its so much faster, I just gave him my code and said to write it*
 
 <div align="center">
@@ -63,7 +63,7 @@ This revolutionary update combines every clip into one length-perfect recording,
 ## Installation 📲
 
 ### Sideloading Instructions:
-1. Download latest IPA from [Releases tab](https://github.com/fayaz12g/GyroCam/releases/latest)
+1. Download latest IPA from [here](https://github.com/fayaz12g/GyroCam/releases/latest)
 2. Install [Sideloadly](https://sideloadly.io/)
 3. Connect iOS device & trust computer
 4. Drag IPA into Sideloadly
@@ -90,5 +90,5 @@ We welcome issues and PRs! Please review our:
 ---
 
 <div align="center">
-  *Made with ❤️ by Fayaz Shaikh - Because Vertical Video Shouldn't Mean Vertical Problems*
+  *Made with 🔄📸🔄 by Fayaz*
 </div>
