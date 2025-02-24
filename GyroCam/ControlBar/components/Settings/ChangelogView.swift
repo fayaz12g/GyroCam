@@ -39,7 +39,7 @@ struct ChangelogView: View {
                         
             VersionEntry(cameraManager: cameraManager, version: "Alpha 016", changes: [
                 ChangeEntry(title: "Video Saving", details: [
-                    "Videos now save with apprirpirate GRC filenames.",
+                    "Videos now save with appropriate GRC filenames.",
                     "Saved videos now contain location metadata.",
                 ]),
                 ChangeEntry(title: "Onboarding", details: [
