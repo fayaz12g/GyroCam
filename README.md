@@ -84,21 +84,6 @@ This revolutionary update combines every clip into one length-perfect recording,
 
 ---
 
-<script>
-  // Ignore this section if you are viewing on GitHub (but you should go to fayaz.one/GyroCam)
-  fetch('https://api.github.com/repos/fayaz12g/GyroCam/releases/latest')
-    .then(response => response.json())
-    .then(data => {
-      const ipaAsset = data.assets.find(asset => asset.name.endsWith('.ipa'));
-      if (ipaAsset) {
-        document.getElementById('download-latest').href = ipaAsset.browser_download_url;
-      }
-    })
-    .catch(error => console.error('Error fetching latest release:', error));
-</script>
-
----
-
 ## Changelog 📜
 
 - [View Full Changelog](CHANGELOG.md)
@@ -117,3 +102,20 @@ We welcome issues and PRs! Please review our:
 <div align="center">
   *An app by Fayaz*
 </div>
+
+---
+
+<script>
+  // Ignore this section if you are viewing on GitHub (but you should go to fayaz.one/GyroCam)
+  fetch('https://api.github.com/repos/fayaz12g/GyroCam/releases/latest')
+    .then(response => response.json())
+    .then(data => {
+      const ipaAsset = data.assets.find(asset => asset.name.endsWith('.ipa'));
+      if (ipaAsset) {
+        document.getElementById('download-latest').href = ipaAsset.browser_download_url;
+      }
+    })
+    .catch(error => console.error('Error fetching latest release:', error));
+</script>
+
+---
