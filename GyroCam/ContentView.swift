@@ -66,13 +66,14 @@ struct ContentView: View {
                 .onChange(of: cameraManager.currentClipNumber) { oldValue, newValue in
                     clipNumber = newValue
                 }
-                .alert("Error", isPresented: .constant(!cameraManager.errorMessage.isEmpty)) {
-                    Button("OK") { cameraManager.errorMessage = "" }
+                .alert(cameraManager.messageType, isPresented: .constant(!cameraManager.presentMessage.isEmpty)) {
+                    Button("OK") { cameraManager.presentMessage = "" }
                 } message: {
-                    Text(cameraManager.errorMessage)
+                    Text(cameraManager.presentMessage)
                 }
             }
         }
     }
 }
+
 

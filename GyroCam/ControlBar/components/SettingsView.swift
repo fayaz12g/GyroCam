@@ -8,7 +8,6 @@ struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var showOnboarding = false
     @State private var forceOnboarding = false
-    @State private var showReset = false
     
     var body: some View {
         if showOnboarding {
@@ -92,18 +91,6 @@ struct SettingsView: View {
             Button("Reset Defaults", action: resetDefaults)
                 .foregroundColor(.blue)
                 .frame(maxWidth: .infinity)
-            
-                .alert(isPresented: $showReset) {
-                    Alert(
-                        title: Text("Settings Reset"),
-                        message: Text("Default settings restored."),
-                        dismissButton: .default(Text("OK")) {
-                            // Explicitly set showReset to false when dismissing the alert
-                            showReset = false
-                        }
-                    )
-                }
-
         }
         .listRowBackground(Color.clear)
     }
@@ -131,11 +118,6 @@ struct SettingsView: View {
     private func resetDefaults() {
             // Reset default settings
             cameraManager.resetToDefaults()
-            cameraManager.configureSession()
-            UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
-
-            // Trigger the alert after resetting defaults
-            showReset = true
         }
 
 

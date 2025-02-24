@@ -40,7 +40,8 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor @Published var isRecording = false
     @MainActor @Published var currentOrientation = "Portrait"
-    @MainActor @Published var errorMessage = ""
+    @MainActor @Published var presentMessage = ""
+    @MainActor @Published var messageType = ""
     @MainActor @Published var currentClipNumber = 1
     private var currentCaptureDevice: AVCaptureDevice?
     
@@ -513,7 +514,7 @@ class CameraManager: NSObject, ObservableObject {
                         self.loadLatestThumbnail.toggle()
                     } else {
                         print("Save error: \(error?.localizedDescription ?? "Unknown error")")
-                        self.errorMessage = error?.localizedDescription ?? "Failed to save video"
+                        self.showError(error?.localizedDescription ?? "Failed to save video")
                     }
                 }
             }
@@ -530,9 +531,11 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor
-    private func showError(_ message: String) {
-        errorMessage = message
+    private func showError(_ message: String, type: String = "Error") {
+        messageType = type
+        presentMessage = message
     }
+
     
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "appSettings") {
@@ -552,7 +555,8 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor func resetToDefaults() {
         settings = AppSettings()
-        settings.accentColor = Color(red: 1.0, green: 0.0, blue: 0.05098) // #FF000D
+        UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
+        showError("Default Settings Restored", type: "Confirmation")
         configureSession()
     }
     
@@ -964,7 +968,7 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
         stopCompletion = nil
         
         if let error = error {
-                self.errorMessage = "Recording failed: \(error.localizedDescription)"
+                showError("Recording failed: \(error.localizedDescription)")
             }
             
         if self.shouldStitchClips {
