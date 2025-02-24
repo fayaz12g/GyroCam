@@ -8,58 +8,65 @@
 import SwiftUI
 import AVFoundation
 
-// Add Codable conformance to all necessary enums first
-extension AVCaptureDevice.Position: Codable {}  // Add this
+// Add Codable conformance
+extension AVCaptureDevice.Position: Codable {}
 
-extension CameraManager.VideoFormat: Codable {}
+extension VideoFormat: Codable {}
 extension FrameRate: Codable {}
-extension CameraManager.LensType: Codable {}
+extension LensType: Codable {}
 
 
 struct AppSettings: Codable {
+    
+    // General Settings
     var accentColor: Color = Color(red: 1.0, green: 0.204, blue: 0.169) // #FF000D
-    var currentFormat: CameraManager.VideoFormat = .hd4K
-    var currentFPS: FrameRate = .sixty
+    var isProMode: Bool = true
+    var preserveAspectRatios: Bool = true
+    
+    // Camera Settings
     var cameraPosition: AVCaptureDevice.Position = .back
-    var currentLens: CameraManager.LensType = .wide
+    var currentLens: LensType = .wide
+    var currentFormat: VideoFormat = .hd4K
+    var currentFPS: FrameRate = .sixty
     var isHDREnabled: Bool = true
-    var showZoomBar: Bool = false
-    var showFocusBar: Bool = false
-    var autoFocus: Bool = true
-    var maximizePreview: Bool = true
-    
-    var lockLandscape: Bool = false
-    
-    var isSavingVideo: Bool = false
-    
-    var stabilizeVideo: CameraManager.StabilizationMode = .auto
-    
-    var showQuickSettings: Bool = true
     var isFlashOn: Bool = false
     
+    // Video Settings
+    var isSavingVideo: Bool = false
     var shouldStitchClips: Bool = false
+    var stabilizeVideo: StabilizationMode = .auto
     
+    // Focus Settings
+    var autoFocus: Bool = true
+    var showFocusBar: Bool = false
+    var focusValue: Float = 0.5
     
-    var playHaptics: Bool = true
-    var playSounds: Bool = true
-    
-    // exposure
+    // Exposure Settings
     var autoExposure: Bool = true
     var manualISO: Float = 100
     var manualShutterSpeed: Double = 1/60
     
-    // Header
+    // Preview Settings
+    var maximizePreview: Bool = true
+    var showZoomBar: Bool = false
+    
+    // Quick Settings
+    var showQuickSettings: Bool = true
+    
+    // UI Elements: Header
     var showRecordingTimer: Bool = false
     var showOrientationBadge: Bool = true
-    var showClipBadge: Bool = true
     var minimalOrientationBadge: Bool = false
+    var showClipBadge: Bool = true
     
-    // Photo Library
-    var isProMode: Bool = true
-    var preserveAspectRatios: Bool = true
+    // Orientation and Landscape Lock
+    var lockLandscape: Bool = false
     
-
+    // Audio and Haptic Feedback
+    var playHaptics: Bool = true
+    var playSounds: Bool = true
 }
+
 
  extension Color: Codable {
      public init(from decoder: Decoder) throws {
@@ -88,5 +95,101 @@ enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
     
     static func < (lhs: FrameRate, rhs: FrameRate) -> Bool {
         return lhs.rawValue < rhs.rawValue
+    }
+}
+
+enum StabilizationMode: String, CaseIterable, Codable {
+    case off = "0"
+    case standard = "1"
+    case cinematic = "2"
+    case cinematicExtended = "3"
+    case auto = "Auto"
+}
+
+enum VideoFormat: String, CaseIterable {
+    case hd4K = "4K"
+    case hd1080p = "1080p"
+    
+    var resolution: CMVideoDimensions {
+        switch self {
+        case .hd4K: return CMVideoDimensions(width: 3840, height: 2160)
+        case .hd1080p: return CMVideoDimensions(width: 1920, height: 1080)
+        }
+    }
+}
+
+enum LensType: String, CaseIterable {
+    case frontWide = "Front"
+    case ultraWide = "0.5x"
+    case wide = "1x"
+    case telephoto = "Tele"
+    
+    var deviceType: AVCaptureDevice.DeviceType {
+        switch self {
+        case .frontWide:
+            return .builtInWideAngleCamera
+        case .ultraWide:
+            return .builtInUltraWideCamera
+        case .wide:
+            return .builtInWideAngleCamera
+        case .telephoto:
+            return .builtInTelephotoCamera
+        }
+    }
+    
+    var position: AVCaptureDevice.Position {
+        switch self {
+        case .frontWide:
+            return .front
+        default:
+            return .back
+        }
+    }}
+
+enum ShutterSpeed: CaseIterable {
+    case speed1_1000
+    case speed1_500
+    case speed1_250
+    case speed1_125
+    case speed1_60
+    case speed1_48
+    case speed1_15
+    case speed1_8
+    case speed1_4
+    case speed1_2
+    case speed1
+    
+    var cmTime: CMTime {
+        let seconds: Double
+        switch self {
+        case .speed1_1000: seconds = 1/1000
+        case .speed1_500: seconds = 1/500
+        case .speed1_250: seconds = 1/250
+        case .speed1_125: seconds = 1/125
+        case .speed1_60: seconds = 1/60
+        case .speed1_48: seconds = 1/48
+        case .speed1_15: seconds = 1/15
+        case .speed1_8: seconds = 1/8
+        case .speed1_4: seconds = 1/4
+        case .speed1_2: seconds = 1/2
+        case .speed1: seconds = 1
+        }
+        return CMTime(seconds: seconds, preferredTimescale: 1000000)
+    }
+    
+    var description: String {
+        switch self {
+        case .speed1_1000: return "1/1000"
+        case .speed1_500: return "1/500"
+        case .speed1_250: return "1/250"
+        case .speed1_125: return "1/125"
+        case .speed1_60: return "1/60"
+        case .speed1_48: return "1/48"
+        case .speed1_15: return "1/15"
+        case .speed1_8: return "1/8"
+        case .speed1_4: return "1/4"
+        case .speed1_2: return "1/2"
+        case .speed1: return "1"
+        }
     }
 }

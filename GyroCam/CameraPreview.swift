@@ -77,7 +77,7 @@ struct CameraPreview: UIViewRepresentable {
     class Coordinator: NSObject {
         var colorScheme: ColorScheme
         private var overlayView: UIView?
-        private var lensTypes: [(CameraManager.LensType, String, String)] = []
+        private var lensTypes: [(LensType, String, String)] = []
         var parent: CameraPreview
         var cameraManager: CameraManager
         private var initialPanPoint: CGFloat = 0
@@ -339,10 +339,10 @@ struct CameraPreview: UIViewRepresentable {
         
         @MainActor private func setupLensOptions(in view: UIView) {
             lensTypes = [
-                (CameraManager.LensType.frontWide, "Front", "web.camera.fill"),
-                (CameraManager.LensType.ultraWide, "0.5x", "camera.viewfinder"),
-                (CameraManager.LensType.wide, "1x", "camera.fill"),
-                (CameraManager.LensType.telephoto, "3x", "camera.macro")
+                (LensType.frontWide, "Front", "web.camera.fill"),
+                (LensType.ultraWide, "0.5x", "camera.viewfinder"),
+                (LensType.wide, "1x", "camera.fill"),
+                (LensType.telephoto, "3x", "camera.macro")
             ]
             
             let optionSize = CGSize(width: 100, height: 100)
@@ -387,7 +387,7 @@ struct CameraPreview: UIViewRepresentable {
             }
         }
 
-        @MainActor private func createLensOptionView(lensType: CameraManager.LensType, zoomText: String, symbolName: String, size: CGSize, isSelected: Bool) -> UIView {
+        @MainActor private func createLensOptionView(lensType: LensType, zoomText: String, symbolName: String, size: CGSize, isSelected: Bool) -> UIView {
             let view = UIView(frame: CGRect(origin: .zero, size: size))
             
             // Background for selection
@@ -455,10 +455,10 @@ struct CameraPreview: UIViewRepresentable {
             }
         }
 
-        @MainActor private func getSelectedLens() -> CameraManager.LensType? {
+        @MainActor private func getSelectedLens() -> LensType? {
                 for lensView in lensViews {
                     if lensView.backgroundColor == UIColor.lightGray {
-                        return CameraManager.LensType.allCases[lensView.tag]
+                        return LensType.allCases[lensView.tag]
                     }
                 }
                 return nil

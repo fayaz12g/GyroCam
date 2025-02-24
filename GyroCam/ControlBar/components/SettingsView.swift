@@ -58,8 +58,6 @@ struct SettingsView: View {
         }
     }
     
-
-    
     private func AboutHelpSection() -> some View {
         Section(header: Text("Information")) {
             NavigationLink(destination: AboutView(cameraManager: cameraManager)) {
@@ -236,7 +234,7 @@ struct CaptureSettingsView: View {
         Form {
             Section(header: Text("Video Quality")) {
                 Picker("Resolution", selection: $cameraManager.currentFormat) {
-                    ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in
+                    ForEach(VideoFormat.allCases, id: \.self) { format in
                         Text(format.rawValue).tag(format)
                     }
                 }
@@ -311,7 +309,7 @@ struct ExposureSettingsView: View {
             
             Section(header: Text("Stabilization Mode")) {
                 Picker("Stabilization Mode", selection: $cameraManager.stabilizeVideo) {
-                    ForEach(CameraManager.StabilizationMode.allCases, id: \.self) { mode in
+                    ForEach(StabilizationMode.allCases, id: \.self) { mode in
                         Text(mode.rawValue)
                             .tag(mode)
                     }

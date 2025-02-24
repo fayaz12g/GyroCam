@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFAudio
 
 struct ControlsView: View {
     @ObservedObject var cameraManager: CameraManager
@@ -26,13 +27,14 @@ struct ControlsView: View {
                     isRecording: $cameraManager.isRecording,
                     cameraManager: cameraManager,
                     action: {
-                        if cameraManager.playHaptics {
-                            if cameraManager.isRecording {
+                        if cameraManager.isRecording {
+                            cameraManager.stopRecording()
+                        } else {
+                            cameraManager.startRecording()
+                        }
+                        DispatchQueue.main.async {
+                            if cameraManager.playHaptics {
                                 triggerHaptic(style: .medium)
-                                cameraManager.stopRecording()
-                            } else {
-                                triggerHaptic(style: .medium)
-                                cameraManager.startRecording()
                             }
                         }
                     }

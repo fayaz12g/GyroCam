@@ -43,7 +43,7 @@ struct QuickSettingsView: View {
             
             // Resolution Picker
             Picker("Res", selection: $cameraManager.currentFormat) {
-                ForEach(CameraManager.VideoFormat.allCases, id: \.self) { format in
+                ForEach(VideoFormat.allCases, id: \.self) { format in
                     Text(format.rawValue)
                         .font(.system(size: 12))
                         .tag(format)

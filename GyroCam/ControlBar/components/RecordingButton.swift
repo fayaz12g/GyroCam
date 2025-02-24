@@ -10,27 +10,7 @@ struct RecordingButton: View {
     
     var body: some View {
         Button(action: {
-            
-            // get the haptics working
-            do {
-                let audioSession = AVAudioSession.sharedInstance()
-                try audioSession.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth, .allowAirPlay])
-                try audioSession.setMode(.videoRecording)
-                try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-                try audioSession.setAllowHapticsAndSystemSoundsDuringRecording(true)
-            } catch {
-                print("Error configuring AVAudioSession: \(error)")
-            }
-            
-            // Haptic feedback before action
-            let generator = UIImpactFeedbackGenerator(style: isRecording ? .heavy : .medium)
-            generator.prepare()
-            
-            action() // Perform the recording action
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                generator.impactOccurred()
-            }
+            action()
         }) {
             ZStack {
                 // White outline circle
