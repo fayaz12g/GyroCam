@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BuildDate</key>
+	<string>February 24, 2025</string>
 	<key>UILaunchImageFile~iphone</key>
 	<string>AppIcon</string>
 </dict>
