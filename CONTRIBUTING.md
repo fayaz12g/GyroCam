@@ -25,7 +25,8 @@ Starting February 24th, the day after the Swift Student Challenge closes, I'll w
   - Console logs if available
 
 ### Feature Requests
-- Check [Roadmap](ROADMAP.md) first
+- Check existing feature requests
+- Check [the roadmap](ROADMAP.md). If it's on there, I'm likely working on it, but if there is no issue open for it yet, it doesn't hurt to ask.
 - Describe use case clearly
 - Include mockups if applicable
 
