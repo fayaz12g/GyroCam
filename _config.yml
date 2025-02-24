@@ -1,1 +1,6 @@
-theme: jekyll-theme-minimal
+theme: jekyll-theme-architect
+
+title: GyroCam
+description: Now in Beta
+show_downloads: true
+
