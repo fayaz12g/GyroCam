@@ -3,8 +3,6 @@ theme: jekyll-theme-architect
 title: GyroCam
 description: Now in Beta
 show_downloads: true 
-    github:  
-      tar_url: https://github.com/fayaz12g/GyroCam/releases/download/0.1.2/GyroCamB2.ipa
 
 google_analytics: GTM-MMC2BRPW
 
