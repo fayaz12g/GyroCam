@@ -14,7 +14,6 @@ class CameraManager: NSObject, ObservableObject {
     private var currentDevice: AVCaptureDevice?
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
-    var orientations: [String] = []
     private var recordingStartTime: Date?
     private var orientationChanges: [(time: TimeInterval, orientation: String)] = []
     var exportDuration: Double = 0.0
@@ -927,13 +926,6 @@ class CameraManager: NSObject, ObservableObject {
         startLocationUpdates()
         print("▶️ Started recording clip #\(currentClipNumber)")
         print("Starting recording with orientation: \(self.previousOrientation.description)")
-        if self.shouldStitchClips {
-            DispatchQueue.main.async {
-                self.orientations.append(self.previousOrientation.description)
-                print("Orientations array as follows:")
-                print(self.orientations)
-            }
-        }
     }
     
     @MainActor func stopRecording(completion: (() -> Void)? = nil) {
