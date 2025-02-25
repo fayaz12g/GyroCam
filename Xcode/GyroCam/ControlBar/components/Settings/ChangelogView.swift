@@ -19,6 +19,9 @@ struct ChangelogView: View {
                         "New feature selection for export quality, though I always reccommend highest for HDR or 60FPS. This significantly increases export speed though.",
                         "Updated versioning naming conventions to match new one throughout the changelog"
                     ]),
+                    ChangeEntry(title: "Stitching", details: [
+                        "Stitching can now take place in the background, including if you lock your phone!"
+                    ]),
                     ChangeEntry(title: "Orientation Handling", details: [
                         "In Lock Landscape, badges now rotate to show you everything upright."
                     ]),

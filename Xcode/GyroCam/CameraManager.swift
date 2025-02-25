@@ -482,7 +482,7 @@ class CameraManager: NSObject, ObservableObject {
         await exporter.export()
         
         if exporter.status == .completed {
-            print("✅ [11.1] Export succeeded")
+            print("✅ [11] Export succeeded")
             await MainActor.run {
                 self.saveFinalVideo(outputURL)
                 self.cleanupClips()
@@ -503,7 +503,6 @@ class CameraManager: NSObject, ObservableObject {
         
         @MainActor
         private func saveFinalVideo(_ url: URL) {
-            // Capture location before entering photo library changes
             let currentLocation = lastKnownLocation
             
             PHPhotoLibrary.shared().performChanges {
