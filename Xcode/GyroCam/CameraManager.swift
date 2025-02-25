@@ -447,13 +447,22 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
+        // Get background task identifier
+        var backgroundTaskID = UIBackgroundTaskIdentifier.invalid
+        backgroundTaskID = UIApplication.shared.beginBackgroundTask {
+            // End task if it expires
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
+            backgroundTaskID = .invalid
+        }
+        
         // Configure exporter
         guard let exporter = AVAssetExportSession(asset: composition,
                                                   presetName: self.exportQuality.preset) else {
             self.showError("Export failed")
+            UIApplication.shared.endBackgroundTask(backgroundTaskID)
             return
         }
-        
+
         let outputURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("stitched-\(UUID().uuidString)")
             .appendingPathExtension("mov")
@@ -469,8 +478,6 @@ class CameraManager: NSObject, ObservableObject {
         print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
         print("   ⏳ Video duration: \(exportDuration)s")
         print("   🎥 Export Quality: \(exportQuality)")
-    
-        
         
         await exporter.export()
         
@@ -482,6 +489,9 @@ class CameraManager: NSObject, ObservableObject {
                 print("🧹 [12] Cleanup completed")
             }
         }
+        
+        // End background task
+        UIApplication.shared.endBackgroundTask(backgroundTaskID)
     }
         
         private let videoDateFormatter: DateFormatter = {
