@@ -226,3 +226,21 @@ enum VideoBadgeType: Identifiable, CaseIterable {
         }
     }
 }
+
+enum ExportQuality: String, CaseIterable, Identifiable {
+    case fastest = "Potato"
+    case balanced = "Okay"
+    case high = "Good"
+    case highest = "Best"
+    
+    var id: String { self.rawValue }
+    
+    var preset: String {
+        switch self {
+        case .fastest: return AVAssetExportPresetLowQuality
+        case .balanced: return AVAssetExportPresetMediumQuality
+        case .high: return AVAssetExportPresetHighestQuality
+        case .highest: return AVAssetExportPresetHEVCHighestQuality
+        }
+    }
+}

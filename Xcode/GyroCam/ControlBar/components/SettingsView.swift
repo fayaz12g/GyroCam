@@ -349,6 +349,17 @@ struct OrientationStitchingView: View {
                         }
                     }
             }
+            Section(header: Text("Processing")) {
+                Picker("Export Quality", selection: $cameraManager.exportQuality) {
+                    ForEach(ExportQuality.allCases, id: \.self) { mode in
+                        Text(mode.rawValue)
+                            .tag(mode)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .tint(cameraManager.accentColor)
+            }
+            
         }
         .navigationTitle("Output")
     }

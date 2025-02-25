@@ -40,15 +40,15 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor @Published var isRecording = false
     @MainActor @Published var currentOrientation = "Portrait"
+    @MainActor @Published var realOrientation = "Portrait"
     @MainActor @Published var presentMessage = ""
     @MainActor @Published var messageType = ""
     @MainActor @Published var currentClipNumber = 1
     private var currentCaptureDevice: AVCaptureDevice?
     
-    
     @Published var currentZoom: CGFloat = 1.0
+    @Published var exportQuality: ExportQuality = .highest
     
-    // Published wrapper for settings
     @Published private var settings = AppSettings() {
         didSet {
             saveSettings()
@@ -449,7 +449,7 @@ class CameraManager: NSObject, ObservableObject {
     private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
         // Configure exporter
         guard let exporter = AVAssetExportSession(asset: composition,
-                                                  presetName: AVAssetExportPresetHEVCHighestQuality) else {
+                                                  presetName: self.exportQuality.preset) else {
             self.showError("Export failed")
             return
         }
@@ -468,6 +468,8 @@ class CameraManager: NSObject, ObservableObject {
         print("   📍 Output URL: \(outputURL)")
         print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
         print("   ⏳ Video duration: \(exportDuration)s")
+        print("   🎥 Export Quality: \(exportQuality)")
+    
         
         
         await exporter.export()
@@ -838,7 +840,7 @@ class CameraManager: NSObject, ObservableObject {
                 self.showError(error?.localizedDescription ?? "Motion updates failed")
                 return
             }
-            let newOrientation = OrientationHelper.getOrientation(from: motion, lockLandscape: lockLandscape, currentOrientation: self.previousOrientation)
+            let newOrientation = OrientationHelper.getOrientation(from: motion, currentOrientation: self.previousOrientation, cameraManager: self)
             if newOrientation != self.previousOrientation && newOrientation != .unknown {
                 self.handleOrientationChange(newOrientation: newOrientation)
                 self.previousOrientation = newOrientation

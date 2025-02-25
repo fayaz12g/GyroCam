@@ -4,6 +4,11 @@
 <dict>
 	<key>BuildDate</key>
 	<string>February 24, 2025</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>processing</string>
+		<string>Audio</string>
+	</array>
 	<key>UILaunchImageFile~iphone</key>
 	<string>AppIcon</string>
 </dict>

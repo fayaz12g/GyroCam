@@ -2,44 +2,50 @@ import CoreMotion
 import UIKit
 import AVFoundation
 
-import CoreMotion
-import UIKit
-import AVFoundation
-
 struct OrientationHelper {
-    static func getOrientation(from motion: CMDeviceMotion, lockLandscape: Bool, currentOrientation: UIDeviceOrientation) -> UIDeviceOrientation {
+    @MainActor static func getOrientation(from motion: CMDeviceMotion, currentOrientation: UIDeviceOrientation, cameraManager: CameraManager) -> UIDeviceOrientation {
         let gravity = motion.gravity
         let absX = abs(gravity.x)
         let absY = abs(gravity.y)
         let absZ = abs(gravity.z)
         
-        // Skip face up/down check if locked to landscape
-        if !lockLandscape {
-            if absZ > max(absX, absY) {
-                if gravity.z > 1 {
-                    return .faceUp
-                } else if gravity.z < -1 {
-                    return .faceDown
-                }
-                // If not clearly face up/down, fall through to closest orientation logic
-            }
-        }
+        // Determine the real device orientation first
+        var realOrientation: UIDeviceOrientation = currentOrientation
         
-        // Determine the closest orientation based on gravity vector
+    
+        // Check for landscape/portrait
         if absX > absY {
             // Landscape orientation
-            return gravity.x > 0 ? .landscapeRight : .landscapeLeft
+            realOrientation = gravity.x > 0 ? .landscapeRight : .landscapeLeft
         } else if absY > absX {
-            // Portrait orientation (only if not locked to landscape)
-            if !lockLandscape {
-                return gravity.y > 0 ? .portraitUpsideDown : .portrait
+            // Portrait orientation
+            realOrientation = gravity.y > 0 ? .portraitUpsideDown : .portrait
+        }
+        
+        // Always update the real orientation in cameraManager
+        cameraManager.realOrientation = realOrientation.description
+        
+        // If landscape lock is on, we need to determine what orientation to return
+        if cameraManager.lockLandscape {
+            // Skip face up/down check if locked to landscape
+            if absZ > max(absX, absY) {
+                // Even with face up/down, we maintain current orientation if landscape locked
+                return currentOrientation
+            }
+            
+            // For landscape orientations, return the detected orientation
+            if absX > absY {
+                return gravity.x > 0 ? .landscapeRight : .landscapeLeft
+            } else if absY > absX {
+                // If locked to landscape but device is in portrait, maintain current orientation
+                return currentOrientation
             } else {
-                // If locked to landscape, return the current orientation to avoid flipping
+                // If X and Y are nearly equal (device is centered), retain the current orientation
                 return currentOrientation
             }
         } else {
-            // If X and Y are nearly equal (device is centered), retain the current orientation
-            return currentOrientation
+            // If not locked to landscape, just return the real orientation we already determined
+            return realOrientation
         }
     }
 }

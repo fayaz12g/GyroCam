@@ -14,6 +14,15 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Beta Releases")) {
                 
+                VersionEntry(cameraManager: cameraManager, version: "Beta 3", changes: [
+                    ChangeEntry(title: "Settings", details: [
+                        "New feature selection for export quality, though I always reccommend highest for HDR or 60FPS. This significantly increases export speed though."
+                    ]),
+                    ChangeEntry(title: "Orientation Handling", details: [
+                        "In Lock Landscape, badges now rotate to show you everything upright."
+                    ]),
+                ])
+                
                 VersionEntry(cameraManager: cameraManager, version: "Beta 2", changes: [
                     ChangeEntry(title: "Haptics", details: [
                         "Fixed an issue where haptics were tied to the record button."

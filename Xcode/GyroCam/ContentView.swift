@@ -29,7 +29,7 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 if cameraManager.showClipBadge {
-                                    ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, showClipBadge: $cameraManager.showClipBadge)
+                                    ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, realOrientation: $cameraManager.realOrientation, showClipBadge: $cameraManager.showClipBadge)
                                 }
                             }
                             
@@ -52,7 +52,7 @@ struct ContentView: View {
                             
                             Spacer()
                             
-                            ControlsView(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation)
+                            ControlsView(cameraManager: cameraManager, currentOrientation: $cameraManager.realOrientation)
                                 .padding(.bottom, 15)
                                 .padding(.leading, -35)
                         }

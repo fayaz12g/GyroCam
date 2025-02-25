@@ -7,7 +7,7 @@ struct OrientationHeader: View {
     @Environment(\.colorScheme) var colorScheme
     
     private var rotationAngle: Angle {
-        switch currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left": return .degrees(90)
         case "Landscape Right": return .degrees(-90)
         case "Upside Down": return .degrees(180)
@@ -16,7 +16,7 @@ struct OrientationHeader: View {
     }
     
     private var horizontalPadding: CGFloat {
-        switch currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left", "Landscape Right": return 0
         case "Upside Down": return 32
         default: return 16
@@ -24,7 +24,7 @@ struct OrientationHeader: View {
     }
     
     private var verticalOffset: CGFloat {
-        switch currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left", "Landscape Right": return 45
         case "Upside Down": return 12
         default: return 0
@@ -94,6 +94,6 @@ struct OrientationHeader: View {
                 Spacer()
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: currentOrientation)
+        .animation(.easeInOut(duration: 0.2), value: cameraManager.realOrientation)
     }
 }

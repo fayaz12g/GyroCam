@@ -3,11 +3,12 @@ import SwiftUI
 struct ClipNumberBadge: View {
     let number: Int
     @Binding var currentOrientation: String
+    @Binding var realOrientation: String
     @Binding var showClipBadge: Bool
     @Environment(\.colorScheme) var colorScheme
     
     private var rotationAngle: Angle {
-        switch currentOrientation {
+        switch realOrientation {
         case "Landscape Left": return .degrees(90)
         case "Landscape Right": return .degrees(-90)
         case "Upside Down": return .degrees(180)
@@ -20,7 +21,7 @@ struct ClipNumberBadge: View {
     }
     
     private var verticalOffset: CGFloat {
-        switch currentOrientation {
+        switch realOrientation {
         case "Landscape Left", "Landscape Right": return 8
         case "Upside Down": return 12
         default: return 0
@@ -58,6 +59,6 @@ struct ClipNumberBadge: View {
                     }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: currentOrientation)
+        .animation(.easeInOut(duration: 0.2), value: realOrientation)
     }
 }
