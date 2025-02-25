@@ -8,6 +8,14 @@
 **The Smart Orientation-Conscious Camera App**  
 *Never suffer from sideways videos again!*
 
+<a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest Release</a>
+
+---
+
+## Demo Video 🎥
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/q6XoJlkMB5Q" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ---
 
 ## About GyroCam 🧭
@@ -63,12 +71,16 @@ This revolutionary update combines every clip into one length-perfect recording,
 ## Installation 📲
 
 ### Sideloading Instructions:
-1. Download latest IPA from [here](https://github.com/fayaz12g/GyroCam/releases/latest)
-2. Install [Sideloadly](https://sideloadly.io/)
-3. Connect iOS device & trust computer
-4. Drag IPA into Sideloadly
-5. Enter Apple ID (app-specific password recommended)
-6. Click Start!
+1. If you are on GitHub, download latest IPA from [here](https://github.com/fayaz12g/GyroCam/releases/latest)
+   Alternativly, if you are on the site, click the button below:
+   
+   <a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest IPA</a>
+   
+3. Install [Sideloadly](https://sideloadly.io/)
+4. Connect iOS device & trust computer
+5. Drag IPA into Sideloadly
+6. Enter Apple ID (app-specific password recommended)
+7. Click Start!
 
 *Note: Requires free developer account (7-day signing) or paid account for year-long install*
 
@@ -89,6 +101,28 @@ We welcome issues and PRs! Please review our:
 
 ---
 
+## The Story Behind GyroCam 
+
+GyroCam was born from a personal need. As someone living with bipolar depression, memory challenges, and processing past traumas, I found vlogging to be a powerful tool for preserving memories and making sense of my experiences. These video journals became my external memory bank - allowing me to revisit moments that would otherwise fade away.
+But there was a problem: every time I flipped my phone to switch between showing my face and my perspective, the orientation would change. What should have been a healing practice became a technical nightmare, with hours spent manually finding, splitting, and rotating segments - sometimes 10-20 orientation changes per minute of footage.
+GyroCam is my solution: an app that intelligently handles orientation changes as you record, eliminating hours of frustrating post-production work. What began as a personal tool to make my mental health journey easier has evolved into something I believe can help content creators, memory-keepers, and storytellers everywhere.
+Every feature in this app was designed with one goal: to let you focus on capturing your story, not wrestling with technology.
+
+---
+
 <div align="center">
   *An app by Fayaz*
 </div>
+
+<script>
+  // Ignore this section if you are viewing on GitHub (but you should go to fayaz.one/GyroCam)
+  fetch('https://api.github.com/repos/fayaz12g/GyroCam/releases/latest')
+    .then(response => response.json())
+    .then(data => {
+      const ipaAsset = data.assets.find(asset => asset.name.endsWith('.ipa'));
+      if (ipaAsset) {
+        document.getElementById('download-latest').href = ipaAsset.browser_download_url;
+      }
+    })
+    .catch(error => console.error('Error fetching latest release:', error));
+</script>
