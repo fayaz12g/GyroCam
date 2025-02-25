@@ -14,16 +14,17 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Beta Releases")) {
                 
-                VersionEntry(cameraManager: cameraManager, version: "Beta 3", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.1.3 (Beta 3)", changes: [
                     ChangeEntry(title: "Settings", details: [
-                        "New feature selection for export quality, though I always reccommend highest for HDR or 60FPS. This significantly increases export speed though."
+                        "New feature selection for export quality, though I always reccommend highest for HDR or 60FPS. This significantly increases export speed though.",
+                        "Updated versioning naming conventions to match new one throughout the changelog"
                     ]),
                     ChangeEntry(title: "Orientation Handling", details: [
                         "In Lock Landscape, badges now rotate to show you everything upright."
                     ]),
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Beta 2", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.1.3 (Beta 2)", changes: [
                     ChangeEntry(title: "Haptics", details: [
                         "Fixed an issue where haptics were tied to the record button."
                     ]),
@@ -56,7 +57,7 @@ struct ChangelogView: View {
                     ]),
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Beta 1", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.1.1 (Beta 1)", changes: [
                     ChangeEntry(title: "Sounds", details: [
                         "Added a new looping sound when saving stitched video.",
                     ]),
@@ -79,7 +80,7 @@ struct ChangelogView: View {
                 
             Section(header: header("Alpha Releases")) {
                         
-            VersionEntry(cameraManager: cameraManager, version: "Alpha 016", changes: [
+            VersionEntry(cameraManager: cameraManager, version: "0.1.0 (Alpha 016)", changes: [
                 ChangeEntry(title: "Video Saving", details: [
                     "Videos now save with appropriate GRC filenames.",
                     "Saved videos now contain location metadata.",
@@ -92,7 +93,7 @@ struct ChangelogView: View {
                 ]),
             ])
                     
-            VersionEntry(cameraManager: cameraManager, version: "Alpha 015", changes: [
+            VersionEntry(cameraManager: cameraManager, version: "0.0.16 (Alpha 015)", changes: [
                 ChangeEntry(title: "Onboarding", details: [
                     "Restructure with titles, sub bullets, and more symbols.",
                     "Improved the clutter of page three as well as verbiage in other pages.",
@@ -111,7 +112,7 @@ struct ChangelogView: View {
                     "A new saving indicator displays on the recording button",
                 ]),
             ])
-            VersionEntry(cameraManager: cameraManager, version: "Alpha 014", changes: [
+            VersionEntry(cameraManager: cameraManager, version: "0.0.15 (Alpha 014)", changes: [
                 ChangeEntry(title: "Focus", details: [
                     "The focus bar now has a tappable circle handle that turns on auto focus",
                 ]),
@@ -133,7 +134,7 @@ struct ChangelogView: View {
             ])
 
                     
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 013", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.14 (Alpha 013)", changes: [
                     ChangeEntry(title: "Changelog", details: [
                         "Renamed headers to be more aligned with proper descriptions",
                     ]),
@@ -157,7 +158,7 @@ struct ChangelogView: View {
                     ]),
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 012", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.13 (Alpha 012)", changes: [
                     ChangeEntry(title: "Added new camera gestures:", details: [
                         "Drag across the screen to adjust focus while auto focus is off",
                         "Hold down to switch lenses in a new picker, now in a square format with rotation and device theme conformity"
@@ -177,7 +178,7 @@ struct ChangelogView: View {
                     ])
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 011", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.12 (Alpha 011)", changes: [
                     ChangeEntry(title: "Logo Update", details: ["Updated the app logo, removing the camera icon for a cleaner look."]),
                     ChangeEntry(title: "Orientation Badge", details: ["Added context menu parity to hide the orientation badge for better UI customization."]),
                     ChangeEntry(title: "Onboarding View", details: ["Refined the onboarding experience with new content describing camera controls to help users understand their functionality."]),
@@ -190,7 +191,7 @@ struct ChangelogView: View {
                     ChangeEntry(title: "Auto Exposure Controls", details: ["Added auto exposure control, with manual shutter speed and ISO options available for future functionality (shells only, no active functionality yet)."])
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 010", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.11 Alpha 010", changes: [
                     ChangeEntry(title: "Onboarding Screen", details: [
                         "Added the onboarding screen with centralized permissions requests"
                     ]),
@@ -216,7 +217,7 @@ struct ChangelogView: View {
                     ])
                 ])
 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 009", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.10 (Alpha 009)", changes: [
                     ChangeEntry(title: "Zoom Bar", details: [
                         "Brought Zoom Bar into beta"
                     ]),
@@ -233,7 +234,7 @@ struct ChangelogView: View {
                     ])
                 ])
 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 008", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.9 (Alpha 008)", changes: [
                     ChangeEntry(title: "New Settings", details: [
                         "Preserve Aspect Ratio",
                         "Show Clip Badge",
@@ -255,7 +256,7 @@ struct ChangelogView: View {
                     ])
                 ])
 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 007", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.8 (Alpha 007)", changes: [
                     ChangeEntry(title: "Settings Improvements", details: [
                         "Improved the ellipsis clickability for settings"
                     ]),
@@ -274,7 +275,7 @@ struct ChangelogView: View {
                     ])
                 ])
 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 006", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.7 (Alpha 006)", changes: [
                     ChangeEntry(title: "UI Changes", details: [
                         "Replaced the second settings gear with an ellipsis"
                     ]),
@@ -291,7 +292,7 @@ struct ChangelogView: View {
                     ])
                 ])
 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 005", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.6 (Alpha 005)", changes: [
                     ChangeEntry(title: "Custom Theming", details: [
                         "Custom accent color theming system"
                     ]),
@@ -307,7 +308,7 @@ struct ChangelogView: View {
                     ])
                 ])
 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 004", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.5 (Alpha 004)", changes: [
                     ChangeEntry(title: "Quick Settings and Photo Library", details: [
                         "Complete quick settings panel",
                         "Photo library preview integration"
@@ -326,7 +327,7 @@ struct ChangelogView: View {
             }
             
             Section(header: header("Internal Builds")) {
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 003", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.4 (Alpha 003)", changes: [
                     ChangeEntry(title: nil, details: [
                         "Double-tap lens switching",
                         "Dynamic UI color schemes",
@@ -335,7 +336,7 @@ struct ChangelogView: View {
                     ])
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 002", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.3 (Alpha 002)", changes: [
                     ChangeEntry(title: nil, details: [
                         "iOS-style animated record button",
                         "System-wide dark/light mode",
@@ -344,7 +345,7 @@ struct ChangelogView: View {
                     ])
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 001", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.2 (Alpha 001)", changes: [
                     ChangeEntry(title: nil, details: [
                         "4K/1080p resolution support",
                         "Front camera implementation",
@@ -354,7 +355,7 @@ struct ChangelogView: View {
                     ])
                 ])
                 
-                VersionEntry(cameraManager: cameraManager, version: "Alpha 00", changes: [
+                VersionEntry(cameraManager: cameraManager, version: "0.0.1 (Alpha 00)", changes: [
                     ChangeEntry(title: nil, details: [
                         "Gyroscopic clip splitting",
                         "720p HDR recording",
