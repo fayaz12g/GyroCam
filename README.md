@@ -101,6 +101,15 @@ We welcome issues and PRs! Please review our:
 
 ---
 
+## The Story Behind GyroCam 
+
+GyroCam was born from a personal need. As someone living with bipolar depression, memory challenges, and processing past traumas, I found vlogging to be a powerful tool for preserving memories and making sense of my experiences. These video journals became my external memory bank - allowing me to revisit moments that would otherwise fade away.
+But there was a problem: every time I flipped my phone to switch between showing my face and my perspective, the orientation would change. What should have been a healing practice became a technical nightmare, with hours spent manually finding, splitting, and rotating segments - sometimes 10-20 orientation changes per minute of footage.
+GyroCam is my solution: an app that intelligently handles orientation changes as you record, eliminating hours of frustrating post-production work. What began as a personal tool to make my mental health journey easier has evolved into something I believe can help content creators, memory-keepers, and storytellers everywhere.
+Every feature in this app was designed with one goal: to let you focus on capturing your story, not wrestling with technology.
+
+---
+
 <div align="center">
   *An app by Fayaz*
 </div>
