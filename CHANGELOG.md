@@ -30,9 +30,13 @@
   - Roadmap renamed back to upcoming features.
   - Upcoming features edited to reflect the GitHub issues closer, along with new section titles.
   - Minor verbiage changed in settings views for stitching navigation menu.
+ 
+- **Other Fixes**:
+  - Fixed an issue where the reset defaults confirmation displays continuously.
 
 
-### Beta 1 (Current)
+
+### Beta 1
 
 **Sounds**
 - Added a new looping sound when saving stitched video.
