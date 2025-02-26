@@ -105,7 +105,7 @@ struct FocusBar: View {
     }
     
     private var rotationAngle: Angle {
-        switch cameraManager.currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left": return .degrees(90)
         case "Landscape Right": return .degrees(-90)
         case "Upside Down": return .degrees(180)

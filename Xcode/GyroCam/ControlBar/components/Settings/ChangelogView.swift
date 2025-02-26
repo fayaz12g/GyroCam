@@ -17,13 +17,18 @@ struct ChangelogView: View {
                 VersionEntry(cameraManager: cameraManager, version: "0.1.3 (Beta 3)", changes: [
                     ChangeEntry(title: "Settings", details: [
                         "New feature selection for export quality, though I always reccommend highest for HDR or 60FPS. This significantly increases export speed though.",
-                        "Updated versioning naming conventions to match new one throughout the changelog"
+                        "Updated versioning naming conventions to match new one throughout the changelog",
+                        "Added ISO control and toggling auto exposure off works now"
                     ]),
                     ChangeEntry(title: "Stitching", details: [
                         "Stitching can now take place in the background, including if you lock your phone!"
                     ]),
                     ChangeEntry(title: "Orientation Handling", details: [
-                        "In Lock Landscape, badges now rotate to show you everything upright."
+                        "In Lock Landscape, badges now rotate to show you everything upright.",
+                        "The above change also applies to the photo thumbnail and bar circles"
+                    ]),
+                    ChangeEntry(title: "ISO Control", details: [
+                        "A new ISO bar exists with auto exposure off."
                     ]),
                 ])
                 

@@ -288,6 +288,24 @@ struct ExposureSettingsView: View {
                     }
             }
             
+            if !cameraManager.autoExposure {
+                Section(header: Text("ISO")) {
+                    TextField("ISO", value: $cameraManager.manualISO, format: .number)
+                        .keyboardType(.numberPad)
+                        .onChange(of: cameraManager.manualISO) {_, newValue in
+                            if newValue < cameraManager.minISO {
+                                cameraManager.manualISO = cameraManager.minISO
+                            } else if newValue > cameraManager.maxISO {
+                                cameraManager.manualISO = cameraManager.maxISO
+                            }
+                        }
+                        .disabled(cameraManager.autoExposure)
+                    
+                    Toggle("ISO Bar", isOn: $cameraManager.showISOBar)
+                        .tint(cameraManager.accentColor)
+                }
+            }
+
             
             Section(header: Text("Stabilization Mode")) {
                 Picker("Stabilization Mode", selection: $cameraManager.stabilizeVideo) {
@@ -302,22 +320,7 @@ struct ExposureSettingsView: View {
                     cameraManager.configureSession()
                 }
             }
-            
-            Section(header: Text("Manual Controls")) {
-                Picker("ISO", selection: $cameraManager.manualISO) {
-                    ForEach(Array(stride(from: 50, through: 3200, by: 50)), id: \.self) { iso in
-                        Text("\(iso)").tag(Float(iso))
-                    }
-                }
-                .disabled(cameraManager.autoExposure)
-                
-//                Picker("Shutter Speed", selection: $cameraManager.manualShutterSpeed) {
-//                    ForEach(CameraManager.ShutterSpeed.allCases, id: \.self) { speed in
-//                        Text(speed.description).tag(speed.cmTime)
-//                    }
-//                }
-//                .disabled(cameraManager.autoExposure)
-            }
+                    
         }
         .navigationTitle("Advanced Controls")
     }

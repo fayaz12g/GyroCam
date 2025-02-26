@@ -33,6 +33,13 @@ struct ContentView: View {
                                 }
                             }
                             
+                            if cameraManager.showISOBar {
+                                ISOBar(cameraManager: cameraManager)
+                                    .padding(.horizontal)
+                                    .padding(.bottom, cameraManager.showZoomBar ||  cameraManager.showFocusBar || (cameraManager.isRecording || !cameraManager.showQuickSettings || cameraManager.isRestarting) ? 0 : 100)
+                                    .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
+                            }
+                            
                             if cameraManager.showFocusBar {
                                 FocusBar(cameraManager: cameraManager)
                                     .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom)
@@ -41,14 +48,11 @@ struct ContentView: View {
                             }
 
                             if cameraManager.showZoomBar {
-                                ZoomIndicator(cameraManager: cameraManager)
+                                ZoomBar(cameraManager: cameraManager)
                                     .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom)
                                     .padding(.bottom, !cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting  ? 100 : 0)
                                     .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
                             }
-
-
-
                             
                             Spacer()
                             

@@ -122,8 +122,10 @@ struct CameraPreview: UIViewRepresentable {
                     if device.isFocusModeSupported(.continuousAutoFocus) {
                         device.focusMode = .continuousAutoFocus
                     }
-                    if device.isExposureModeSupported(.continuousAutoExposure) {
-                        device.exposureMode = .continuousAutoExposure
+                    if cameraManager.autoExposure {
+                        if device.isExposureModeSupported(.continuousAutoExposure) {
+                            device.exposureMode = .continuousAutoExposure
+                        }
                     }
                 } else {
                     if device.isFocusModeSupported(.autoFocus) {
@@ -241,6 +243,8 @@ struct CameraPreview: UIViewRepresentable {
         
         @objc @MainActor func handlePan(_ gesture: UIPanGestureRecognizer) {
             guard !cameraManager.autoFocus else { return }
+
+            if cameraManager.autoExposure { return }
             
             let translation = gesture.translation(in: gesture.view)
             let screenWidth = gesture.view?.bounds.width ?? 1

@@ -1,13 +1,14 @@
 //
-//  ZoomIndicator.swift
+//  ZoomBar.swift
 //  GyroCam
 //
-//  Created by Fayaz Shaikh on 2/20/25.
+//  Created by Fayaz Shaikh on 2/25/25.
 //
+
 
 import SwiftUI
 
-struct ZoomIndicator: View {
+struct ZoomBar: View {
     @ObservedObject var cameraManager: CameraManager
     @Environment(\.colorScheme) var colorScheme
     
@@ -96,7 +97,7 @@ struct ZoomIndicator: View {
     }
     
     private var rotationAngle: Angle {
-        switch cameraManager.currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left": return .degrees(90)
         case "Landscape Right": return .degrees(-90)
         case "Upside Down": return .degrees(180)

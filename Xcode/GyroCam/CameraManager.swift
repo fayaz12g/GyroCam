@@ -181,16 +181,24 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.autoExposure }
         set {
             settings.autoExposure = newValue
-            configureSession()
+            configureExposureMode()
         }
     }
     
     @MainActor var manualISO: Float {
         get { settings.manualISO }
         set {
-            settings.manualISO = newValue
-            updateExposureSettings()
+            let clampedISO = min(max(newValue, minISO), maxISO)
+            settings.manualISO = clampedISO
+            if !autoExposure {
+                setDeviceISO(clampedISO)
+            }
         }
+    }
+    
+    @MainActor var showISOBar: Bool {
+        get { settings.showISOBar }
+        set { settings.showISOBar = newValue }
     }
     
     @MainActor var showFocusBar: Bool {
@@ -241,11 +249,39 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    @MainActor var manualShutterSpeed: CMTime? {
-        get { CMTime(seconds: settings.manualShutterSpeed, preferredTimescale: 1/60) }
-        set {
-            settings.manualShutterSpeed = newValue.map(CMTimeGetSeconds) ?? (1/60)
-            updateExposureSettings()
+    public var minISO: Float {
+        return captureDevice?.activeFormat.minISO ?? 0.0
+    }
+
+    public var maxISO: Float {
+        return captureDevice?.activeFormat.maxISO ?? 0.0
+    }
+
+    private func configureExposureMode() {
+        guard let device = captureDevice else { return }
+        do {
+            try device.lockForConfiguration()
+            if autoExposure {
+                device.exposureMode = .continuousAutoExposure
+            } else {
+                let currentDuration = device.exposureDuration
+                device.setExposureModeCustom(duration: currentDuration, iso: manualISO)
+            }
+            device.unlockForConfiguration()
+        } catch {
+            print("Error configuring exposure: \(error)")
+        }
+    }
+
+    private func setDeviceISO(_ iso: Float) {
+        guard let device = captureDevice else { return }
+        do {
+            try device.lockForConfiguration()
+            let currentDuration = device.exposureDuration
+            device.setExposureModeCustom(duration: currentDuration, iso: iso)
+            device.unlockForConfiguration()
+        } catch {
+            print("Error setting ISO: \(error)")
         }
     }
     
@@ -272,25 +308,6 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func updateExposureSettings() {
-        guard !autoExposure,
-              let device = captureDevice else { return }
-        
-        do {
-            try device.lockForConfiguration()
-            if device.isExposureModeSupported(.custom) {
-                device.exposureMode = .custom
-                device.setExposureModeCustom(
-                    duration: manualShutterSpeed ?? CMTime(seconds: 1/60, preferredTimescale: 1000000),
-                    iso: manualISO,
-                    completionHandler: nil
-                )
-            }
-            device.unlockForConfiguration()
-        } catch {
-            print("Error updating exposure settings: \(error)")
-        }
-    }
 
     func updateFocusValueLive() {
         if let device = captureDevice {
@@ -767,14 +784,6 @@ class CameraManager: NSObject, ObservableObject {
         try device.lockForConfiguration()
         defer { device.unlockForConfiguration() }
         
-        // Check if the stabilization mode is supported
-        if device.activeFormat.isVideoStabilizationModeSupported(mapStabilizationMode(stabilizeVideo)) {
-            print("Stabilization mode \(stabilizeVideo.rawValue) is supported.")
-        } else {
-            print("Stabilization mode \(stabilizeVideo.rawValue) is NOT supported.")
-        }
-        
-        
         let targetFormat = try findBestFormat(for: device)
         device.activeFormat = targetFormat
         
@@ -824,15 +833,9 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor func switchLens(_ lens: LensType) {
         guard availableLenses.contains(lens) else {
-            showError("Selected lens is unavailable")
+            showError("Selected lens is not allowed on this device.")
             return }
-        print("Lens switching detected. Switching from:")
-        print(currentLens)
-        print("To target lens:")
-        print(lens)
         currentLens = lens
-        print("Successfully switched to:")
-        print(currentLens)
         configureSession()
     }
     

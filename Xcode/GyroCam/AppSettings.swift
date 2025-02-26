@@ -44,6 +44,7 @@ struct AppSettings: Codable {
     // Exposure Settings
     var autoExposure: Bool = true
     var manualISO: Float = 100
+    var showISOBar: Bool = false
     var manualShutterSpeed: Double = 1/60
     
     // Preview Settings
