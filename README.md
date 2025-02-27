@@ -93,7 +93,7 @@ We maintain complete transparency in our development process. Visit our interact
 - Upcoming feature development
 - Recent resolutions and closed tickets
 
-[View Live Issue Tracker](ISSUES.md)
+[View Live Issue Tracker](https://fayaz.one/GyroCam/ISSUES.md)
 
 All feature requests and bug reports are welcome! Please search existing issues before creating new ones.
 
