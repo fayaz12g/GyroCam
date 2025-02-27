@@ -86,6 +86,19 @@ This revolutionary update combines every clip into one length-perfect recording,
 
 ---
 
+## Issue Tracking & Progress 🐛
+
+We maintain complete transparency in our development process. Visit our interactive issue tracker to see:
+- Current bug fixes in progress
+- Upcoming feature development
+- Recent resolutions and closed tickets
+
+[View Live Issue Tracker](ISSUES.md)
+
+All feature requests and bug reports are welcome! Please search existing issues before creating new ones.
+
+---
+
 ## Changelog 📜
 
 - [View Full Changelog](CHANGELOG.md)
