@@ -912,7 +912,7 @@ class CameraManager: NSObject, ObservableObject {
        recordingStartTime = Date()
        orientationChanges.removeAll()
        // Record initial orientation
-       let initialOrientation = previousOrientation.description
+       let initialOrientation = currentOrientation.description
        orientationChanges.append((time: 0.0, orientation: initialOrientation))
        if playSounds {
             AudioServicesPlaySystemSound(1117)
