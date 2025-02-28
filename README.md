@@ -96,7 +96,7 @@ We maintain complete transparency in our development process. Visit our interact
 
 [View Live Issue Tracker](https://fayaz.one/GyroCam/ISSUES.html)
 
-<a id="issues" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Bugs and Features</a>
+<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Bugs and Features</a>
 
 All feature requests and bug reports are welcome! Please search existing issues before creating new ones.
 
