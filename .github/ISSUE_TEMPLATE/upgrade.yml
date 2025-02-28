@@ -1,0 +1,30 @@
+name: Update software
+description: Select a software package
+title: "update(scope): "
+labels: ["update"]
+assignees:
+  - AnonymousWP
+body:
+  - type: dropdown
+    id: Software-package
+    attributes:
+      label: Software selection
+      multiple: false
+      options:
+        - Graylog
+        - OpenSearch
+        - MongoDB
+        - Docker Compose
+        - Graylog Terraform Provider
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: Version and changelog
+      render: 
+      value: |
+        - Version: 
+        - Link to changelog: 
+    validations:
+      required: true
