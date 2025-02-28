@@ -1,6 +1,6 @@
 name: Feature Request
 description: File a feature request
-title: "feat(scope): "
+title: "[Feature Request] "
 labels: ["enhancement"]
 assignees:
   - AnonymousWP
