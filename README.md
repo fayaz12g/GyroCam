@@ -10,7 +10,7 @@
 
 <a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest Release</a>
 
-<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: ##FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
+<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
 
 ---
 
@@ -96,9 +96,7 @@ We maintain complete transparency in our development process. Visit our interact
 - Recent resolutions and closed tickets
 - Submit your own reports and requests
 
-[View Live Issue Tracker](https://fayaz.one/GyroCam/ISSUES.html)
-
-<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Bugs and Features</a>
+<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">View Live Issue Tracker</a>
 
 All feature requests and bug reports are welcome! Please search existing issues before creating new ones.
 
