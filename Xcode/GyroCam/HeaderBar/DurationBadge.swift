@@ -57,7 +57,7 @@ struct DurationBadge: View {
         else {
             let minutes = totalSeconds / 60
             let seconds = totalSeconds % 60
-            return String(format: "%d:%02d:%03d", minutes, seconds, milliseconds)
+            return String(format: "%d:%02d:%02d", minutes, seconds, milliseconds)
         }
     }
 

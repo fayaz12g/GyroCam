@@ -128,6 +128,10 @@ struct SavingDotsView: View {
             // Start progress percentage timer
             progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
                 withAnimation(.linear(duration: 0.1)) {
+                    // reset every time
+                    if progressPercentage == 100 && totalTime == 0 {
+                        progressPercentage = 0
+                    }
                     if initialDuration == 0 {
                         progressPercentage = 100
                     } else {
@@ -136,8 +140,9 @@ struct SavingDotsView: View {
                     }
                 }
                 
-                if progressPercentage >= 100 {
+                if progressPercentage > 100 {
                     timer.invalidate()
+                    totalTime = 0.0
                     progressPercentage = 100
                 }
             }

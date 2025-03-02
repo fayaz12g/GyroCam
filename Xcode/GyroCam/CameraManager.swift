@@ -918,9 +918,9 @@ class CameraManager: NSObject, ObservableObject {
             durationTimer?.invalidate()
             videoDuration = 0.0
             
-            // Start the timer to update every 0.1 seconds
-            durationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                self.videoDuration += 0.1
+            // Start the timer to update every 0.01 seconds
+            durationTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
+                self.videoDuration += 0.01
             }
         }
         
