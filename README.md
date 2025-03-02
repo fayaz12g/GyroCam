@@ -8,9 +8,9 @@
 **The Smart Orientation-Conscious Camera App**  
 *Never suffer from sideways videos again!*
 
-<a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest Release</a>
+<a id="download-latest" href="#" class="button" style="display: inline-block; margin-right: 10px; padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest Release</a>
 
-<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
+<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="display: inline-block; margin-right: 10px; padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
 
 ---
 
@@ -76,7 +76,7 @@ This revolutionary update combines every clip into one length-perfect recording,
 1. If you are on GitHub, download latest IPA from [here](https://github.com/fayaz12g/GyroCam/releases/latest)
    Alternativly, if you are on the site, click the button below:
    
-   <a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest IPA</a>
+   <a id="download-latest" href="#" class="button" style="display: inline-block; margin-right: 10px; padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest IPA</a>
    
 3. Install [Sideloadly](https://sideloadly.io/)
 4. Connect iOS device & trust computer
