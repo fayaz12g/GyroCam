@@ -26,7 +26,7 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                if cameraManager.showDurationBadge {
+                                if cameraManager.showDurationBadge && (cameraManager.isRecording || cameraManager.isRestarting) {
                                     DurationBadge(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showDurationBadge: $cameraManager.showDurationBadge)
                                 }
                                 

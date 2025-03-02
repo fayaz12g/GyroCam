@@ -17,6 +17,7 @@ struct ChangelogView: View {
                 VersionEntry(cameraManager: cameraManager, version: "0.1.4 (Beta 4)", changes: [
                     ChangeEntry(title: "Badges", details: [
                         "A new 'Duration' badge shows how long you've been recording for.",
+                        "The duration badge changes the text color based on the backing accent color brightness.",
                         "Orientation Header renamed to orientation badge in the code"
                     ]),
                     ChangeEntry(title: "Stitching", details: [

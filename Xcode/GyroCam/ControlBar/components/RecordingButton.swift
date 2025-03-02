@@ -119,39 +119,26 @@ struct SavingDotsView: View {
         }
         .frame(width: 70, height: 70)
         .onChange(of: cameraManager.exportDuration) { _, newValue in
-            // Don't update during cleanup
-            if newValue != 0 {
-                // Store the initial duration for percentage calculation
-                if initialDuration == 0 {
-                    initialDuration = newValue + 2
-                }
-                
-                // Calculate percentage based on remaining time
-                let remainingTime = newValue + 2
-                progressPercentage = 100 - (remainingTime / initialDuration * 100)
-            }
+            initialDuration = newValue
         }
         .onAppear {
-            // Initialize with current duration
-            initialDuration = cameraManager.exportDuration + 2
+            initialDuration = cameraManager.exportDuration
+            var totalTime = 0.0
             
             // Start progress percentage timer
             progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
                 withAnimation(.linear(duration: 0.1)) {
-                    if initialDuration > 0 {
-                        let remainingTime = max(cameraManager.exportDuration, 0)
-                        progressPercentage = 100 - (remainingTime / initialDuration * 100)
-                        
-                        // Ensure we reach exactly 100% at the end
-                        if remainingTime == 0 {
-                            progressPercentage = 100
-                        }
+                    if initialDuration == 0 {
+                        progressPercentage = 100
+                    } else {
+                        totalTime += 0.1
+                        progressPercentage = (totalTime / initialDuration) * 100
                     }
                 }
                 
-                // Stop the timer when we reach 100%
                 if progressPercentage >= 100 {
                     timer.invalidate()
+                    progressPercentage = 100
                 }
             }
             

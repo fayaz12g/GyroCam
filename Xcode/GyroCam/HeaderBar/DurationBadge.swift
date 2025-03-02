@@ -39,49 +39,23 @@ struct DurationBadge: View {
         }
     }
     
-    private var orientationArrow: String {
-        switch currentOrientation {
-        case "Landscape Left": return "arrow.left"
-        case "Landscape Right": return "arrow.right"
-        case "Upside Down": return "arrow.down"
-        default: return "arrow.up"
-        }
-    }
-    
-    private var orientationPhone: String {
-        switch currentOrientation {
-        case "Landscape Left": return "iphone.landscape"
-        case "Landscape Right": return "iphone.landscape"
-        case "Upside Down": return "iphone"
-        default: return "iphone"
-        }
+    var isAccentColorDark: Bool {
+        return UIColor(cameraManager.accentColor).isDarkColor
     }
 
     var body: some View {
         GeometryReader { geometry in
             HStack {
                 Group {
-                    if cameraManager.minimalOrientationBadge {
-                        HStack(spacing: 4) {
-                            Image(systemName: orientationArrow)
-                            Image(systemName: orientationPhone)
-                        }
-                    } else {
-                        Text(currentOrientation)
-                    }
-                }
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.1)) {
-                        cameraManager.minimalOrientationBadge.toggle()
-                    }
+                    Text("\(String(format: "%.1f", cameraManager.videoDuration))")
                 }
                 .font(.title3.weight(.semibold))
-                .foregroundColor(colorScheme == .dark ? .white : .black)
+                .foregroundColor(isAccentColorDark ? .white : .black)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
                 .background(
-                    Capsule()
-                        .fill(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white.opacity(0.7))
+                    RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
+                        .fill(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9)) // change lighter opacity?
                 )
                 .rotationEffect(rotationAngle)
                 .fixedSize()
@@ -103,5 +77,13 @@ struct DurationBadge: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: cameraManager.realOrientation)
+    }
+}
+
+extension UIColor {
+    var isDarkColor: Bool {
+        var white: CGFloat = 0
+        self.getWhite(&white, alpha: nil)
+        return white < 0.8
     }
 }

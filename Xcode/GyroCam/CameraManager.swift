@@ -17,6 +17,8 @@ class CameraManager: NSObject, ObservableObject {
     private var recordingStartTime: Date?
     private var orientationChanges: [(time: TimeInterval, orientation: String)] = []
     var exportDuration: Double = 0.0
+    var videoDuration: Double = 0.0
+    @State private var durationTimer: Timer? = nil
     
     private var previousOrientation: UIDeviceOrientation = .portrait
     private let recordingQueue = DispatchQueue(label: "recording.queue")
@@ -911,6 +913,17 @@ class CameraManager: NSObject, ObservableObject {
        stitchingGroup = DispatchGroup()
        recordingStartTime = Date()
        orientationChanges.removeAll()
+        
+        if !isRestarting {
+            durationTimer?.invalidate()
+            videoDuration = 0.0
+            
+            // Start the timer to update every 0.1 seconds
+            durationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                self.videoDuration += 0.1
+            }
+        }
+        
        // Record initial orientation
        let initialOrientation = previousOrientation.description
        orientationChanges.append((time: 0.0, orientation: initialOrientation))
@@ -939,6 +952,9 @@ class CameraManager: NSObject, ObservableObject {
         
         
         if !isRestarting {
+            durationTimer?.invalidate()
+            videoDuration = 0.0
+            
             stitchingGroup?.notify(queue: .main) { [weak self] in
                 guard let self = self else { return }
                 if self.shouldStitchClips && !self.clipURLs.isEmpty {
