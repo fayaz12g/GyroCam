@@ -8,9 +8,9 @@
 **The Smart Orientation-Conscious Camera App**  
 *Never suffer from sideways videos again!*
 
-<a id="download-latest" href="#" class="button" style="display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest Release</a>
+<a id="download-latest" href="#" class="button" style="padding: 10px 15px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">Download Latest Release</a>
 
-<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="display: inline-block; padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
+<a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
 
 ---
 
