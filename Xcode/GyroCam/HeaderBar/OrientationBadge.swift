@@ -1,6 +1,14 @@
+//
+//  OrientationBadge.swift
+//  GyroCam
+//
+//  Created by Fayaz Shaikh on 3/2/25.
+//
+
+
 import SwiftUI
 
-struct OrientationHeader: View {
+struct OrientationBadge: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var currentOrientation: String
     @Binding var showOrientationBadge: Bool

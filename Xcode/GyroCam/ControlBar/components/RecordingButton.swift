@@ -78,12 +78,15 @@ struct SavingDotsView: View {
     @ObservedObject var cameraManager: CameraManager
     let color: Color
     @State private var rotation = 0.0
-    @State private var displayedDuration: Double = 0
+    @State private var progressPercentage: Double = 0
+    
+    // Initial and total durations for percentage calculation
+    @State private var initialDuration: Double = 0
     
     // Feedback and timers
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .soft)
     @State private var feedbackTimer: Timer?
-    @State private var countdownTimer: Timer?  // New timer for countdown
+    @State private var progressTimer: Timer?  // Renamed timer for progress
     
     var body: some View {
         ZStack {
@@ -109,29 +112,38 @@ struct SavingDotsView: View {
             .frame(width: 70, height: 70)
             .rotationEffect(.degrees(rotation))
             
-            Text(String(format: "%.1f", displayedDuration))
+            Text("\(Int(progressPercentage))%")
                 .foregroundColor(.white)
                 .font(.system(size: 24, weight: .bold))
                 .monospacedDigit()
         }
         .frame(width: 70, height: 70)
         .onChange(of: cameraManager.exportDuration) { _, newValue in
-            // dont do it during cleanup
-            if newValue != 0 {
-                displayedDuration = cameraManager.exportDuration + 2
-            }
+            initialDuration = newValue
         }
         .onAppear {
-            // Initialize with current duration
-            displayedDuration = cameraManager.exportDuration
+            initialDuration = cameraManager.exportDuration
+            var totalTime = 0.0
             
-            // Start smooth countdown timer
-            countdownTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            // Start progress percentage timer
+            progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
                 withAnimation(.linear(duration: 0.1)) {
-                    displayedDuration = max(displayedDuration - 0.1, 0)
+                    // reset every time
+                    if progressPercentage == 100 && totalTime == 0 {
+                        progressPercentage = 0
+                    }
+                    if initialDuration == 0 {
+                        progressPercentage = 100
+                    } else {
+                        totalTime += 0.1
+                        progressPercentage = (totalTime / initialDuration) * 100
+                    }
                 }
-                if displayedDuration <= 0 {
+                
+                if progressPercentage > 100 {
                     timer.invalidate()
+                    totalTime = 0.0
+                    progressPercentage = 100
                 }
             }
             
@@ -152,7 +164,7 @@ struct SavingDotsView: View {
             }
         }
         .onDisappear {
-            countdownTimer?.invalidate()
+            progressTimer?.invalidate()
             feedbackTimer?.invalidate()
         }
     }

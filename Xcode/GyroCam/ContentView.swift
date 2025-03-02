@@ -1,7 +1,5 @@
 import SwiftUI
 
-import SwiftUI
-
 struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
     @State private var focusValue: Float = 0.5
@@ -19,15 +17,21 @@ struct ContentView: View {
                     ZStack {
                         CameraPreview(session: cameraManager.session, cameraManager: cameraManager, showOnboarding: $showOnboarding)
                             .ignoresSafeArea()
-                        
                         VStack {
                             // Top Bar
                             HStack {
                                 if cameraManager.showOrientationBadge {
-                                    OrientationHeader(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showOrientationBadge: $cameraManager.showOrientationBadge)
+                                    OrientationBadge(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showOrientationBadge: $cameraManager.showOrientationBadge)
                                 }
                                 
                                 Spacer()
+                                
+                                if cameraManager.showDurationBadge && (cameraManager.isRecording || cameraManager.isRestarting) {
+                                    DurationBadge(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showDurationBadge: $cameraManager.showDurationBadge)
+                                }
+                                
+                                Spacer()
+                                
                                 if cameraManager.showClipBadge {
                                     ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, realOrientation: $cameraManager.realOrientation, showClipBadge: $cameraManager.showClipBadge)
                                 }
