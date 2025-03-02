@@ -160,10 +160,12 @@ struct InterfaceSettingsView: View {
                 Toggle("Minimal Orientation Badge", isOn: $cameraManager.minimalOrientationBadge)
                     .tint(cameraManager.accentColor)
                     .disabled(!cameraManager.showOrientationBadge)
+                Toggle("Show Recording Duration Badge", isOn: $cameraManager.showDurationBadge)
+                    .tint(cameraManager.accentColor)
                 FeatureToggle(
-                    title: "Recording Timer",
+                    title: "Secret Settings",
                     status: "Coming Soon",
-                    isOn: $cameraManager.showRecordingTimer,
+                    isOn: $cameraManager.showDurationBadge,
                     statusColor: .purple, cameraManager: cameraManager
                 )
                 

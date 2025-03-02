@@ -21,10 +21,17 @@ struct ContentView: View {
                             // Top Bar
                             HStack {
                                 if cameraManager.showOrientationBadge {
-                                    OrientationHeader(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showOrientationBadge: $cameraManager.showOrientationBadge)
+                                    OrientationBadge(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showOrientationBadge: $cameraManager.showOrientationBadge)
                                 }
                                 
                                 Spacer()
+                                
+                                if cameraManager.showDurationBadge {
+                                    DurationBadge(cameraManager: cameraManager, currentOrientation: $cameraManager.currentOrientation, showDurationBadge: $cameraManager.showDurationBadge)
+                                }
+                                
+                                Spacer()
+                                
                                 if cameraManager.showClipBadge {
                                     ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, realOrientation: $cameraManager.realOrientation, showClipBadge: $cameraManager.showClipBadge)
                                 }

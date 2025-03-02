@@ -135,9 +135,9 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.minimalOrientationBadge = newValue }
     }
     
-    @MainActor var showRecordingTimer: Bool {
-        get { settings.showRecordingTimer }
-        set { settings.showRecordingTimer = newValue }
+    @MainActor var showDurationBadge: Bool {
+        get { settings.showDurationBadge }
+        set { settings.showDurationBadge = newValue }
     }
     
     @MainActor var showQuickSettings: Bool {

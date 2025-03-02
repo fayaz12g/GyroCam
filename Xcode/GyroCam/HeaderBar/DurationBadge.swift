@@ -1,9 +1,17 @@
+//
+//  DurationBadge.swift
+//  GyroCam
+//
+//  Created by Fayaz Shaikh on 3/2/25.
+//
+
+
 import SwiftUI
 
-struct OrientationHeader: View {
+struct DurationBadge: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var currentOrientation: String
-    @Binding var showOrientationBadge: Bool
+    @Binding var showDurationBadge: Bool
     @Environment(\.colorScheme) var colorScheme
     
     private var rotationAngle: Angle {
@@ -84,10 +92,10 @@ struct OrientationHeader: View {
                 .offset(y: verticalOffset)
                 .contextMenu {
                     Button {
-                        showOrientationBadge.toggle()
+                        showDurationBadge.toggle()
                     } label: {
-                        Label(showOrientationBadge ? "Hide Badge" : "Show Badge",
-                              systemImage: showOrientationBadge ? "eye.slash" : "eye")
+                        Label(showDurationBadge ? "Hide Badge" : "Show Badge",
+                              systemImage: showDurationBadge ? "eye.slash" : "eye")
                     }
                 }
                 

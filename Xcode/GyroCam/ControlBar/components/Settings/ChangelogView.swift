@@ -14,6 +14,18 @@ struct ChangelogView: View {
         Form {
             Section(header: header("Beta Releases")) {
                 
+                VersionEntry(cameraManager: cameraManager, version: "0.1.4 (Beta 4)", changes: [
+                    ChangeEntry(title: "Badges", details: [
+                        "A new 'Duration' badge shows how long you've been recording for.",
+                        "Orientation Header renamed to orientation badge in the code"
+                    ]),
+                    ChangeEntry(title: "Stitching", details: [
+                        "The record saving button shows clip duration as a percentage increasing",
+                        "It hangs at 100% until complete",
+                        
+                    ]),
+                ])
+                
                 VersionEntry(cameraManager: cameraManager, version: "0.1.3 (Beta 3)", changes: [
                     ChangeEntry(title: "Settings", details: [
                         "New feature selection for export quality, though I always reccommend highest for HDR or 60FPS. This significantly increases export speed though.",
