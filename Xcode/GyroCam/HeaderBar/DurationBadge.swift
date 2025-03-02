@@ -37,7 +37,7 @@ struct DurationBadge: View {
     
     private func formatDuration(_ duration: Double) -> String {
         let totalSeconds = Int(duration)
-        let milliseconds = Int((duration - Double(totalSeconds)) * 1000)
+        let milliseconds = Int((duration - Double(totalSeconds)) * 1000 / 10)
         
         // Days:Hours:Minutes format (for durations > 24 hours)
         if totalSeconds >= 86400 { // 24 hours in seconds
@@ -60,6 +60,7 @@ struct DurationBadge: View {
             return String(format: "%d:%02d:%02d", minutes, seconds, milliseconds)
         }
     }
+
 
     var body: some View {
         GeometryReader { geometry in
