@@ -18,6 +18,7 @@ struct ChangelogView: View {
                     ChangeEntry(title: "Badges", details: [
                         "A new 'Duration' badge shows how long you've been recording for.",
                         "The duration badge changes the text color based on the backing accent color brightness.",
+                        "Show duration badge defaults to true",
                         "Orientation Header renamed to orientation badge in the code"
                     ]),
                     ChangeEntry(title: "Stitching", details: [
