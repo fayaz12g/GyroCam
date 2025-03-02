@@ -562,7 +562,6 @@ class CameraManager: NSObject, ObservableObject {
         messageType = type
         presentMessage = message
     }
-
     
     private func loadSettings() {
         if let data = UserDefaults.standard.data(forKey: "appSettings") {
@@ -778,6 +777,7 @@ class CameraManager: NSObject, ObservableObject {
         case .auto: return .auto
         }
     }
+    
     @MainActor private func configureDeviceFormat() throws {
         guard let device = currentDevice else { return }
         

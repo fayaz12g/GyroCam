@@ -104,6 +104,7 @@ extension UIDevice {
             return identifier + String(UnicodeScalar(UInt8(value)))
         }
         
+        
         // Map identifier to marketing name
         switch identifier {
             // iPhone 16 Pro models

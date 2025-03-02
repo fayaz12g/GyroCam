@@ -1,7 +1,5 @@
 import SwiftUI
 
-import SwiftUI
-
 struct ContentView: View {
     @StateObject private var cameraManager = CameraManager()
     @State private var focusValue: Float = 0.5
@@ -19,7 +17,6 @@ struct ContentView: View {
                     ZStack {
                         CameraPreview(session: cameraManager.session, cameraManager: cameraManager, showOnboarding: $showOnboarding)
                             .ignoresSafeArea()
-                        
                         VStack {
                             // Top Bar
                             HStack {

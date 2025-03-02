@@ -216,6 +216,7 @@ enum VideoBadgeType: Identifiable, CaseIterable {
         }
     }
     
+    // change label to AVCaptureVideoStabilizationMode? to eliminate camera manaegr function mapStabilizationMode
     var label: String {
         switch self {
         case .hdr: return "HDR"
