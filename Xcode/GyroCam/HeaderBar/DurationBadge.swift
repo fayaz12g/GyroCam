@@ -1,11 +1,3 @@
-//
-//  DurationBadge.swift
-//  GyroCam
-//
-//  Created by Fayaz Shaikh on 3/2/25.
-//
-
-
 import SwiftUI
 
 struct DurationBadge: View {
@@ -42,12 +34,38 @@ struct DurationBadge: View {
     var isAccentColorDark: Bool {
         return UIColor(cameraManager.accentColor).isDarkColor
     }
+    
+    private func formatDuration(_ duration: Double) -> String {
+        let totalSeconds = Int(duration)
+        let milliseconds = Int((duration - Double(totalSeconds)) * 1000)
+        
+        // Days:Hours:Minutes format (for durations > 24 hours)
+        if totalSeconds >= 86400 { // 24 hours in seconds
+            let days = totalSeconds / 86400
+            let hours = (totalSeconds % 86400) / 3600
+            let minutes = (totalSeconds % 3600) / 60
+            return String(format: "%d:%02d:%02d", days, hours, minutes)
+        }
+        // Hours:Minutes:Seconds format (for durations > 60 minutes)
+        else if totalSeconds >= 3600 { // 60 minutes in seconds
+            let hours = totalSeconds / 3600
+            let minutes = (totalSeconds % 3600) / 60
+            let seconds = totalSeconds % 60
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        // Minutes:Seconds:Milliseconds format (default)
+        else {
+            let minutes = totalSeconds / 60
+            let seconds = totalSeconds % 60
+            return String(format: "%d:%02d:%03d", minutes, seconds, milliseconds)
+        }
+    }
 
     var body: some View {
         GeometryReader { geometry in
             HStack {
                 Group {
-                    Text("\(String(format: "%.1f", cameraManager.videoDuration))")
+                    Text(formatDuration(cameraManager.videoDuration))
                 }
                 .font(.title3.weight(.semibold))
                 .foregroundColor(isAccentColorDark ? .white : .black)
