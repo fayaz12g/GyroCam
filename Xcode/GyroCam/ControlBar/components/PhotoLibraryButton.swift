@@ -17,7 +17,7 @@ struct PhotoLibraryButton: View {
     @State private var latestThumbnail: UIImage?
     
     private var rotationAngle: Angle {
-        switch cameraManager.currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left": return .degrees(90)
         case "Landscape Right": return .degrees(-90)
         case "Upside Down": return .degrees(180)
@@ -30,7 +30,7 @@ struct PhotoLibraryButton: View {
     }
     
     private var verticalOffset: CGFloat {
-        switch cameraManager.currentOrientation {
+        switch cameraManager.realOrientation {
         case "Landscape Left", "Landscape Right": return -6
         case "Upside Down": return 0
         default: return 0
