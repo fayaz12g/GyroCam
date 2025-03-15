@@ -33,7 +33,7 @@ jobs:
       - name: Increment build number
         run: |
           NEW_BUILD_NUMBER=$((CURRENT_PROJECT_VERSION+1))
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD_NUMBER" Xcode/GyroCam.xcodeproj/project.pbxproj
+          /usr/libexec/PlistBuddy -c "Set :CURRENT_PROJECT_VERSION $NEW_BUILD_NUMBER" Xcode/GyroCam.xcodeproj/project.pbxproj
           echo "Updated build number to $NEW_BUILD_NUMBER"
 
       - name: Build iOS app
