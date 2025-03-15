@@ -7,14 +7,14 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest  # macOS runner
+    runs-on: macos-15-large  # macOS runner
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3  # Check out the repository
 
       - name: Set up Xcode
-        run: sudo xcode-select --switch /Applications/Xcode-beta.app/Contents/Developer
+        run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
       # - name: Install CocoaPods
       #   run: |
