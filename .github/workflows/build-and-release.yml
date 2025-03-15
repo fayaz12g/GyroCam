@@ -16,11 +16,11 @@ jobs:
       - name: Set up Xcode
         run: sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 
-      - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-          cd Xcode
-          pod install --repo-update
+      # - name: Install CocoaPods
+      #   run: |
+      #     gem install cocoapods
+      #     cd Xcode
+      #     pod install --repo-update
 
       - name: Get MARKETING_VERSION and CURRENT_PROJECT_VERSION
         id: version_info
