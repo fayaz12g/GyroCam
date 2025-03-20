@@ -5,7 +5,7 @@ import AVFoundation
 struct SettingsView: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var isPresented: Bool
-    @Environment(\.presentationMode) var presentationMode
+    @State private var selectedTab = 0
     @State private var showOnboarding = false
     @State private var forceOnboarding = false
     
@@ -14,113 +14,221 @@ struct SettingsView: View {
             OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding)
         } else {
             NavigationStack {
-                Form {
-                    // Main Settings Sections
-                    CaptureSettingsSection()
-                    InterfaceSettingsSection()
-                    AboutHelpSection()
-                    MiscellaneousSection()
+                TabView(selection: $selectedTab) {
+                    CaptureSettingsTab(cameraManager: cameraManager)
+                        .tag(0)
+                        .tabItem {
+                            Image(systemName: "camera.aperture")
+                            Text("Capture")
+                        }
+                    
+                    CustomizationSettingsTab(cameraManager: cameraManager)
+                        .tag(1)
+                        .tabItem {
+                            Image(systemName: "slider.horizontal.3")
+                            Text("Customize")
+                        }
+                    
+                    InformationSettingsTab(cameraManager: cameraManager, showOnboarding: $showOnboarding)
+                        .tag(2)
+                        .tabItem {
+                            Image(systemName: "info.circle")
+                            Text("Info")
+                        }
                 }
                 .navigationTitle("Settings")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { DoneButton() }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") {
+                            isPresented = false
+                        }
+                        .foregroundColor(cameraManager.accentColor)
+                    }
+                }
             }
+            .tint(cameraManager.accentColor)
+            .presentationBackground(.ultraThinMaterial)
         }
     }
+}
+
+struct CaptureSettingsTab: View {
+    @ObservedObject var cameraManager: CameraManager
     
-    // MARK: - Subviews
-    private func InterfaceSettingsSection() -> some View {
-        Section(header: Text("Customization")) {
-            NavigationLink(destination: InterfaceSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Interface", icon: "uiwindow.split.2x1")
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                ModernSettingRow(
+                    title: "Video Settings",
+                    description: "Configure resolution, frame rate, and quality",
+                    icon: "camera.aperture",
+                    iconColor: .blue,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Advanced Controls",
+                    description: "Adjust exposure, focus, and white balance",
+                    icon: "camera.badge.ellipsis",
+                    iconColor: .purple,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Output",
+                    description: "Manage orientation and export settings",
+                    icon: "list.and.film",
+                    iconColor: .orange,
+                    action: { /* Navigation */ }
+                )
             }
-            NavigationLink(destination: SoundsAndHapticsSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Sounds and Haptics", icon: "speaker.badge.exclamationmark")
-            }
-            NavigationLink(destination: PhotoLibrarySettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Photo Library", icon: "photo.stack")
-            }
+            .padding()
         }
     }
+}
+
+struct CustomizationSettingsTab: View {
+    @ObservedObject var cameraManager: CameraManager
     
-    private func CaptureSettingsSection() -> some View {
-        Section(header: Text("Capture")) {
-            NavigationLink(destination: CaptureSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Video Settings", icon: "camera.aperture")
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                ModernSettingRow(
+                    title: "Interface",
+                    description: "Customize appearance and UI elements",
+                    icon: "uiwindow.split.2x1",
+                    iconColor: .green,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Sounds and Haptics",
+                    description: "Configure audio feedback and vibrations",
+                    icon: "speaker.badge.exclamationmark",
+                    iconColor: .pink,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Photo Library",
+                    description: "Adjust photo library integration settings",
+                    icon: "photo.stack",
+                    iconColor: .cyan,
+                    action: { /* Navigation */ }
+                )
             }
-            NavigationLink(destination: ExposureSettingsView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Advanced Controls", icon: "camera.badge.ellipsis")
-            }
-            NavigationLink(destination: OrientationStitchingView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Output", icon: "list.and.film")
-            }
+            .padding()
         }
     }
+}
+
+struct InformationSettingsTab: View {
+    @ObservedObject var cameraManager: CameraManager
+    @Binding var showOnboarding: Bool
     
-    private func AboutHelpSection() -> some View {
-        Section(header: Text("Information")) {
-            NavigationLink(destination: AboutView(cameraManager: cameraManager)) {
-                SettingsRow(title: "About", icon: "info.circle")
-            }
-            NavigationLink(destination: PrivacyPolicyView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Privacy Policy", icon: "hand.raised.fill")
-            }
-            NavigationLink(destination: ChangelogView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Version History", icon: "clock.badge.checkmark")
-            }
-            NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
-                SettingsRow(title: "Upcoming Features", icon: "road.lanes.curved.right")
-            }
-            VStack {
-                Spacer() // Push the button towards the center vertically
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                ModernSettingRow(
+                    title: "About",
+                    description: "Learn about GyroCam and its features",
+                    icon: "info.circle",
+                    iconColor: .indigo,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Privacy Policy",
+                    description: "Review our privacy practices",
+                    icon: "hand.raised.fill",
+                    iconColor: .red,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Version History",
+                    description: "See what's changed in recent updates",
+                    icon: "clock.badge.checkmark",
+                    iconColor: .gray,
+                    action: { /* Navigation */ }
+                )
+                
+                ModernSettingRow(
+                    title: "Upcoming Features",
+                    description: "Preview what's coming next",
+                    icon: "road.lanes.curved.right",
+                    iconColor: .mint,
+                    action: { /* Navigation */ }
+                )
+                
                 Button("Show Onboarding") {
                     showOnboarding = true
                 }
                 .foregroundColor(cameraManager.accentColor)
-                .frame(maxWidth: .infinity) // Take full width
-                .multilineTextAlignment(.center) // Align text in case of multiline
-                Spacer() // Push the button towards the center vertically
+                .padding()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
         }
     }
+}
+
+struct ModernSettingRow: View {
+    let title: String
+    let description: String
+    let icon: String
+    let iconColor: Color
+    let action: () -> Void
+    @Environment(\.colorScheme) var colorScheme
+    @State private var isPressed = false
     
-    private func MiscellaneousSection() -> some View {
-        Section {
-            
-            Button("Reset Defaults", action: resetDefaults)
-                .foregroundColor(.blue)
-                .frame(maxWidth: .infinity)
-        }
-        .listRowBackground(Color.clear)
-    }
-    
-    private func DoneButton() -> some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button("Done") { presentationMode.wrappedValue.dismiss() }
-                .foregroundColor(cameraManager.accentColor)
-        }
-    }
-    
-    private struct SettingsRow: View {
-        let title: String
-        let icon: String
-        
-        var body: some View {
-            HStack {
-                Text(title)
+    var body: some View {
+        Button(action: action) {
+            HStack(alignment: .center, spacing: 16) {
+                // Icon in colored circle
+                Circle()
+                    .fill(iconColor)
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Image(systemName: icon)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                    )
+                
+                // Title and description
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                    Text(description)
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+                        .lineLimit(1)
+                }
+                
                 Spacer()
-                Image(systemName: icon)
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.gray)
             }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white)
+                    .shadow(color: colorScheme == .dark ? .clear : .black.opacity(0.05), radius: 8, x: 0, y: 2)
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
         }
+        .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
     }
-    
-    private func resetDefaults() {
-            // Reset default settings
-            cameraManager.resetToDefaults()
-        }
-
-
 }
 
 // MARK: - Submenu Views
@@ -363,6 +471,9 @@ struct OrientationStitchingView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .tint(cameraManager.accentColor)
+                
+                Toggle("Allow Recording While Saving", isOn: $cameraManager.allowRecordingWhileSaving)
+                    .tint(cameraManager.accentColor)
             }
             
         }

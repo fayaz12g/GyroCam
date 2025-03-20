@@ -12,12 +12,15 @@ class CameraManager: NSObject, ObservableObject {
     private let movieOutput = AVCaptureMovieFileOutput()
     private let motionManager = CMMotionManager()
     private var currentDevice: AVCaptureDevice?
+    private var currentCaptureDevice: AVCaptureDevice?
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
     private var recordingStartTime: Date?
     private var orientationChanges: [(time: TimeInterval, orientation: String)] = []
     var exportDuration: Double = 0.0
     var videoDuration: Double = 0.0
+    @Published var exportProgress: Float = 0.0
+    @Published var isExporting: Bool = false
     @State private var durationTimer: Timer? = nil
     
     private var previousOrientation: UIDeviceOrientation = .portrait
@@ -28,6 +31,7 @@ class CameraManager: NSObject, ObservableObject {
     
     private var clipURLs: [URL] = []
     private var stitchingGroup: DispatchGroup?
+    @Published var currentClipNumber = 1
     
     // location
     private let locationManager = CLLocationManager()
@@ -44,8 +48,6 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor @Published var realOrientation = "Portrait"
     @MainActor @Published var presentMessage = ""
     @MainActor @Published var messageType = ""
-    @MainActor @Published var currentClipNumber = 1
-    private var currentCaptureDevice: AVCaptureDevice?
     
     @Published var currentZoom: CGFloat = 1.0
     @Published var exportQuality: ExportQuality = .highest
@@ -376,104 +378,152 @@ class CameraManager: NSObject, ObservableObject {
         Task(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             
-            let asset = AVURLAsset(url: clipURL)
-            guard let videoTrack = try? await asset.loadTracks(withMediaType: .video).first,
-                  let audioTrack = try? await asset.loadTracks(withMediaType: .audio).first else {
-                self.showError("Missing video/audio track")
-                return
-            }
-            
-            // Get video properties
-            let naturalSize = try await videoTrack.load(.naturalSize)
-            let assetDuration = try await asset.load(.duration)
-            let frameRate = try await videoTrack.load(.nominalFrameRate)
-            
-            // Create composition with audio
-            let composition = AVMutableComposition()
-            guard let compVideoTrack = composition.addMutableTrack(withMediaType: .video,
-                                                                   preferredTrackID: kCMPersistentTrackID_Invalid),
-                  let compAudioTrack = composition.addMutableTrack(withMediaType: .audio,
-                                                                   preferredTrackID: kCMPersistentTrackID_Invalid) else {
-                self.showError("Failed to create composition tracks")
-                return
-            }
-            
-            // Build segments properly
-            var segments: [CMTimeRange] = []
-            var prevTime = CMTime.zero
-            for change in self.orientationChanges {
-                let time = CMTime(seconds: change.time, preferredTimescale: 600)
-                if time > prevTime {
-                    segments.append(CMTimeRange(start: prevTime, end: time))
-                    prevTime = time
-                }
-            }
-            segments.append(CMTimeRange(start: prevTime, end: assetDuration))
-            
-            // Remove zero-length segments
-            let validSegments = segments.filter { $0.duration.seconds > 0 }
-            
-            
-            // Create video composition
-            let videoComposition = AVMutableVideoComposition()
-            videoComposition.renderSize = naturalSize
-            videoComposition.frameDuration = CMTime(value: 1, timescale: Int32(frameRate))
-            
-            var instructions: [AVMutableVideoCompositionInstruction] = []
-            var insertTime = CMTime.zero
-            
-            for (index, segment) in validSegments.enumerated() {
-                // Insert video
-                try compVideoTrack.insertTimeRange(segment, of: videoTrack, at: insertTime)
+            do {
+                let asset = AVURLAsset(url: clipURL)
                 
-                // Insert audio
-                try compAudioTrack.insertTimeRange(segment, of: audioTrack, at: insertTime)
+                // Load tracks synchronously to ensure they exist
+                let videoTracks = try await asset.loadTracks(withMediaType: .video)
+                let audioTracks = try await asset.loadTracks(withMediaType: .audio)
                 
-                
-                let num = (self.orientationChanges.first?.orientation == "Landscape Left") ? 1 : 0
-                
-                // Create rotation transform
-                let transform: CGAffineTransform
-                if index % 2 == num {
-                    let centerX = naturalSize.width / 2
-                    let centerY = naturalSize.height / 2
-                    transform = CGAffineTransform(translationX: centerX, y: centerY)
-                        .rotated(by: .pi)
-                        .translatedBy(x: -centerX, y: -centerY)
-                } else {
-                    transform = .identity
+                guard let videoTrack = videoTracks.first,
+                      let audioTrack = audioTracks.first else {
+                    print("❌ Missing video/audio track")
+                    await MainActor.run {
+                        self.showError("Missing video/audio track")
+                        self.isSavingVideo = false
+                    }
+                    return
                 }
                 
-                // Create instruction
-                let instruction = AVMutableVideoCompositionInstruction()
-                instruction.timeRange = CMTimeRange(start: insertTime, duration: segment.duration)
+                // Get video properties
+                let naturalSize = try await videoTrack.load(.naturalSize)
+                let assetDuration = try await asset.load(.duration)
+                let frameRate = try await videoTrack.load(.nominalFrameRate)
                 
-                let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compVideoTrack)
-                layerInstruction.setTransform(transform, at: .zero)
-                instruction.layerInstructions = [layerInstruction]
-                instructions.append(instruction)
+                // Create composition
+                let composition = AVMutableComposition()
                 
-                insertTime = CMTimeAdd(insertTime, segment.duration)
+                // Create video and audio tracks
+                guard let compVideoTrack = composition.addMutableTrack(
+                    withMediaType: .video,
+                    preferredTrackID: kCMPersistentTrackID_Invalid
+                ) else {
+                    throw NSError(domain: "Stitching", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create video track"])
+                }
+                
+                guard let compAudioTrack = composition.addMutableTrack(
+                    withMediaType: .audio,
+                    preferredTrackID: kCMPersistentTrackID_Invalid
+                ) else {
+                    throw NSError(domain: "Stitching", code: -1, userInfo: [NSLocalizedDescriptionKey: "Could not create audio track"])
+                }
+                
+                // Insert the entire video and audio tracks
+                let timeRange = CMTimeRange(start: .zero, duration: assetDuration)
+                try compVideoTrack.insertTimeRange(timeRange, of: videoTrack, at: .zero)
+                try compAudioTrack.insertTimeRange(timeRange, of: audioTrack, at: .zero)
+                
+                // Create video composition
+                let videoComposition = AVMutableVideoComposition()
+                videoComposition.renderSize = naturalSize
+                videoComposition.frameDuration = CMTime(value: 1, timescale: Int32(frameRate))
+                
+                // Build segments from orientation changes
+                var segments: [(range: CMTimeRange, orientation: String)] = []
+                var prevTime = CMTime.zero
+                
+                for change in self.orientationChanges {
+                    let time = CMTime(seconds: change.time, preferredTimescale: 600)
+                    if time > prevTime {
+                        segments.append((
+                            range: CMTimeRange(start: prevTime, end: time),
+                            orientation: change.orientation
+                        ))
+                        prevTime = time
+                    }
+                }
+                segments.append((
+                    range: CMTimeRange(start: prevTime, end: assetDuration),
+                    orientation: self.orientationChanges.last?.orientation ?? "Portrait"
+                ))
+                
+                // Create instructions for each segment
+                var instructions: [AVMutableVideoCompositionInstruction] = []
+                
+                for segment in segments {
+                    let instruction = AVMutableVideoCompositionInstruction()
+                    instruction.timeRange = segment.range
+                    
+                    let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compVideoTrack)
+                    
+                    // Apply transform based on orientation
+                    if segment.orientation == "Landscape Left" {
+                        let transform = CGAffineTransform(translationX: naturalSize.width/2, y: naturalSize.height/2)
+                            .rotated(by: .pi)
+                            .translatedBy(x: -naturalSize.width/2, y: -naturalSize.height/2)
+                        layerInstruction.setTransform(transform, at: segment.range.start)
+                    } else {
+                        // Explicitly set identity transform for non-flipped segments
+                        layerInstruction.setTransform(.identity, at: segment.range.start)
+                    }
+                    
+                    instruction.layerInstructions = [layerInstruction]
+                    instructions.append(instruction)
+                }
+                
+                videoComposition.instructions = instructions
+                
+                // Export the final video
+                await exportVideo(composition: composition, videoComposition: videoComposition)
+                
+            } catch {
+                print("❌ Stitching error: \(error.localizedDescription)")
+                await MainActor.run {
+                    self.showError("Failed to stitch video: \(error.localizedDescription)")
+                    self.isSavingVideo = false
+                }
             }
-            
-            videoComposition.instructions = instructions
-            
-            // export and save video
-            await exportVideo(composition: composition, videoComposition: videoComposition)
-
         }
     }
     
+    struct ExportProgress: Identifiable {
+        let id: UUID
+        let filename: String
+        var progress: Float
+        var isCompleted: Bool
+        let startTime: Date
+    }
+    
+    @Published private(set) var activeExports: [ExportProgress] = []
+    @Published var showExportSheet: Bool = false
+    
+    @MainActor var allowRecordingWhileSaving: Bool {
+        get { settings.allowRecordingWhileSaving }
+        set { settings.allowRecordingWhileSaving = newValue }
+    }
+    
     private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
+        isExporting = true
+        exportProgress = 0.0
+        
+        let exportId = UUID()
+        let filename = getNextClipNumber()
+        let exportProgress = ExportProgress(id: exportId, filename: filename, progress: 0.0, isCompleted: false, startTime: Date())
+        
+        await MainActor.run {
+            activeExports.append(exportProgress)
+            if allowRecordingWhileSaving {
+                showExportSheet = true
+            }
+        }
+        
         // Get background task identifier
         var backgroundTaskID = UIBackgroundTaskIdentifier.invalid
         backgroundTaskID = UIApplication.shared.beginBackgroundTask {
-            // End task if it expires
             UIApplication.shared.endBackgroundTask(backgroundTaskID)
             backgroundTaskID = .invalid
         }
         
-        // Configure exporter
         guard let exporter = AVAssetExportSession(asset: composition,
                                                   presetName: self.exportQuality.preset) else {
             self.showError("Export failed")
@@ -491,6 +541,20 @@ class CameraManager: NSObject, ObservableObject {
         exporter.shouldOptimizeForNetworkUse = false
         exportDuration = CMTimeGetSeconds(composition.duration)
         
+        // Set up progress monitoring
+        let progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            let progress = Float(exporter.progress)
+            
+            Task { @MainActor in
+                self.exportProgress = progress
+                // Update progress in activeExports
+                if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
+                    self.activeExports[index].progress = progress
+                }
+            }
+        }
+        
         print("📤 [10] Starting export")
         print("   📍 Output URL: \(outputURL)")
         print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
@@ -498,13 +562,31 @@ class CameraManager: NSObject, ObservableObject {
         print("   🎥 Export Quality: \(exportQuality)")
         
         await exporter.export()
+        progressTimer.invalidate()
         
         if exporter.status == .completed {
             print("✅ [11] Export succeeded")
             await MainActor.run {
+                if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
+                    self.activeExports[index].isCompleted = true
+                    self.activeExports[index].progress = 1.0
+                }
                 self.saveFinalVideo(outputURL)
                 self.cleanupClips()
                 print("🧹 [12] Cleanup completed")
+            }
+        }
+        
+        isExporting = false
+        self.exportProgress = 1.0
+        
+        // Clean up completed export after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            Task { @MainActor in
+                self?.activeExports.removeAll(where: { $0.id == exportId })
+                if self?.activeExports.isEmpty == true {
+                    self?.showExportSheet = false
+                }
             }
         }
         
@@ -981,27 +1063,26 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
         return String(format: "GRC_%02d", currentNumber)
     }
     
-    
     @MainActor
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        
         // Immediately trigger completion to allow next recording
         stopCompletion?()
         stopCompletion = nil
         
         if let error = error {
-                showError("Recording failed: \(error.localizedDescription)")
-            }
-            
-        if self.shouldStitchClips {
+            showError("Recording failed: \(error.localizedDescription)")
+        }
+        
+        if shouldStitchClips {
             DispatchQueue.main.async {
                 self.clipURLs.append(outputFileURL)
             }
         } else {
             saveFinalVideo(outputFileURL)
         }
+        
         self.stitchingGroup?.leave()
-        }
+    }
 }
 
 

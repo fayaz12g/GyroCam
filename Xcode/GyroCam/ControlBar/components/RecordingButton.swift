@@ -22,7 +22,7 @@ struct RecordingButton: View {
                 RoundedRectangle(cornerRadius: isRecording ? 7 : 60)
                     .fill(cameraManager.accentColor)
                     .frame(width: isRecording ? 28 : 60, height: isRecording ? 28 : 60)
-                    .opacity(cameraManager.isSavingVideo ? 0 : 1)
+                    .opacity(shouldShowSavingDots ? 0 : 1)
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isRecording)
                     .animation(.easeInOut(duration: 0.3), value: cameraManager.isSavingVideo)
                 
@@ -36,8 +36,8 @@ struct RecordingButton: View {
                         .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: false), value: animate)
                 }
                 
-                // Saving video animation
-                if cameraManager.isSavingVideo {
+                // Saving video animation (only show if not allowing recording while saving)
+                if shouldShowSavingDots {
                     SavingDotsView(cameraManager: cameraManager, color: cameraManager.accentColor)
                         .transition(.scale.combined(with: .opacity))
                 }
@@ -62,8 +62,8 @@ struct RecordingButton: View {
             .contentShape(Circle())
         }
         .buttonStyle(RecordingButtonStyle())
+        .disabled(isButtonDisabled)
         .onAppear {
-            
             // Initialize animate to true on first appearance
             animate = isRecording
         }
@@ -72,21 +72,24 @@ struct RecordingButton: View {
             animate = false
         }
     }
+    
+    private var shouldShowSavingDots: Bool {
+        cameraManager.isSavingVideo && !cameraManager.allowRecordingWhileSaving
+    }
+    
+    private var isButtonDisabled: Bool {
+        cameraManager.isSavingVideo && !cameraManager.allowRecordingWhileSaving
+    }
 }
 
 struct SavingDotsView: View {
     @ObservedObject var cameraManager: CameraManager
     let color: Color
     @State private var rotation = 0.0
-    @State private var progressPercentage: Double = 0
-    
-    // Initial and total durations for percentage calculation
-    @State private var initialDuration: Double = 0
     
     // Feedback and timers
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .soft)
     @State private var feedbackTimer: Timer?
-    @State private var progressTimer: Timer?  // Renamed timer for progress
     
     var body: some View {
         ZStack {
@@ -112,41 +115,15 @@ struct SavingDotsView: View {
             .frame(width: 70, height: 70)
             .rotationEffect(.degrees(rotation))
             
-            Text("\(Int(progressPercentage))%")
-                .foregroundColor(.white)
-                .font(.system(size: 24, weight: .bold))
-                .monospacedDigit()
+            if cameraManager.isExporting {
+                Text("\(Int(cameraManager.exportProgress * 100))%")
+                    .foregroundColor(.white)
+                    .font(.system(size: 24, weight: .bold))
+                    .monospacedDigit()
+            }
         }
         .frame(width: 70, height: 70)
-        .onChange(of: cameraManager.exportDuration) { _, newValue in
-            initialDuration = newValue
-        }
         .onAppear {
-            initialDuration = cameraManager.exportDuration
-            var totalTime = 0.0
-            
-            // Start progress percentage timer
-            progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-                withAnimation(.linear(duration: 0.1)) {
-                    // reset every time
-                    if progressPercentage == 100 && totalTime == 0 {
-                        progressPercentage = 0
-                    }
-                    if initialDuration == 0 {
-                        progressPercentage = 100
-                    } else {
-                        totalTime += 0.1
-                        progressPercentage = (totalTime / initialDuration) * 100
-                    }
-                }
-                
-                if progressPercentage > 100 {
-                    timer.invalidate()
-                    totalTime = 0.0
-                    progressPercentage = 100
-                }
-            }
-            
             // Rotation animation
             withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
                 rotation = 360
@@ -164,7 +141,6 @@ struct SavingDotsView: View {
             }
         }
         .onDisappear {
-            progressTimer?.invalidate()
             feedbackTimer?.invalidate()
         }
     }

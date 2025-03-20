@@ -15,58 +15,42 @@ struct DurationBadge: View {
         }
     }
     
-    private var horizontalPadding: CGFloat {
-        switch cameraManager.realOrientation {
-        case "Landscape Left", "Landscape Right": return 0
-        case "Upside Down": return 32
-        default: return 16
-        }
+    private func formatDuration(_ duration: Double) -> (minutes: String, seconds: String, milliseconds: String) {
+        let totalSeconds = Int(duration)
+        let milliseconds = Int((duration - Double(totalSeconds)) * 1000 / 10)
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        
+        // Return tuple of formatted strings
+        return (
+            String(format: "%d", minutes),
+            String(format: "%02d", seconds),
+            String(format: "%02d", milliseconds)
+        )
     }
-    
-    private var verticalOffset: CGFloat {
-        switch cameraManager.realOrientation {
-        case "Landscape Left", "Landscape Right": return 45
-        case "Upside Down": return 12
-        default: return 0
-        }
-    }
-    
+
     var isAccentColorDark: Bool {
         return UIColor(cameraManager.accentColor).isDarkColor
     }
-    
-    private func formatDuration(_ duration: Double) -> String {
-        let totalSeconds = Int(duration)
-        let milliseconds = Int((duration - Double(totalSeconds)) * 1000 / 10)
-        
-        // Days:Hours:Minutes format (for durations > 24 hours)
-        if totalSeconds >= 86400 { // 24 hours in seconds
-            let days = totalSeconds / 86400
-            let hours = (totalSeconds % 86400) / 3600
-            let minutes = (totalSeconds % 3600) / 60
-            return String(format: "%d:%02d:%02d", days, hours, minutes)
-        }
-        // Hours:Minutes:Seconds format (for durations > 60 minutes)
-        else if totalSeconds >= 3600 { // 60 minutes in seconds
-            let hours = totalSeconds / 3600
-            let minutes = (totalSeconds % 3600) / 60
-            let seconds = totalSeconds % 60
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        }
-        // Minutes:Seconds:Milliseconds format (default)
-        else {
-            let minutes = totalSeconds / 60
-            let seconds = totalSeconds % 60
-            return String(format: "%d:%02d:%02d", minutes, seconds, milliseconds)
-        }
-    }
-
 
     var body: some View {
+        let duration = formatDuration(cameraManager.videoDuration)
+        
         GeometryReader { geometry in
             HStack {
-                Group {
-                    Text(formatDuration(cameraManager.videoDuration))
+                Spacer()
+                
+                HStack(spacing: 0) {
+                    Text(duration.minutes)
+                        .rotationEffect(rotationAngle)
+                    Text(":")
+                        .rotationEffect(rotationAngle)
+                    Text(duration.seconds)
+                        .rotationEffect(rotationAngle)
+                    Text(":")
+                        .rotationEffect(rotationAngle)
+                    Text(duration.milliseconds)
+                        .rotationEffect(rotationAngle)
                 }
                 .font(.title3.weight(.semibold))
                 .foregroundColor(isAccentColorDark ? .white : .black)
@@ -74,15 +58,10 @@ struct DurationBadge: View {
                 .padding(.horizontal, 12)
                 .background(
                     RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
-                        .fill(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9)) // change lighter opacity?
+                        .fill(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9))
                 )
-                .rotationEffect(rotationAngle)
-                .fixedSize()
-                .frame(width: rotationAngle != .zero ? 100 : nil,
-                       height: rotationAngle != .zero ? 30 : nil)
-                .padding(.leading, horizontalPadding)
+                .frame(height: 40)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
-                .offset(y: verticalOffset)
                 .contextMenu {
                     Button {
                         showDurationBadge.toggle()

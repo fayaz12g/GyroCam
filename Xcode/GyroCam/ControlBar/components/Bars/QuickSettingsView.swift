@@ -12,28 +12,51 @@ import UIKit
 struct QuickSettingsView: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var showSettings: Bool
+    @Environment(\.colorScheme) var colorScheme
+    
+    private func formatValue(_ title: String, value: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(colorScheme == .dark ? .white : .black)
+            Text(title)
+                .font(.system(size: 8, weight: .medium))
+                .foregroundColor(colorScheme == .dark ? .gray.opacity(0.8) : .gray.opacity(0.6))
+        }
+    }
+    
+    private func lensDisplayValue(_ lens: LensType) -> String {
+        switch lens {
+        case .ultraWide: return "0.5x"
+        case .wide: return "1x"
+        case .telephoto: return "\(Int(getTelephotoZoomFactor()))x"
+        case .frontWide: return "Front"
+        }
+    }
+    
+    private func lensMenuValue(_ lens: LensType) -> String {
+        switch lens {
+        case .ultraWide: return "Ultra Wide"
+        case .wide: return "Wide Angle"
+        case .telephoto: return "Telephoto"
+        case .frontWide: return "Front Camera"
+        }
+    }
     
     var body: some View {
         HStack(spacing: 12) {
             // Lens Picker
-            Picker("Lens", selection: $cameraManager.currentLens) {
-                ForEach(cameraManager.availableLenses, id: \.self) { lens in
-                    if lens.rawValue == "Tele" {
-                        let zoomFactor = getTelephotoZoomFactor()
-                        Text("\(Int(zoomFactor))x")
-                            .font(.system(size: 12))
-                            .tag(lens)
-                    } else {
-                        Text(lens.rawValue)
+            Menu {
+                Picker("Lens", selection: $cameraManager.currentLens) {
+                    ForEach(cameraManager.availableLenses, id: \.self) { lens in
+                        Text(lensMenuValue(lens))
                             .font(.system(size: 12))
                             .tag(lens)
                     }
                 }
+            } label: {
+                formatValue("LENS", value: lensDisplayValue(cameraManager.currentLens))
             }
-            
-            .pickerStyle(.menu)
-            .tint(.primary)
-            .fixedSize()
             .onChange(of: cameraManager.currentLens) { _, _ in
                 cameraManager.configureSession()
             }
@@ -42,16 +65,17 @@ struct QuickSettingsView: View {
                 .frame(height: 20)
             
             // Resolution Picker
-            Picker("Res", selection: $cameraManager.currentFormat) {
-                ForEach(VideoFormat.allCases, id: \.self) { format in
-                    Text(format.rawValue)
-                        .font(.system(size: 12))
-                        .tag(format)
+            Menu {
+                Picker("Resolution", selection: $cameraManager.currentFormat) {
+                    ForEach(VideoFormat.allCases, id: \.self) { format in
+                        Text(format.rawValue)
+                            .font(.system(size: 12))
+                            .tag(format)
+                    }
                 }
+            } label: {
+                formatValue("RESOLUTION", value: cameraManager.currentFormat.rawValue)
             }
-            .pickerStyle(.menu)
-            .tint(.primary)
-            .fixedSize()
             .onChange(of: cameraManager.currentFormat) { _, _ in
                 cameraManager.configureSession()
             }
@@ -60,17 +84,40 @@ struct QuickSettingsView: View {
                 .frame(height: 20)
             
             // FPS Picker
-            Picker("FPS", selection: $cameraManager.currentFPS) {
-                ForEach(cameraManager.availableFrameRates) { fps in
-                    Text(fps.description)
-                        .font(.system(size: 12))
-                        .tag(fps)
+            Menu {
+                Picker("FPS", selection: $cameraManager.currentFPS) {
+                    ForEach(cameraManager.availableFrameRates) { fps in
+                        Text("\(fps.rawValue)")
+                            .font(.system(size: 12))
+                            .tag(fps)
+                    }
                 }
+            } label: {
+                formatValue("FPS", value: "\(cameraManager.currentFPS.rawValue)")
             }
-            .pickerStyle(.menu)
-            .tint(.primary)
-            .fixedSize()
             .onChange(of: cameraManager.currentFPS) { _, _ in
+                cameraManager.configureSession()
+            }
+            
+            Divider()
+                .frame(height: 20)
+            
+            // Stabilization Picker
+            Menu {
+                Picker("Stabilization", selection: $cameraManager.stabilizeVideo) {
+                    ForEach(StabilizationMode.allCases, id: \.self) { mode in
+                        Text(mode == .cinematicExtended ? "Cinematic Extended" :
+                             mode == .cinematic ? "Cinematic" :
+                             mode == .standard ? "Standard" :
+                             mode == .auto ? "Auto" : "Off")
+                            .font(.system(size: 12))
+                            .tag(mode)
+                    }
+                }
+            } label: {
+                formatValue("STABILIZATION", value: cameraManager.stabilizeVideo.rawValue)
+            }
+            .onChange(of: cameraManager.stabilizeVideo) { _, _ in
                 cameraManager.configureSession()
             }
             
@@ -81,8 +128,8 @@ struct QuickSettingsView: View {
                 cameraManager.toggleFlash()
             } label: {
                 Image(systemName: cameraManager.isFlashOn ? "bolt.fill" : "bolt.slash.fill")
+                    .imageScale(.medium)
             }
-//            .disabled(!cameraManager.hasTorch)
             .tint(.primary)
             
         }

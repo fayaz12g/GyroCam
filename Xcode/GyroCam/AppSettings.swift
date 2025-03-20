@@ -22,6 +22,7 @@ struct AppSettings: Codable {
     var accentColor: Color = Color(red: 1.0, green: 0.204, blue: 0.169) // #FF000D
     var isProMode: Bool = true
     var preserveAspectRatios: Bool = true
+    var allowRecordingWhileSaving: Bool = false
     
     // Camera Settings
     var cameraPosition: AVCaptureDevice.Position = .back

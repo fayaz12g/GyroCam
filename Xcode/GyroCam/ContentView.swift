@@ -32,6 +32,17 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
+                                if !cameraManager.activeExports.isEmpty && cameraManager.allowRecordingWhileSaving {
+                                    Button(action: {
+                                        cameraManager.showExportSheet = true
+                                    }) {
+                                        Image(systemName: "square.and.arrow.up.circle.fill")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(cameraManager.accentColor)
+                                            .padding(.trailing, 8)
+                                    }
+                                }
+                                
                                 if cameraManager.showClipBadge {
                                     ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, realOrientation: $cameraManager.realOrientation, showClipBadge: $cameraManager.showClipBadge)
                                 }
@@ -78,6 +89,9 @@ struct ContentView: View {
                     Button("OK") { cameraManager.presentMessage = "" }
                 } message: {
                     Text(cameraManager.presentMessage)
+                }
+                .sheet(isPresented: $cameraManager.showExportSheet) {
+                    ExportProgressSheet(cameraManager: cameraManager)
                 }
             }
         }
