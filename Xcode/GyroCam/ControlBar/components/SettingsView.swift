@@ -93,7 +93,7 @@ struct SettingsView: View {
         if showOnboarding {
             OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding)
         } else {
-            NavigationView {
+            NavigationStack {
                 ZStack {
                     if cameraManager.useBlurredBackground {
                         Color.clear
@@ -130,7 +130,6 @@ struct SettingsView: View {
                     }
                 }
             }
-            .navigationViewStyle(.stack)
             .tint(cameraManager.accentColor)
         }
     }
@@ -226,99 +225,70 @@ struct CustomizationSettingsTab: View {
 struct InformationSettingsTab: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var showOnboarding: Bool
-    @State private var selectedSheet: InfoSheet?
-    
-    enum InfoSheet: Identifiable {
-        case about, privacy, changelog, upcoming
-        
-        var id: Int {
-            switch self {
-            case .about: return 0
-            case .privacy: return 1
-            case .changelog: return 2
-            case .upcoming: return 3
-            }
-        }
-    }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Button(action: { selectedSheet = .about }) {
-                    ModernSettingRow(
-                        title: "About",
-                        description: "Learn about GyroCam and its features",
-                        icon: "info.circle",
-                        iconColor: .indigo,
-                        isExpanded: .constant(false)
-                    ) { EmptyView() }
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button(action: { selectedSheet = .privacy }) {
-                    ModernSettingRow(
-                        title: "Privacy Policy",
-                        description: "Review our privacy practices",
-                        icon: "hand.raised.fill",
-                        iconColor: .red,
-                        isExpanded: .constant(false)
-                    ) { EmptyView() }
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button(action: { selectedSheet = .changelog }) {
-                    ModernSettingRow(
-                        title: "Version History",
-                        description: "See what's changed in recent updates",
-                        icon: "clock.badge.checkmark",
-                        iconColor: .gray,
-                        isExpanded: .constant(false)
-                    ) { EmptyView() }
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button(action: { selectedSheet = .upcoming }) {
-                    ModernSettingRow(
-                        title: "Upcoming Features",
-                        description: "Preview what's coming next",
-                        icon: "road.lanes.curved.right",
-                        iconColor: .mint,
-                        isExpanded: .constant(false)
-                    ) { EmptyView() }
-                }
-                .buttonStyle(PlainButtonStyle())
-                
-                Button("Show Onboarding") {
-                    showOnboarding = true
-                }
-                .foregroundColor(cameraManager.accentColor)
-                .padding()
-            }
-            .padding()
-        }
-        .sheet(item: $selectedSheet) { sheet in
-            NavigationView {
-                Group {
-                    switch sheet {
-                    case .about:
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    NavigationLink {
                         AboutView(cameraManager: cameraManager)
-                    case .privacy:
+                    } label: {
+                        ModernSettingRow(
+                            title: "About",
+                            description: "Learn about GyroCam and its features",
+                            icon: "info.circle",
+                            iconColor: .indigo,
+                            isExpanded: .constant(false)
+                        ) { EmptyView() }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    NavigationLink {
                         PrivacyPolicyView(cameraManager: cameraManager)
-                    case .changelog:
+                    } label: {
+                        ModernSettingRow(
+                            title: "Privacy Policy",
+                            description: "Review our privacy practices",
+                            icon: "hand.raised.fill",
+                            iconColor: .red,
+                            isExpanded: .constant(false)
+                        ) { EmptyView() }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    NavigationLink {
                         ChangelogView(cameraManager: cameraManager)
-                    case .upcoming:
+                    } label: {
+                        ModernSettingRow(
+                            title: "Version History",
+                            description: "See what's changed in recent updates",
+                            icon: "clock.badge.checkmark",
+                            iconColor: .gray,
+                            isExpanded: .constant(false)
+                        ) { EmptyView() }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    NavigationLink {
                         UpcomingFeaturesView(cameraManager: cameraManager)
+                    } label: {
+                        ModernSettingRow(
+                            title: "Upcoming Features",
+                            description: "Preview what's coming next",
+                            icon: "road.lanes.curved.right",
+                            iconColor: .mint,
+                            isExpanded: .constant(false)
+                        ) { EmptyView() }
                     }
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
-                            selectedSheet = nil
-                        }
-                        .foregroundColor(cameraManager.accentColor)
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Button("Show Onboarding") {
+                        showOnboarding = true
                     }
+                    .foregroundColor(cameraManager.accentColor)
+                    .padding()
                 }
+                .padding()
             }
         }
     }
@@ -550,6 +520,36 @@ struct CaptureSettingsTab: View {
     @State private var expandedSection: String? = nil
     @Environment(\.colorScheme) var colorScheme
     
+    private func lensDisplayValue(_ lens: LensType) -> String {
+        switch lens {
+        case .ultraWide: return "0.5x"
+        case .wide: return "1x"
+        case .telephoto: return "\(Int(getTelephotoZoomFactor()))x"
+        case .frontWide: return "Front"
+        }
+    }
+    
+    func getTelephotoZoomFactor() -> Double {
+        let device = UIDevice.modelName
+        
+        switch device {
+        case "iPhone 16 Pro Max", "iPhone 16 Pro", "iPhone 15 Pro Max":
+            return 5.0
+        case "iPhone 15 Pro", "iPhone 14 Pro Max", "iPhone 14 Pro",
+             "iPhone 13 Pro Max", "iPhone 13 Pro":
+            return 3.0
+        case "iPhone 12 Pro Max":
+            return 2.5
+        case "iPhone 12 Pro", "iPhone 11 Pro Max", "iPhone 11 Pro",
+             "iPhone XS Max", "iPhone XS", "iPhone X",
+             "iPhone 8 Plus", "iPhone 7 Plus":
+            return 2.0
+        default:
+            return 1.0
+        }
+    }
+
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -584,7 +584,7 @@ struct CaptureSettingsTab: View {
                             
                             Picker("Camera Lens", selection: $cameraManager.currentLens) {
                                 ForEach(cameraManager.availableLenses, id: \.self) { lens in
-                                    Text(lens.rawValue).tag(lens)
+                                    Text(lensDisplayValue(lens)).tag(lens)
                                 }
                             }
                             .pickerStyle(.segmented)
