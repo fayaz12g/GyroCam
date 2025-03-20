@@ -186,6 +186,7 @@ struct OnboardingView: View {
             }
             .disabled(currentPage == 4 && !permissionsManager.allPermissionsGranted)
             .padding(.bottom, 20)
+            .presentationBackground(cameraManager.useBlurredBackground ? Material.ultraThin : Material.ultraThick)
         }
     }
 }

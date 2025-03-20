@@ -87,6 +87,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.lockLandscape = newValue }
     }
     
+    @MainActor var useBlurredBackground: Bool {
+        get { settings.useBlurredBackground }
+        set { settings.useBlurredBackground = newValue }
+    }
+    
     @MainActor var stabilizeVideo: StabilizationMode {
         get { settings.stabilizeVideo }
         set { settings.stabilizeVideo = newValue }

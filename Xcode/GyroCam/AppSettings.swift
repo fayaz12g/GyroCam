@@ -31,6 +31,7 @@ struct AppSettings: Codable {
     var currentFPS: FrameRate = .sixty
     var isHDREnabled: Bool = true
     var isFlashOn: Bool = false
+    var useBlurredBackground: Bool = true
     
     // Video Settings
     var isSavingVideo: Bool = false
