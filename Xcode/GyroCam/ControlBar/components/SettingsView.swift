@@ -123,7 +123,7 @@ struct SettingsView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
+                        Button("Close") {
                             isPresented = false
                         }
                         .foregroundColor(cameraManager.accentColor)
@@ -222,74 +222,113 @@ struct CustomizationSettingsTab: View {
     }
 }
 
+struct SettingsRow: View {
+    let title: String
+    let icon: String
+    let description: String
+    let iconColor: Color
+    @Environment(\.colorScheme) var colorScheme
+    @State private var isPressed = false
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            // Icon in colored circle
+            Circle()
+                .fill(iconColor)
+                .frame(width: 32, height: 32)
+                .overlay(
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                )
+            
+            // Title and description
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                Text(description)
+                    .font(.system(size: 12))
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.gray)
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(colorScheme == .dark ? Color.gray.opacity(0.25) : Color.white)
+                .shadow(color: colorScheme == .dark ? .clear : .black.opacity(0.05), radius: 8, x: 0, y: 2)
+        )
+        .scaleEffect(isPressed ? 0.98 : 1.0)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
+    }
+}
+
 struct InformationSettingsTab: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var showOnboarding: Bool
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    NavigationLink {
-                        AboutView(cameraManager: cameraManager)
-                    } label: {
-                        ModernSettingRow(
-                            title: "About",
-                            description: "Learn about GyroCam and its features",
-                            icon: "info.circle",
-                            iconColor: .indigo,
-                            isExpanded: .constant(false)
-                        ) { EmptyView() }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    NavigationLink {
-                        PrivacyPolicyView(cameraManager: cameraManager)
-                    } label: {
-                        ModernSettingRow(
-                            title: "Privacy Policy",
-                            description: "Review our privacy practices",
-                            icon: "hand.raised.fill",
-                            iconColor: .red,
-                            isExpanded: .constant(false)
-                        ) { EmptyView() }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    NavigationLink {
-                        ChangelogView(cameraManager: cameraManager)
-                    } label: {
-                        ModernSettingRow(
-                            title: "Version History",
-                            description: "See what's changed in recent updates",
-                            icon: "clock.badge.checkmark",
-                            iconColor: .gray,
-                            isExpanded: .constant(false)
-                        ) { EmptyView() }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    NavigationLink {
-                        UpcomingFeaturesView(cameraManager: cameraManager)
-                    } label: {
-                        ModernSettingRow(
-                            title: "Upcoming Features",
-                            description: "Preview what's coming next",
-                            icon: "road.lanes.curved.right",
-                            iconColor: .mint,
-                            isExpanded: .constant(false)
-                        ) { EmptyView() }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    Button("Show Onboarding") {
-                        showOnboarding = true
-                    }
-                    .foregroundColor(cameraManager.accentColor)
-                    .padding()
+        ScrollView {
+            VStack(spacing: 20) {
+                NavigationLink(destination: AboutView(cameraManager: cameraManager)) {
+                    SettingsRow(
+                        title: "About",
+                        icon: "info.circle",
+                        description: "Learn about GyroCam and its features",
+                        iconColor: .indigo
+                    )
                 }
+                .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination: PrivacyPolicyView(cameraManager: cameraManager)) {
+                    SettingsRow(
+                        title: "Privacy Policy",
+                        icon: "hand.raised.fill",
+                        description: "Review our privacy practices",
+                        iconColor: .red
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination: ChangelogView(cameraManager: cameraManager)) {
+                    SettingsRow(
+                        title: "Version History",
+                        icon: "clock.badge.checkmark",
+                        description: "See what's changed in recent updates",
+                        iconColor: .gray
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
+                    SettingsRow(
+                        title: "Upcoming Features",
+                        icon: "road.lanes.curved.right",
+                        description: "Preview what's coming next",
+                        iconColor: .mint
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button("Show Onboarding") {
+                    showOnboarding = true
+                }
+                .foregroundColor(cameraManager.accentColor)
                 .padding()
             }
+            .padding()
         }
     }
 }
