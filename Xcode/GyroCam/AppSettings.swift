@@ -57,7 +57,7 @@ struct AppSettings: Codable {
     var showQuickSettings: Bool = true
     
     // UI Elements: Header
-    var showDurationBadge: Bool = false
+    var showDurationBadge: Bool = true
     var showOrientationBadge: Bool = true
     var minimalOrientationBadge: Bool = false
     var showClipBadge: Bool = true

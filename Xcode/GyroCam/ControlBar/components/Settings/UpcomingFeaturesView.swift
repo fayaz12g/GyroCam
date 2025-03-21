@@ -7,44 +7,89 @@
 
 import SwiftUI
 
-struct UpcomingFeaturesView: View {
-    @ObservedObject var cameraManager: CameraManager
+struct ManualFeatureGroup: View {
+    let title: String
+    @State private var isExpanded = false
+    @Environment(\.colorScheme) var colorScheme
+    
+    let features = [
+        (title: "Camera Control Support", type: FeatureType.enhancement),
+        (title: "Other bug fixes", type: FeatureType.bug)
+    ]
+    
     var body: some View {
-        Form {
-            Section(header: header("Development Pipeline")) {
-
-                FeatureGroup(title: "Features & Enhancements", features: [
-                    "HDR overlays to match image",
-                    "Recording status visualization with timer",
-                    "Implement full iPhone 16+ Camera Control Support",
-                    "Implement locked camera Control Center support",
-                    "Aspect ratio mode selector with gridlines",
-                    "Lens switching during recording/zooming",
-                    "Manual exposure controls (ISO/shutter)",
-                    "Clip management tools (deletion, renaming)",
-                ])
-                
-                FeatureGroup(title: "Bug Fixes/Unexpected Behavior", features: [
-                    "Maximize Preview doesn't reload till app reload",
-                    "Export time estimate just shows the clip duration",
-                    "Toggle flash causes weird issues when configuring session",
-                    "Photo Library metadata does not display properly in Grid View for non 16:9 content",
-                    "Saving button action is not disabled",
-                    "Grammatical and spelling errors in Changelog View"
+        VStack(alignment: .leading, spacing: 8) {
+            Button(action: {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    Text(title)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.red)
                     
-                ])
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(features, id: \.title) { feature in
+                        HStack(spacing: 6) {
+                            Image(systemName: feature.type.icon)
+                                .font(.system(size: 12))
+                                .foregroundColor(feature.type.color)
+                            
+                            Text(feature.title)
+                                .font(.subheadline)
+                                .foregroundColor(.primary)
+                                .lineLimit(1)
+                        }
+                        .padding(.leading, 4)
+                    }
+                }
+                .padding(.leading, 4)
+                .padding(.top, 8)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .navigationTitle("Upcoming Features")
-        .navigationBarTitleDisplayMode(.inline)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.secondarySystemGroupedBackground))
+        )
     }
+}
+
+struct UpcomingFeaturesView: View {
+    @ObservedObject var cameraManager: CameraManager
     
-    private func header(_ text: String) -> some View {
-        Text(text)
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-            .textCase(nil)
-            .padding(.vertical, 8)
+    var body: some View {
+        ZStack {
+            if cameraManager.useBlurredBackground {
+                Color.clear
+                    .background(.ultraThinMaterial)
+                    .ignoresSafeArea()
+            }
+            
+            ScrollView {
+                VStack(spacing: 20) {
+                    FeatureGroup(title: "GitHub Issues")
+                    ManualFeatureGroup(title: "Other Features")
+                }
+                .padding()
+            }
+            .navigationTitle("Upcoming Features")
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }
 
