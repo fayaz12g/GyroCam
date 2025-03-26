@@ -2,7 +2,62 @@
 
 ## Beta Releases
 
-### Beta 2 (0.1.2 - Current)
+### Beta 5 (0.1.5)
+
+- **What's New**
+  - Redesigned settings interface with modern floating tab bar
+  - New belt-style navigation with animated tab transitions
+  - Fixed orientation issues with final video segment after flipping
+  - Enhanced settings organization with expandable sections
+  - Added settings contrast toggle for better visibility
+  - Moved export progress back to recording button
+  - Modernized version history and information views
+  - Improved the upcoming features view to pull directly from GitHub issues
+  - Enhanced visual feedback for settings interactions
+
+- **Fixed GitHub Issues**
+  - [36](https://github.com/fayaz12g/GyroCam/issues/36)
+  - [11](https://github.com/fayaz12g/GyroCam/issues/11)
+  - [10](https://github.com/fayaz12g/GyroCam/issues/10)
+  - [1](https://github.com/fayaz12g/GyroCam/issues/1)
+  - [34](https://github.com/fayaz12g/GyroCam/issues/34)
+  - [30](https://github.com/fayaz12g/GyroCam/issues/30)
+  - [26](https://github.com/fayaz12g/GyroCam/issues/26)
+  - [27](https://github.com/fayaz12g/GyroCam/issues/27)
+  - [19](https://github.com/fayaz12g/GyroCam/issues/19)
+  - [9](https://github.com/fayaz12g/GyroCam/issues/9)
+  - [37](https://github.com/fayaz12g/GyroCam/issues/37)
+
+### Beta 4 (0.1.4)
+
+- **Badges**
+  - A new **"Duration" badge** shows how long you've been recording for.
+  - The duration badge changes the text color based on the backing accent color brightness.
+  - Orientation Header renamed to **"orientation badge"** in the code.
+
+- **Stitching**
+  - The record saving button shows clip duration as a percentage increasing.
+  - It hangs at 100% until complete.
+
+
+### Beta 3 (0.1.3)
+
+- **Settings**
+  - New feature selection for export quality, though I always recommend the highest for HDR or 60FPS. This significantly increases export speed though.
+  - Updated versioning naming conventions to match the new one throughout the changelog.
+  - Added ISO control, and toggling auto exposure off works now.
+
+- **Stitching**
+  - Stitching can now take place in the background, including if you lock your phone!
+
+- **Orientation Handling**
+  - In Lock Landscape, badges now rotate to show you everything upright.
+  - The above change also applies to the photo thumbnail and bar circles.
+
+- **ISO Control**
+  - A new ISO bar exists that works when auto exposure is off.
+  
+### Beta 2 (0.1.2)
 
 - **Haptics**:
   - Fixed an issue where haptics were tied to the record button.
