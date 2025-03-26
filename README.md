@@ -12,6 +12,8 @@
 
 <a id="download-latest" href="https://fayaz.one/GyroCam/ISSUES.html" class="button" style="padding: 10px 15px; background-color: #FF5733; color: white; border-radius: 5px; text-decoration: none;">Bugs and Feature Requests</a>
 
+<a id="download-latest" href="https://fayaz.one/GyroCam/CHANGELOG.html" class="button" style="padding: 10px 15px; background-color: #8A9A5B; color: white; border-radius: 5px; text-decoration: none;">Changelog</a>
+
 ---
 
 ## Demo Video 🎥
