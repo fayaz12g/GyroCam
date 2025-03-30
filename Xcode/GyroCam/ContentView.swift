@@ -32,16 +32,6 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                if !cameraManager.activeExports.isEmpty && cameraManager.allowRecordingWhileSaving {
-                                    Button(action: {
-                                        cameraManager.showExportSheet = true
-                                    }) {
-                                        Image(systemName: "square.and.arrow.up.circle.fill")
-                                            .font(.system(size: 24))
-                                            .foregroundColor(cameraManager.accentColor)
-                                            .padding(.trailing, 8)
-                                    }
-                                }
                                 
                                 if cameraManager.showClipBadge {
                                     ClipNumberBadge(number: clipNumber, currentOrientation: $cameraManager.currentOrientation, realOrientation: $cameraManager.realOrientation, showClipBadge: $cameraManager.showClipBadge)
@@ -74,6 +64,61 @@ struct ContentView: View {
                             ControlsView(cameraManager: cameraManager, currentOrientation: $cameraManager.realOrientation)
                                 .padding(.bottom, 15)
                                 .padding(.leading, -35)
+                            
+                            if !cameraManager.activeExports.isEmpty && cameraManager.allowRecordingWhileSaving {
+                                Button(action: {
+                                    cameraManager.showExportSheet = true
+                                }) {
+                                    HStack(spacing: 8) {
+                                        // Export indicator with stacked papers look
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .fill(cameraManager.accentColor.opacity(0.8))
+                                                .frame(width: 16, height: 16)
+                                                .offset(y: 0)
+                                            
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .fill(cameraManager.accentColor)
+                                                .frame(width: 16, height: 16)
+                                                .offset(y: -3)
+                                            
+                                            // Export arrow on top
+                                            Image(systemName: "arrow.up")
+                                                .font(.system(size: 8, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .offset(y: -3)
+                                        }
+                                        
+                                        Text("Show Exports")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.primary)
+                                        
+                                        // Badge showing number of exports
+                                        if cameraManager.activeExports.count > 0 {
+                                            Text("\(cameraManager.activeExports.count)")
+                                                .font(.system(size: 12, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .padding(4)
+                                                .background(Circle().fill(Color.red))
+                                                .frame(width: 20, height: 20)
+                                        }
+                                    }
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 15)
+                                            .fill(.ultraThinMaterial)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 15)
+                                                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                                            )
+                                    )
+                                    .padding(.trailing, 12)
+                                }
+                                .transition(.scale.combined(with: .opacity))
+                                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: cameraManager.activeExports.isEmpty)
+                            }
+
                         }
                     }
                     .navigationBarHidden(true)

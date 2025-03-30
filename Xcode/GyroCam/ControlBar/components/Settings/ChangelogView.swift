@@ -30,7 +30,13 @@ struct ChangelogView: View {
                             date: "March 30, 2025",
                             type: .beta(version: 4),
                             changes: [
-                                .init(type: .fixed, description: "Restored accent color customization")
+                                .init(type: .fixed, description: "Restored accent color customization"),
+                                .init(type: .fixed, description: "Fixed a bug where the last clip is alwasys upside down"),
+                                .init(type: .fixed, description: "Fixed a bug making the new QuickSettingsView subtext hard to read"),
+                                .init(type: .changed, description: "Made the export stack button more modern and moved to a a better place"),
+                                .init(type: .changed, description: "Updated the UI of the badges and settings button to have symmertry and match the visionOS like iOS 19 leaks"),
+                                .init(type: .added, description: "Added a motion manager to create depth with badges"),
+                                .init(type: .changed, description: "Update the belt to match this new UI"),
                             ]
                         )
                         

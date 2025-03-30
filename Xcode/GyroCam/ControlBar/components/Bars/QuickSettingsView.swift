@@ -21,7 +21,7 @@ struct QuickSettingsView: View {
                 .foregroundColor(colorScheme == .dark ? .white : .black)
             Text(title)
                 .font(.system(size: 8, weight: .medium))
-                .foregroundColor(colorScheme == .dark ? .gray.opacity(0.8) : .gray.opacity(0.6))
+                .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : .black.opacity(0.7))
         }
     }
     

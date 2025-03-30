@@ -6,6 +6,7 @@ struct ClipNumberBadge: View {
     @Binding var realOrientation: String
     @Binding var showClipBadge: Bool
     @Environment(\.colorScheme) var colorScheme
+    @StateObject private var motionManager = MotionManager()
     
     private var rotationAngle: Angle {
         switch realOrientation {
@@ -33,32 +34,54 @@ struct ClipNumberBadge: View {
             HStack {
                 Spacer()
                 
-                Text("Clip #\(number)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(
-                        Capsule()
-                            .fill(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white.opacity(0.7))
-                    )
-                    .rotationEffect(rotationAngle)
-                    .fixedSize()
-                    .frame(width: rotationAngle != .zero ? 80 : nil,
-                           height: rotationAngle != .zero ? 30 : nil)
-                    .padding(.trailing, horizontalPadding)
-                    .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
-                    .offset(y: verticalOffset)
-                    .contextMenu {
-                        Button {
-                            showClipBadge.toggle()
-                        } label: {
-                            Label(showClipBadge ? "Hide Badge" : "Show Badge",
-                                  systemImage: showClipBadge ? "eye.slash" : "eye")
-                        }
+                // Main badge container
+                ZStack {
+                    // Outer blur effect - moves slightly with gyroscope
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                        )
+                        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+                        .offset(
+                            x: motionManager.roll * 2.6,
+                            y: motionManager.pitch * 2.6
+                        )
+                    
+                    // Text layer - moves slightly more to create parallax
+                    Text("Clip #\(number)")
+                        .font(.subheadline.weight(.regular))
+                        .fontWidth(.condensed)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .offset(
+                            x: motionManager.roll * 2.8,
+                            y: motionManager.pitch * 2.8
+                        )
+                        .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+                }
+                .frame(width: rotationAngle != .zero ? 70 : 70, height: rotationAngle != .zero ? 30 : 30)
+                .rotationEffect(rotationAngle)
+                .padding(.trailing, horizontalPadding)
+                .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
+                .offset(y: verticalOffset)
+                .contextMenu {
+                    Button {
+                        showClipBadge.toggle()
+                    } label: {
+                        Label(showClipBadge ? "Hide Badge" : "Show Badge",
+                              systemImage: showClipBadge ? "eye.slash" : "eye")
                     }
+                }
             }
         }
         .animation(.easeInOut(duration: 0.2), value: realOrientation)
+        .onAppear {
+            motionManager.start()
+        }
+        .onDisappear {
+            motionManager.stop()
+        }
     }
 }
+

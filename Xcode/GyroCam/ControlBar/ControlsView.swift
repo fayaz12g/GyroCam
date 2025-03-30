@@ -46,7 +46,7 @@ struct ControlsView: View {
                 )
                 .padding(.leading, cameraManager.isRecording || cameraManager.isRestarting ? 35 : -15)
                 .padding(.vertical, cameraManager.isRecording || cameraManager.isRestarting ? 10 : 0)
-
+                
                 
                 Spacer()
                 
@@ -65,14 +65,24 @@ struct ControlsView: View {
                             showingSettings.toggle()
                         }
                     } label: {
-                        Image(systemName: "gear")
-                            .font(.system(size: 24))
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
-                            .padding()
-                            .background(colorScheme == .dark ? Color.black.opacity(0.5) : Color.white.opacity(0.5))
-                            .clipShape(Circle())
-                            .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
-                            .matchedGeometryEffect(id: "gear", in: animationNamespace)
+                        ZStack {
+                            // Outer glass effect with blur
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.ultraThinMaterial)
+                                .frame(width: 60, height: 60)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                                )
+                                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+                            
+                            // Gear icon
+                            Image(systemName: "gear")
+                                .font(.system(size: 22, weight: .medium))
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
+                                .matchedGeometryEffect(id: "gear", in: animationNamespace)
+                        }
                     }
                     .padding(.trailing, 15)
                 }

@@ -13,6 +13,7 @@ struct OrientationBadge: View {
     @Binding var currentOrientation: String
     @Binding var showOrientationBadge: Bool
     @Environment(\.colorScheme) var colorScheme
+    @StateObject private var motionManager = MotionManager()
     
     private var rotationAngle: Angle {
         switch cameraManager.realOrientation {
@@ -68,6 +69,14 @@ struct OrientationBadge: View {
                         }
                     } else {
                         Text(currentOrientation)
+                            .font(.title.weight(.medium))
+                            .fontWidth(.condensed)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+                            .offset(
+                                x: motionManager.roll * 2.8,
+                                y: motionManager.pitch * 2.8
+                            )
                     }
                 }
                 .onTapGesture {
@@ -81,7 +90,16 @@ struct OrientationBadge: View {
                 .padding(.horizontal, 12)
                 .background(
                     Capsule()
-                        .fill(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white.opacity(0.7))
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                        )
+                        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+                        .offset(
+                            x: motionManager.roll * 2.6,
+                            y: motionManager.pitch * 2.6
+                        )
                 )
                 .rotationEffect(rotationAngle)
                 .fixedSize()

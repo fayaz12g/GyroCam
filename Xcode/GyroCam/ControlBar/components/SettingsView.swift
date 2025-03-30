@@ -24,24 +24,28 @@ struct FloatingTabBar: View {
         if offset == 2 { offset = -1 }
         if offset == -2 { offset = 1 }
         
-        return CGFloat(offset) * 60
+        return CGFloat(offset) * 70
     }
     
     var body: some View {
         ZStack {
-            // Background belt
+            // Unified glassy belt background
             Capsule()
-                .fill(.black.opacity(0.15))
-                .frame(height: 35)
-                .shadow(color: .black.opacity(0.15), radius: 5, x: 0, y: 5)
-            
-            // Center highlight bubble
-            Circle()
-                .fill(.black.opacity(0.15))
-                .frame(width: 65, height: 65)
-                .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5) // Subtle stroke
+                )
+                .frame(height: 60)
+                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+
+            // Center tab bubble, merged and aligned lower
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .frame(width: 75, height: 75)
+                .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
                 .offset(y: 0)
-            
+
             // Tab items
             ForEach(tabs) { tab in
                 let isCenter = selectedTab == tab.tag
@@ -57,23 +61,27 @@ struct FloatingTabBar: View {
                 }) {
                     VStack(spacing: 4) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: isCenter ? 32 : 12))
+                            .font(.system(size: isCenter ? 28 : 16)) // Adjusted icon size
                             .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
+                            .frame(maxWidth: .infinity, alignment: .center) // Center the icon
                         
                         Text(tab.title)
-                            .font(.system(size: isCenter ? 12 : 8))
+                            .font(.system(size: isCenter ? 10 : 8, weight: .bold))
+                            .fontWidth(.compressed)
                             .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
+                            .frame(maxWidth: .infinity, alignment: .center) // Center the text
                     }
                     .frame(width: 60)
                 }
-                .offset(x: getTabPosition(tab))
                 .zIndex(isCenter ? 1 : 0)
             }
         }
-        .padding(.horizontal, 120)
-        .frame(maxHeight: 60)
+        .padding(.horizontal, 100)
+        .frame(maxHeight: 75)
     }
 }
+
+
 
 struct SettingsView: View {
     @ObservedObject var cameraManager: CameraManager
