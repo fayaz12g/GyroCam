@@ -447,10 +447,29 @@ class CameraManager: NSObject, ObservableObject {
                         prevTime = time
                     }
                 }
-                segments.append((
-                    range: CMTimeRange(start: prevTime, end: assetDuration),
-                    orientation: self.orientationChanges.last?.orientation ?? "Portrait"
-                ))
+                
+                // flip the last (its messy (crying emoji))
+                var saveOrientation = "Landscape Right"
+                
+                if currentOrientation != "Landscape Right" {
+                    saveOrientation = "Landscape Right"
+                }
+                else {
+                    saveOrientation = "Landscape Left"
+                }
+                
+                if let lastChange = self.orientationChanges.last {
+                    let lastTime = CMTime(seconds: lastChange.time, preferredTimescale: 600)
+                    segments.append((
+                        range: CMTimeRange(start: lastTime, end: assetDuration),
+                        orientation: saveOrientation
+                    ))
+                } else {
+                    segments.append((
+                        range: CMTimeRange(start: .zero, end: assetDuration),
+                        orientation: self.currentOrientation
+                    ))
+                }
                 
                 // Create instructions for each segment
                 var instructions: [AVMutableVideoCompositionInstruction] = []

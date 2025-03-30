@@ -142,6 +142,8 @@ struct CustomizationSettingsTab: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+            
+                
                 ModernSettingRow(
                     title: "Interface",
                     description: "Customize appearance and UI elements",
@@ -154,6 +156,12 @@ struct CustomizationSettingsTab: View {
                 ) {
                     VStack(spacing: 16) {
                         Group {
+                            HStack {
+                                Text("Accent Color")
+                                Spacer()
+                                ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
+                                    .labelsHidden()
+                            }
                             Toggle("Quick Settings", isOn: $cameraManager.showQuickSettings)
                                 .tint(cameraManager.accentColor)
                             

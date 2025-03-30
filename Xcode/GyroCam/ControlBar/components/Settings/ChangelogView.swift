@@ -24,6 +24,16 @@ struct ChangelogView: View {
                     SectionHeader(title: "Beta Releases")
                     
                     VStack(spacing: 20) {
+                        
+                        VersionEntry(
+                            version: "0.1.6",
+                            date: "March 30, 2025",
+                            type: .beta(version: 4),
+                            changes: [
+                                .init(type: .fixed, description: "Restored accent color customization")
+                            ]
+                        )
+                        
                         VersionEntry(
                             version: "0.1.5",
                             date: "March 20, 2025",
