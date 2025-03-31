@@ -38,10 +38,14 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "Added a motion manager to create depth with badges"),
                                 .init(type: .changed, description: "Update the belt to match this new UI"),
                                 .init(type: .fixed, description: "Fixed a light mode issue of inconsistent backgrounds in settings"),
-                                .init(type: .fixed, description: "Fixed the clipping of toggles on the far right"),
-                                
+                                .init(type: .fixed, description: "Fixed the clipping of toggles on the far right (build 319)"),
+                                .init(type: .added, description: "New toggle type replacing the old one."),
+                                .init(type: .added, description: "New control bars category in settings"),
+                                .init(type: .changed, description: "Adjusted the sizing of the clip badge to match the orientation badge"),
+                                .init(type: .fixed, description: "Adjusted font color of toggles based on accent color darkness"),
+                                .init(type: .fixed, description: "Fixed lock landscape duration badge being blocked by orientation badge in portrait"),
                             ],
-                            fixedIssues: [42]
+                            fixedIssues: [41, 42]
                         )
                         
                         VersionEntry(

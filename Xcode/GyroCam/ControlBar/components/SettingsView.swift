@@ -1,89 +1,6 @@
 import SwiftUI
 import AVFoundation
 
-// MARK: - Main Settings View
-struct FloatingTabItem: Identifiable {
-    let id: Int
-    let title: String
-    let icon: String
-    let tag: Int
-}
-
-struct FloatingTabBar: View {
-    @Binding var selectedTab: Int
-    @ObservedObject var cameraManager: CameraManager
-    let tabs: [FloatingTabItem]
-    @State private var animationDirection: CGFloat = 1
-    
-    private func getTabPosition(_ tab: FloatingTabItem) -> CGFloat {
-        let currentIndex = tabs.firstIndex(where: { $0.tag == selectedTab }) ?? 1
-        let tabIndex = tabs.firstIndex(where: { $0.id == tab.id }) ?? 1
-        var offset = tabIndex - currentIndex
-        
-        // Ensure we maintain circular order
-        if offset == 2 { offset = -1 }
-        if offset == -2 { offset = 1 }
-        
-        return CGFloat(offset) * 70
-    }
-    
-    var body: some View {
-        ZStack {
-            // Unified glassy belt background
-            Capsule()
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    Capsule()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5) // Subtle stroke
-                )
-                .frame(height: 60)
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
-
-            // Center tab bubble, merged and aligned lower
-            Capsule()
-                .fill(.ultraThinMaterial)
-                .frame(width: 75, height: 75)
-                .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
-                .offset(y: 0)
-
-            // Tab items
-            ForEach(tabs) { tab in
-                let isCenter = selectedTab == tab.tag
-                Button(action: {
-                    let currentIndex = tabs.firstIndex(where: { $0.tag == selectedTab }) ?? 1
-                    let newIndex = tabs.firstIndex(where: { $0.tag == tab.tag }) ?? 1
-                    let direction: CGFloat = newIndex > currentIndex ? 1 : -1
-                    
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        animationDirection = direction
-                        selectedTab = tab.tag
-                    }
-                }) {
-                    VStack(spacing: 4) {
-                        Image(systemName: tab.icon)
-                            .font(.system(size: isCenter ? 32 : 16)) // Adjusted icon size
-                            .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
-                            .frame(maxWidth: .infinity, alignment: .center) // Center the icon
-                        
-                        Text(tab.title)
-                            .font(.system(size: isCenter ? 10 : 8, weight: .bold))
-                            .fontWidth(.compressed)
-                            .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
-                            .frame(maxWidth: .infinity, alignment: .center) // Center the text
-                    }
-                    .frame(width: 60)
-                }
-                .offset(x: getTabPosition(tab), y: isCenter ? 0 : 0)
-                .zIndex(isCenter ? 1 : 0)
-            }
-        }
-        .padding(.horizontal, 100)
-        .frame(maxHeight: 75)
-    }
-}
-
-
-
 struct SettingsView: View {
     @ObservedObject var cameraManager: CameraManager
     @Binding var isPresented: Bool
@@ -155,7 +72,7 @@ struct CustomizationSettingsTab: View {
                 
                 ModernSettingRow(
                     title: "Interface",
-                    description: "Customize appearance and UI elements",
+                    description: "Customize appearance of the app",
                     icon: "uiwindow.split.2x1",
                     iconColor: .green,
                     isExpanded: .init(
@@ -171,25 +88,49 @@ struct CustomizationSettingsTab: View {
                                 ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
                                     .labelsHidden()
                             }
-                            Toggle("Quick Settings", isOn: $cameraManager.showQuickSettings)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
                             
-                            Toggle("Zoom Bar", isOn: $cameraManager.showZoomBar)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
+                            ModernToggle(isOn: $cameraManager.maximizePreview,
+                                    label: "Maximize Preview",
+                                    accentColor: cameraManager.accentColor)
                             
-                            Toggle("Focus Bar", isOn: $cameraManager.showFocusBar)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
-                            
-                            Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
+                            ModernToggle(isOn: $cameraManager.useBlurredBackground,
+                                    label: "Settings Contrast",
+                                    accentColor: cameraManager.accentColor)
                                 
-                            Toggle("Settings Contrast", isOn: $cameraManager.useBlurredBackground)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                
+                ModernSettingRow(
+                    title: "Control Bars",
+                    description: "Customize UI elements that control functionality",
+                    icon: "dock.rectangle",
+                    iconColor: .yellow,
+                    isExpanded: .init(
+                        get: { expandedSection == "bars" },
+                        set: { if $0 { expandedSection = "bars" } else { expandedSection = nil } }
+                    )
+                ) {
+                    VStack(spacing: 16) {
+                        Group {
+                            
+                            ModernToggle(isOn: $cameraManager.showQuickSettings,
+                                    label: "Quick Settings Bar",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            ModernToggle(isOn: $cameraManager.showZoomBar,
+                                    label: "Zoom Bar",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            ModernToggle(isOn: $cameraManager.showFocusBar,
+                                    label: "Focus Bar",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            ModernToggle(isOn: $cameraManager.showISOBar,
+                                    label: "ISO Bar",
+                                    accentColor: cameraManager.accentColor)
+                            
                         }
                         .padding(.horizontal)
                     }
@@ -207,13 +148,15 @@ struct CustomizationSettingsTab: View {
                 ) {
                     VStack(spacing: 16) {
                         Group {
-                            Toggle("Play Sound Effects", isOn: $cameraManager.playSounds)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
                             
-                            Toggle("Play Haptics", isOn: $cameraManager.playHaptics)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
+                            ModernToggle(isOn: $cameraManager.playSounds,
+                                    label: "Play Sound Effects",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            ModernToggle(isOn: $cameraManager.playHaptics,
+                                    label: "Play Haptics",
+                                    accentColor: cameraManager.accentColor)
+                        
                         }
                         .padding(.horizontal)
                     }
@@ -231,13 +174,15 @@ struct CustomizationSettingsTab: View {
                 ) {
                     VStack(spacing: 16) {
                         Group {
-                            Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
                             
-                            Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
+                            ModernToggle(isOn: $cameraManager.preserveAspectRatios,
+                                    label: "Preserve Aspect Ratios",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            ModernToggle(isOn: $cameraManager.isProMode,
+                                    label: "Show Metadata",
+                                    accentColor: cameraManager.accentColor)
+                            
                         }
                         .padding(.horizontal)
                     }
@@ -443,143 +388,6 @@ struct ModernSettingRow: View {
     }
 }
 
-struct ModernToggleRow: View {
-    let title: String
-    let description: String
-    let icon: String
-    let iconColor: Color
-    @Binding var isOn: Bool
-    @ObservedObject var cameraManager: CameraManager
-    @Environment(\.colorScheme) var colorScheme
-    
-    var body: some View {
-        HStack(alignment: .center, spacing: 16) {
-            // Icon in colored circle
-            Circle()
-                .fill(isOn ? cameraManager.accentColor : iconColor)
-                .frame(width: 32, height: 32)
-                .overlay(
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                )
-            
-            // Title and description
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
-                Text(description)
-                    .font(.system(size: 12))
-                    .foregroundColor(.gray)
-                    .lineLimit(1)
-            }
-            
-            Spacer()
-            
-            Toggle("", isOn: $isOn)
-                .labelsHidden()
-                .tint(cameraManager.accentColor)
-        }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(isOn ? 
-                    cameraManager.accentColor.opacity(colorScheme == .dark ? 0.2 : 0.1) :
-                    (colorScheme == .dark ? Color.gray.opacity(0.5) : Color.white))
-                .shadow(color: colorScheme == .dark ? .clear : .white.opacity(0.05), radius: 8, x: 0, y: 2)
-        )
-        .animation(.spring(response: 0.3), value: isOn)
-    }
-}
-
-// MARK: - Submenu Views
-struct InterfaceSettingsView: View {
-    @ObservedObject var cameraManager: CameraManager
-    
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Group {
-                    ModernToggleRow(
-                        title: "Quick Settings",
-                        description: "Show quick access settings in camera view",
-                        icon: "slider.horizontal.3",
-                        iconColor: .blue,
-                        isOn: $cameraManager.showQuickSettings,
-                        cameraManager: cameraManager
-                    )
-                    
-                    ModernToggleRow(
-                        title: "Zoom Bar",
-                        description: "Display zoom control bar in camera view",
-                        icon: "arrow.up.left.and.arrow.down.right",
-                        iconColor: .green,
-                        isOn: $cameraManager.showZoomBar,
-                        cameraManager: cameraManager
-                    )
-                    
-                    ModernToggleRow(
-                        title: "Focus Bar",
-                        description: "Show manual focus control in camera view",
-                        icon: "camera.focus",
-                        iconColor: .purple,
-                        isOn: $cameraManager.showFocusBar,
-                        cameraManager: cameraManager
-                    )
-                    
-                    ModernToggleRow(
-                        title: "Maximize Preview",
-                        description: "Expand camera preview to fill screen",
-                        icon: "arrow.up.left.and.arrow.down.right.magnifyingglass",
-                        iconColor: .orange,
-                        isOn: $cameraManager.maximizePreview,
-                        cameraManager: cameraManager
-                    )
-                }
-                .padding(.horizontal)
-            }
-            .padding(.vertical)
-        }
-        .navigationTitle("Interface")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-struct PhotoLibrarySettingsView: View {
-    @ObservedObject var cameraManager: CameraManager
-    var body: some View {
-        Form {
-            Section(header: Text("Photo Library")) {
-                Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
-                    .tint(cameraManager.accentColor)
-                Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
-                    .tint(cameraManager.accentColor)
-            }
-        }
-        .navigationTitle("Photo Library")
-    }
-}
-
-struct SoundsAndHapticsSettingsView: View {
-    @ObservedObject var cameraManager: CameraManager
-    var body: some View {
-        Form {
-            Section(header: Text("Sounds")) {
-                Toggle("Play Sound Effects", isOn: $cameraManager.playSounds)
-                    .tint(cameraManager.accentColor)
-            }
-            Section(header: Text("Haptics")) {
-                Toggle("Play Haptics", isOn: $cameraManager.playHaptics)
-                    .tint(cameraManager.accentColor)
-            }
-                
-        }
-        .navigationTitle("Sounds & Haptics")
-    }
-}
-
 struct CaptureSettingsTab: View {
     @ObservedObject var cameraManager: CameraManager
     @State private var expandedSection: String? = nil
@@ -643,9 +451,10 @@ struct CaptureSettingsTab: View {
                                 }
                             }
                             .pickerStyle(.segmented)
-                                Toggle("Enable HDR", isOn: $cameraManager.isHDREnabled)
-                                    .tint(cameraManager.accentColor)
-                                    .padding(.trailing, 5)
+                   
+                                ModernToggle(isOn: $cameraManager.isHDREnabled,
+                                        label: "HDR",
+                                        accentColor: cameraManager.accentColor)
                             
                             Picker("Camera Lens", selection: $cameraManager.currentLens) {
                                 ForEach(cameraManager.availableLenses, id: \.self) { lens in
@@ -683,21 +492,21 @@ struct CaptureSettingsTab: View {
                     )
                 ) {
                     VStack(spacing: 16) {
-                        Toggle("Auto Focus", isOn: $cameraManager.autoFocus)
-                            .tint(cameraManager.accentColor)
-                            .padding(.trailing, 5)
-//                            .disabled(cameraManager.showFocusBar)
                         
-                        Toggle("Flash", isOn: $cameraManager.isFlashOn)
-                            .tint(cameraManager.accentColor)
-                            .padding(.trailing, 5)
+                        ModernToggle(isOn: $cameraManager.autoFocus,
+                                label: "Auto Focus",
+                                accentColor: cameraManager.accentColor)
+
+                        ModernToggle(isOn: $cameraManager.isFlashOn,
+                                label: "Flash",
+                                accentColor: cameraManager.accentColor)
                             .onChange(of: cameraManager.isFlashOn) { _, _ in
                                 cameraManager.toggleFlash()
                             }
                         
-                        Toggle("Auto Exposure", isOn: $cameraManager.autoExposure)
-                            .tint(cameraManager.accentColor)
-                            .padding(.trailing, 5)
+                        ModernToggle(isOn: $cameraManager.autoExposure,
+                                label: "Auto Exposure",
+                                accentColor: cameraManager.accentColor)
                             .onChange(of: cameraManager.autoExposure) { _, _ in
                                 cameraManager.configureSession()
                             }
@@ -713,10 +522,6 @@ struct CaptureSettingsTab: View {
                                         cameraManager.manualISO = cameraManager.maxISO
                                     }
                                 }
-                            
-                            Toggle("ISO Bar", isOn: $cameraManager.showISOBar)
-                                .tint(cameraManager.accentColor)
-                                .padding(.trailing, 5)
                         }
                         
                         Picker("Stabilization", selection: $cameraManager.stabilizeVideo) {
@@ -749,18 +554,19 @@ struct CaptureSettingsTab: View {
                     )
                 ) {
                     VStack(spacing: 16) {
-                        Toggle("Stitch Clips", isOn: $cameraManager.shouldStitchClips)
-                            .tint(cameraManager.accentColor)
-                            .padding(.trailing, 5)
+                        
+                        ModernToggle(isOn: $cameraManager.shouldStitchClips,
+                                label: "Stitch Clips",
+                                accentColor: cameraManager.accentColor)
                             .onChange(of: cameraManager.shouldStitchClips) { _, newValue in
                                 if newValue {
                                     cameraManager.lockLandscape = true
                                 }
                             }
                         
-                        Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
-                            .tint(cameraManager.accentColor)
-                            .padding(.trailing, 5)
+                        ModernToggle(isOn: $cameraManager.lockLandscape,
+                                label: "Lock to Landscape Orientations",
+                                accentColor: cameraManager.accentColor)
                             .disabled(cameraManager.shouldStitchClips)
                             .onChange(of: cameraManager.lockLandscape) { _, newValue in
                                 if newValue {
@@ -776,9 +582,10 @@ struct CaptureSettingsTab: View {
                         }
                         .pickerStyle(.segmented)
                         
-                        Toggle("Allow Recording While Saving", isOn: $cameraManager.allowRecordingWhileSaving)
-                            .tint(cameraManager.accentColor)
-                            .padding(.trailing, 5)
+                        ModernToggle(isOn: $cameraManager.allowRecordingWhileSaving,
+                                label: "Allow Recording While Saving",
+                                accentColor: cameraManager.accentColor)
+                        
                     }
                     .padding(.vertical, 8)
                     .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))

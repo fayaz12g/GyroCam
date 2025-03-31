@@ -61,7 +61,7 @@ struct DurationBadge: View {
                         .fill(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9))
                 )
                 .frame(height: 40)
-                .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
+                .padding(.top, geometry.safeAreaInsets.top > 47 ? cameraManager.lockLandscape ? 50 : 28 : 20)
                 .contextMenu {
                     Button {
                         showDurationBadge.toggle()

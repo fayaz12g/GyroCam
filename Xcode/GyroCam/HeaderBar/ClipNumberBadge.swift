@@ -51,7 +51,7 @@ struct ClipNumberBadge: View {
                     
                     // Text layer - moves slightly more to create parallax
                     Text("Clip #\(number)")
-                        .font(.subheadline.weight(.regular))
+                        .font(.title.weight(.medium))
                         .fontWidth(.condensed)
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                         .offset(
@@ -60,7 +60,7 @@ struct ClipNumberBadge: View {
                         )
                         .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
                 }
-                .frame(width: rotationAngle != .zero ? 70 : 70, height: rotationAngle != .zero ? 30 : 30)
+                .frame(width: rotationAngle != .zero ? 90 : 90, height: rotationAngle != .zero ? 35 : 35)
                 .rotationEffect(rotationAngle)
                 .padding(.trailing, horizontalPadding)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
