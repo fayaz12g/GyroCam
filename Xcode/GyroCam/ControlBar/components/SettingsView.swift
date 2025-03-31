@@ -61,7 +61,7 @@ struct FloatingTabBar: View {
                 }) {
                     VStack(spacing: 4) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: isCenter ? 28 : 16)) // Adjusted icon size
+                            .font(.system(size: isCenter ? 32 : 16)) // Adjusted icon size
                             .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
                             .frame(maxWidth: .infinity, alignment: .center) // Center the icon
                         
@@ -73,6 +73,7 @@ struct FloatingTabBar: View {
                     }
                     .frame(width: 60)
                 }
+                .offset(x: getTabPosition(tab), y: isCenter ? 0 : 0)
                 .zIndex(isCenter ? 1 : 0)
             }
         }
