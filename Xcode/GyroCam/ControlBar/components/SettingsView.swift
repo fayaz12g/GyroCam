@@ -173,18 +173,23 @@ struct CustomizationSettingsTab: View {
                             }
                             Toggle("Quick Settings", isOn: $cameraManager.showQuickSettings)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                             
                             Toggle("Zoom Bar", isOn: $cameraManager.showZoomBar)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                             
                             Toggle("Focus Bar", isOn: $cameraManager.showFocusBar)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                             
                             Toggle("Maximize Preview", isOn: $cameraManager.maximizePreview)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                                 
                             Toggle("Settings Contrast", isOn: $cameraManager.useBlurredBackground)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                         }
                         .padding(.horizontal)
                     }
@@ -204,9 +209,11 @@ struct CustomizationSettingsTab: View {
                         Group {
                             Toggle("Play Sound Effects", isOn: $cameraManager.playSounds)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                             
                             Toggle("Play Haptics", isOn: $cameraManager.playHaptics)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                         }
                         .padding(.horizontal)
                     }
@@ -226,9 +233,11 @@ struct CustomizationSettingsTab: View {
                         Group {
                             Toggle("Preserve Aspect Ratios", isOn: $cameraManager.preserveAspectRatios)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                             
                             Toggle("Show Pro Mode", isOn: $cameraManager.isProMode)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                         }
                         .padding(.horizontal)
                     }
@@ -634,9 +643,9 @@ struct CaptureSettingsTab: View {
                                 }
                             }
                             .pickerStyle(.segmented)
-                            
-                            Toggle("Enable HDR", isOn: $cameraManager.isHDREnabled)
-                                .tint(cameraManager.accentColor)
+                                Toggle("Enable HDR", isOn: $cameraManager.isHDREnabled)
+                                    .tint(cameraManager.accentColor)
+                                    .padding(.trailing, 5)
                             
                             Picker("Camera Lens", selection: $cameraManager.currentLens) {
                                 ForEach(cameraManager.availableLenses, id: \.self) { lens in
@@ -659,7 +668,7 @@ struct CaptureSettingsTab: View {
                         }
                     }
                     .padding(.vertical, 8)
-                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.05))
+                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
                     .cornerRadius(12)
                 }
                 
@@ -676,16 +685,19 @@ struct CaptureSettingsTab: View {
                     VStack(spacing: 16) {
                         Toggle("Auto Focus", isOn: $cameraManager.autoFocus)
                             .tint(cameraManager.accentColor)
+                            .padding(.trailing, 5)
 //                            .disabled(cameraManager.showFocusBar)
                         
                         Toggle("Flash", isOn: $cameraManager.isFlashOn)
                             .tint(cameraManager.accentColor)
+                            .padding(.trailing, 5)
                             .onChange(of: cameraManager.isFlashOn) { _, _ in
                                 cameraManager.toggleFlash()
                             }
                         
                         Toggle("Auto Exposure", isOn: $cameraManager.autoExposure)
                             .tint(cameraManager.accentColor)
+                            .padding(.trailing, 5)
                             .onChange(of: cameraManager.autoExposure) { _, _ in
                                 cameraManager.configureSession()
                             }
@@ -704,6 +716,7 @@ struct CaptureSettingsTab: View {
                             
                             Toggle("ISO Bar", isOn: $cameraManager.showISOBar)
                                 .tint(cameraManager.accentColor)
+                                .padding(.trailing, 5)
                         }
                         
                         Picker("Stabilization", selection: $cameraManager.stabilizeVideo) {
@@ -721,7 +734,7 @@ struct CaptureSettingsTab: View {
                         }
                     }
                     .padding(.vertical, 8)
-                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.05))
+                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
                     .cornerRadius(12)
                 }
                 
@@ -738,6 +751,7 @@ struct CaptureSettingsTab: View {
                     VStack(spacing: 16) {
                         Toggle("Stitch Clips", isOn: $cameraManager.shouldStitchClips)
                             .tint(cameraManager.accentColor)
+                            .padding(.trailing, 5)
                             .onChange(of: cameraManager.shouldStitchClips) { _, newValue in
                                 if newValue {
                                     cameraManager.lockLandscape = true
@@ -746,6 +760,7 @@ struct CaptureSettingsTab: View {
                         
                         Toggle("Lock Landscape", isOn: $cameraManager.lockLandscape)
                             .tint(cameraManager.accentColor)
+                            .padding(.trailing, 5)
                             .disabled(cameraManager.shouldStitchClips)
                             .onChange(of: cameraManager.lockLandscape) { _, newValue in
                                 if newValue {
@@ -763,9 +778,10 @@ struct CaptureSettingsTab: View {
                         
                         Toggle("Allow Recording While Saving", isOn: $cameraManager.allowRecordingWhileSaving)
                             .tint(cameraManager.accentColor)
+                            .padding(.trailing, 5)
                     }
                     .padding(.vertical, 8)
-                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.05))
+                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
                     .cornerRadius(12)
                 }
                 
@@ -803,6 +819,7 @@ struct FeatureToggle: View {
                 .badgeModifier(backgroundColor: statusColor)
             Toggle("", isOn: $isOn)
                 .tint(cameraManager.accentColor)
+                .padding(.trailing, 5)
                 .disabled(status == "Coming Soon")
         }
     }

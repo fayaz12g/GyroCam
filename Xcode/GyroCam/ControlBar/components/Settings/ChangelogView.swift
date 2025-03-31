@@ -37,7 +37,11 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Updated the UI of the badges and settings button to have symmertry and match the visionOS like iOS 19 leaks"),
                                 .init(type: .added, description: "Added a motion manager to create depth with badges"),
                                 .init(type: .changed, description: "Update the belt to match this new UI"),
-                            ]
+                                .init(type: .fixed, description: "Fixed a light mode issue of inconsistent backgrounds in settings"),
+                                .init(type: .fixed, description: "Fixed the clipping of toggles on the far right"),
+                                
+                            ],
+                            fixedIssues: [42]
                         )
                         
                         VersionEntry(
