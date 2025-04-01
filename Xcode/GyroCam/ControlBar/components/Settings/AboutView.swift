@@ -105,22 +105,22 @@ struct AboutView: View {
         VStack {
             Image("gyro_icon")
                 .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 120, height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 30))
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 30)
-//                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-//                )
-//                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-//                .rotation3DEffect(
-//                    .degrees(motionManager.roll * 5),
-//                    axis: (x: 0, y: 1, z: 0)
-//                )
-//                .rotation3DEffect(
-//                    .degrees(motionManager.pitch * 5),
-//                    axis: (x: 1, y: 0, z: 0)
-//                )
+                .renderingMode(.template)
+                .frame(width: 110, height: 110)
+                .foregroundColor(.clear)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.red, .orange, .yellow, .green, .blue, .indigo]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .mask(
+                        Image("gyro_icon")
+                            .resizable()
+                            .renderingMode(.template)
+                            .frame(width: 150, height: 150)
+                    )
+                )
             
             Text("GyroCam")
                 .font(.system(size: 32, weight: .bold, design: .rounded))

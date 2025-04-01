@@ -36,6 +36,9 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Made the badges have rounded rectangular edges"),
                                 .init(type: .changed, description: "Updated the bars to fit the number better and have descriptors in line with ISO bar"),
                                 .init(type: .changed, description: "Updated the bars to all be the same length"),
+                                .init(type: .changed, description: "Revamped the provacy policy view to match the new about view"),
+                                .init(type: .changed, description: "Updated the gyrocam icon in the about view to match onboarding"),
+                                .init(type: .changed, description: "Reduced animation timings in settings"),
                                
                             ],
                             fixedIssues: []
