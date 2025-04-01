@@ -27,7 +27,7 @@ struct ChangelogView: View {
                         
                         VersionEntry(
                             version: "0.1.6",
-                            date: "March 30, 2025",
+                            date: "March 31, 2025",
                             type: .beta(version: 4),
                             changes: [
                                 .init(type: .fixed, description: "Restored accent color customization"),
@@ -44,6 +44,12 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Adjusted the sizing of the clip badge to match the orientation badge"),
                                 .init(type: .fixed, description: "Adjusted font color of toggles based on accent color darkness"),
                                 .init(type: .fixed, description: "Fixed lock landscape duration badge being blocked by orientation badge in portrait"),
+                                .init(type: .added, description: "New custom segemented pickers with headings"),
+                                .init(type: .changed, description: "Internal name for pickers and toggles are prefixed with Gyro"),
+                                .init(type: .changed, description: "Reordered some settings to better fit the new system"),
+                                .init(type: .changed, description: "Reinvented the accent color picker with default presets included"),
+                                .init(type: .changed, description: "Updated the background in the About and Privacy Policy Views"),
+                                .init(type: .changed, description: "Completly revamped the about view to closely resemble the read me"),
                             ],
                             fixedIssues: [41, 42]
                         )

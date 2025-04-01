@@ -82,18 +82,14 @@ struct CustomizationSettingsTab: View {
                 ) {
                     VStack(spacing: 16) {
                         Group {
-                            HStack {
-                                Text("Accent Color")
-                                Spacer()
-                                ColorPicker("", selection: $cameraManager.accentColor, supportsOpacity: false)
-                                    .labelsHidden()
-                            }
                             
-                            ModernToggle(isOn: $cameraManager.maximizePreview,
+                            AccentColorPicker(selectedColor: $cameraManager.accentColor)
+                            
+                            GyroToggle(isOn: $cameraManager.maximizePreview,
                                     label: "Maximize Preview",
                                     accentColor: cameraManager.accentColor)
                             
-                            ModernToggle(isOn: $cameraManager.useBlurredBackground,
+                            GyroToggle(isOn: $cameraManager.useBlurredBackground,
                                     label: "Settings Contrast",
                                     accentColor: cameraManager.accentColor)
                                 
@@ -115,19 +111,19 @@ struct CustomizationSettingsTab: View {
                     VStack(spacing: 16) {
                         Group {
                             
-                            ModernToggle(isOn: $cameraManager.showQuickSettings,
+                            GyroToggle(isOn: $cameraManager.showQuickSettings,
                                     label: "Quick Settings Bar",
                                     accentColor: cameraManager.accentColor)
                             
-                            ModernToggle(isOn: $cameraManager.showZoomBar,
+                            GyroToggle(isOn: $cameraManager.showZoomBar,
                                     label: "Zoom Bar",
                                     accentColor: cameraManager.accentColor)
                             
-                            ModernToggle(isOn: $cameraManager.showFocusBar,
+                            GyroToggle(isOn: $cameraManager.showFocusBar,
                                     label: "Focus Bar",
                                     accentColor: cameraManager.accentColor)
                             
-                            ModernToggle(isOn: $cameraManager.showISOBar,
+                            GyroToggle(isOn: $cameraManager.showISOBar,
                                     label: "ISO Bar",
                                     accentColor: cameraManager.accentColor)
                             
@@ -149,11 +145,11 @@ struct CustomizationSettingsTab: View {
                     VStack(spacing: 16) {
                         Group {
                             
-                            ModernToggle(isOn: $cameraManager.playSounds,
+                            GyroToggle(isOn: $cameraManager.playSounds,
                                     label: "Play Sound Effects",
                                     accentColor: cameraManager.accentColor)
                             
-                            ModernToggle(isOn: $cameraManager.playHaptics,
+                            GyroToggle(isOn: $cameraManager.playHaptics,
                                     label: "Play Haptics",
                                     accentColor: cameraManager.accentColor)
                         
@@ -175,11 +171,11 @@ struct CustomizationSettingsTab: View {
                     VStack(spacing: 16) {
                         Group {
                             
-                            ModernToggle(isOn: $cameraManager.preserveAspectRatios,
+                            GyroToggle(isOn: $cameraManager.preserveAspectRatios,
                                     label: "Preserve Aspect Ratios",
                                     accentColor: cameraManager.accentColor)
                             
-                            ModernToggle(isOn: $cameraManager.isProMode,
+                            GyroToggle(isOn: $cameraManager.isProMode,
                                     label: "Show Metadata",
                                     accentColor: cameraManager.accentColor)
                             
@@ -421,7 +417,7 @@ struct CaptureSettingsTab: View {
             return 1.0
         }
     }
-
+    let videoFormats: [VideoFormat] = VideoFormat.allCases  // Break this out for clarity
     
     var body: some View {
         ScrollView {
@@ -438,30 +434,35 @@ struct CaptureSettingsTab: View {
                 ) {
                     VStack(spacing: 16) {
                         Group {
-                            Picker("Resolution", selection: $cameraManager.currentFormat) {
-                                ForEach(VideoFormat.allCases, id: \.self) { format in
-                                    Text(format.rawValue).tag(format)
-                                }
-                            }
-                            .pickerStyle(.segmented)
                             
-                            Picker("Frame Rate", selection: $cameraManager.currentFPS) {
-                                ForEach(cameraManager.availableFrameRates) { fps in
-                                    Text(fps.description).tag(fps)
-                                }
-                            }
-                            .pickerStyle(.segmented)
-                   
-                                ModernToggle(isOn: $cameraManager.isHDREnabled,
-                                        label: "HDR",
-                                        accentColor: cameraManager.accentColor)
+                            GyroPicker(
+                                selection: $cameraManager.currentFormat,
+                                items: VideoFormat.allCases,
+                                title: "Resolution",
+                                accentColor: cameraManager.accentColor,
+                                displayValue: { $0.rawValue }
+                            )
                             
-                            Picker("Camera Lens", selection: $cameraManager.currentLens) {
-                                ForEach(cameraManager.availableLenses, id: \.self) { lens in
-                                    Text(lensDisplayValue(lens)).tag(lens)
-                                }
-                            }
-                            .pickerStyle(.segmented)
+                            GyroPicker(
+                                    selection: $cameraManager.currentFPS,
+                                    items: cameraManager.availableFrameRates,
+                                    title: "Frame Rate",
+                                    accentColor: cameraManager.accentColor,
+                                    displayValue: { $0.description }
+                                )
+                            
+                            GyroPicker(
+                                selection: $cameraManager.currentLens,
+                                items: cameraManager.availableLenses,
+                                title: "Camera Lens",
+                                accentColor: cameraManager.accentColor,
+                                displayValue: { lensDisplayValue($0) }
+                            )
+                            
+                            GyroToggle(isOn: $cameraManager.isHDREnabled,
+                                    label: "HDR",
+                                    accentColor: cameraManager.accentColor)
+                            
                         }
                         .onChange(of: cameraManager.currentFormat) { _, _ in
                             cameraManager.configureSession()
@@ -477,6 +478,7 @@ struct CaptureSettingsTab: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    .padding(.horizontal)
                     .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
                     .cornerRadius(12)
                 }
@@ -492,19 +494,31 @@ struct CaptureSettingsTab: View {
                     )
                 ) {
                     VStack(spacing: 16) {
+            
+                        GyroPicker(
+                            selection: $cameraManager.stabilizeVideo,
+                            items: StabilizationMode.allCases,
+                            title: "Stabilization",
+                            accentColor: cameraManager.accentColor,
+                            displayValue: { $0.rawValue }
+                        )
+                        .onChange(of: cameraManager.stabilizeVideo) { _, _ in
+                            cameraManager.configureSession()
+                        }
                         
-                        ModernToggle(isOn: $cameraManager.autoFocus,
+                        
+                        GyroToggle(isOn: $cameraManager.autoFocus,
                                 label: "Auto Focus",
                                 accentColor: cameraManager.accentColor)
 
-                        ModernToggle(isOn: $cameraManager.isFlashOn,
+                        GyroToggle(isOn: $cameraManager.isFlashOn,
                                 label: "Flash",
                                 accentColor: cameraManager.accentColor)
                             .onChange(of: cameraManager.isFlashOn) { _, _ in
                                 cameraManager.toggleFlash()
                             }
                         
-                        ModernToggle(isOn: $cameraManager.autoExposure,
+                        GyroToggle(isOn: $cameraManager.autoExposure,
                                 label: "Auto Exposure",
                                 accentColor: cameraManager.accentColor)
                             .onChange(of: cameraManager.autoExposure) { _, _ in
@@ -523,22 +537,9 @@ struct CaptureSettingsTab: View {
                                     }
                                 }
                         }
-                        
-                        Picker("Stabilization", selection: $cameraManager.stabilizeVideo) {
-                            ForEach(StabilizationMode.allCases, id: \.self) { mode in
-                                Text(mode == .cinematicExtended ? "Cinematic Extended" :
-                                        mode == .cinematic ? "Cinematic" :
-                                        mode == .standard ? "Standard" :
-                                        mode == .auto ? "Auto" : "Off")
-                                .tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .onChange(of: cameraManager.stabilizeVideo) { _, _ in
-                            cameraManager.configureSession()
-                        }
                     }
                     .padding(.vertical, 8)
+                    .padding(.horizontal)
                     .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
                     .cornerRadius(12)
                 }
@@ -555,7 +556,15 @@ struct CaptureSettingsTab: View {
                 ) {
                     VStack(spacing: 16) {
                         
-                        ModernToggle(isOn: $cameraManager.shouldStitchClips,
+                        GyroPicker(
+                            selection: $cameraManager.exportQuality,
+                            items: ExportQuality.allCases,
+                            title: "Export Quality",
+                            accentColor: cameraManager.accentColor,
+                            displayValue: { $0.rawValue }
+                        )
+                        
+                        GyroToggle(isOn: $cameraManager.shouldStitchClips,
                                 label: "Stitch Clips",
                                 accentColor: cameraManager.accentColor)
                             .onChange(of: cameraManager.shouldStitchClips) { _, newValue in
@@ -564,7 +573,7 @@ struct CaptureSettingsTab: View {
                                 }
                             }
                         
-                        ModernToggle(isOn: $cameraManager.lockLandscape,
+                        GyroToggle(isOn: $cameraManager.lockLandscape,
                                 label: "Lock to Landscape Orientations",
                                 accentColor: cameraManager.accentColor)
                             .disabled(cameraManager.shouldStitchClips)
@@ -573,21 +582,14 @@ struct CaptureSettingsTab: View {
                                     cameraManager.currentOrientation = "Landscape Left"
                                 }
                             }
-                        
-                        Picker("Export Quality", selection: $cameraManager.exportQuality) {
-                            ForEach(ExportQuality.allCases, id: \.self) { mode in
-                                Text(mode.rawValue)
-                                    .tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        
-                        ModernToggle(isOn: $cameraManager.allowRecordingWhileSaving,
+                    
+                        GyroToggle(isOn: $cameraManager.allowRecordingWhileSaving,
                                 label: "Allow Recording While Saving",
                                 accentColor: cameraManager.accentColor)
                         
                     }
                     .padding(.vertical, 8)
+                    .padding(.horizontal)
                     .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
                     .cornerRadius(12)
                 }

@@ -1,5 +1,13 @@
 //
-//  ModernToggle.swift
+//  GyroToggle.swift
+//  GyroCam
+//
+//  Created by Fayaz Shaikh on 3/31/25.
+//
+
+
+//
+//  GyroToggle.swift
 //  GyroCam
 //
 //  Created by Fayaz Shaikh on 3/31/25.
@@ -7,7 +15,7 @@
 
 import SwiftUI
 
-struct ModernToggle: View {
+struct GyroToggle: View {
     @Binding var isOn: Bool
     var label: String
     var accentColor: Color
@@ -69,6 +77,7 @@ struct ModernToggle: View {
                 fillPercentage = 0.0
             }
         }
+        .padding(.horizontal, -20)
         .onAppear {
             // Initialize fill percentage when view loads based on isOn
             fillPercentage = isOn ? 1.0 : 0.0

@@ -104,7 +104,7 @@ struct OrientationBadge: View {
                 .rotationEffect(rotationAngle)
                 .fixedSize()
                 .frame(width: rotationAngle != .zero ? 100 : nil,
-                       height: rotationAngle != .zero ? 30 : nil)
+                       height: rotationAngle != .zero ? 25 : nil)
                 .padding(.leading, horizontalPadding)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)
                 .offset(y: verticalOffset)

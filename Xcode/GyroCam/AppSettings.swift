@@ -101,7 +101,9 @@ enum FrameRate: Int, CaseIterable, Identifiable, Comparable {
     }
 }
 
-enum StabilizationMode: String, CaseIterable, Codable {
+enum StabilizationMode: String, CaseIterable, Codable, Identifiable {
+    var id: String { self.rawValue }
+    
     case off = "0"
     case standard = "1"
     case cinematic = "2"
@@ -109,9 +111,11 @@ enum StabilizationMode: String, CaseIterable, Codable {
     case auto = "Auto"
 }
 
-enum VideoFormat: String, CaseIterable {
+enum VideoFormat: String, CaseIterable, Identifiable {
     case hd4K = "4K"
     case hd1080p = "1080p"
+    
+    var id: String { self.rawValue }
     
     var resolution: CMVideoDimensions {
         switch self {
@@ -121,11 +125,13 @@ enum VideoFormat: String, CaseIterable {
     }
 }
 
-enum LensType: String, CaseIterable {
+enum LensType: String, Identifiable, Hashable, CaseIterable {
     case frontWide = "Front"
     case ultraWide = "0.5x"
     case wide = "1x"
     case telephoto = "Tele"
+
+    var id: String { self.rawValue }
     
     var deviceType: AVCaptureDevice.DeviceType {
         switch self {
@@ -147,7 +153,8 @@ enum LensType: String, CaseIterable {
         default:
             return .back
         }
-    }}
+    }
+}
 
 enum ShutterSpeed: CaseIterable {
     case speed1_1000
