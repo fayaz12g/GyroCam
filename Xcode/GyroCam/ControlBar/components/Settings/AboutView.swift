@@ -195,7 +195,7 @@ struct AboutView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(height: 100)
-                            .foregroundColor(.blue)
+                            .foregroundColor(.red)
                             .opacity(0.8)
                         
                         Text("Watch on YouTube")
