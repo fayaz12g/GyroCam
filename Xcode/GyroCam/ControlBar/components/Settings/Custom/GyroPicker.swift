@@ -30,7 +30,7 @@ struct GyroPicker<Item: Identifiable & Hashable>: View {
             HStack {
                 ForEach(items) { item in
                     Button(action: {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                        withAnimation(.bouncy(duration: 0.2)) {
                             selection = item
                         }
                     }) {

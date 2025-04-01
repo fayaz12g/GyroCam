@@ -40,6 +40,7 @@ struct ContentView: View {
                             
                             if cameraManager.showISOBar {
                                 ISOBar(cameraManager: cameraManager)
+                                    .frame(width: UIScreen.main.bounds.width * 0.9, alignment: .bottom)
                                     .padding(.horizontal)
                                     .padding(.bottom, cameraManager.showZoomBar ||  cameraManager.showFocusBar || (cameraManager.isRecording || !cameraManager.showQuickSettings || cameraManager.isRestarting) ? 0 : 100)
                                     .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
@@ -47,14 +48,14 @@ struct ContentView: View {
                             
                             if cameraManager.showFocusBar {
                                 FocusBar(cameraManager: cameraManager)
-                                    .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom)
+                                    .frame(width: UIScreen.main.bounds.width * 0.9, alignment: .bottom)
                                     .padding(.bottom, cameraManager.showZoomBar || (cameraManager.isRecording || !cameraManager.showQuickSettings || cameraManager.isRestarting) ? 0 : 100)
                                     .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
                             }
 
                             if cameraManager.showZoomBar {
                                 ZoomBar(cameraManager: cameraManager)
-                                    .frame(width: UIScreen.main.bounds.width * 0.8, alignment: .bottom)
+                                    .frame(width: UIScreen.main.bounds.width * 0.9, alignment: .bottom)
                                     .padding(.bottom, !cameraManager.isRecording && cameraManager.showQuickSettings && !cameraManager.isRestarting  ? 100 : 0)
                                     .animation(.easeInOut(duration: 0.2), value: cameraManager.isRecording)
                             }

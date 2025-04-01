@@ -25,6 +25,11 @@ struct FocusBar: View {
                     .frame(height: 4)
                     .foregroundColor(colorScheme == .dark ? Color.gray.opacity(0.5) : Color.white.opacity(0.7))
                     .padding(.horizontal, 20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 2)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                            .padding(.horizontal, 20)
+                        )
                 
                 // Outer glass effect with blur
                 Circle()
@@ -32,11 +37,16 @@ struct FocusBar: View {
                     .frame(width: 40, height: 40)
                     .overlay(
                         Circle()
+                            .fill(continuousFocusMode ? Color.yellow.opacity(0.9) : Color.yellow.opacity(0))
                             .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                     )
                     .overlay(
-                        Text(continuousFocusMode ? "AUTO" : "\(String(format: "%.1f", (cameraManager.focusValue * 10)))f")
-                            .font(.system(size: 12, weight: .bold))
+                        VStack(alignment: .center, spacing: 2) {
+                            Text(continuousFocusMode ? "AUTO" : "\(String(format: "%.1f", (cameraManager.focusValue * 10)))")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("FOCUS")
+                                .font(.system(size: 6, weight: .bold))
+                        }
                     )
                     .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
                     .rotationEffect(rotationAngle)

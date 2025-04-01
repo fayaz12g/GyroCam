@@ -5,14 +5,6 @@
 //  Created by Fayaz Shaikh on 3/31/25.
 //
 
-
-//
-//  GyroToggle.swift
-//  GyroCam
-//
-//  Created by Fayaz Shaikh on 3/31/25.
-//
-
 import SwiftUI
 
 struct GyroToggle: View {
@@ -29,10 +21,9 @@ struct GyroToggle: View {
     
     var body: some View {
         Button(action: {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+            withAnimation(.bouncy(duration: 0.2)) {
                 isOn.toggle()
-                
-                // Animate fill percentage based on toggle state
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 fillPercentage = isOn ? 1.0 : 0.0
             }
         }) {
@@ -46,7 +37,7 @@ struct GyroToggle: View {
                     RoundedRectangle(cornerRadius: 14)
                         .fill(accentColor)
                         .frame(width: geometry.size.width * fillPercentage)
-                        .animation(.easeInOut(duration: 0.5), value: fillPercentage)
+                        .animation(.bouncy(duration: 0.3), value: fillPercentage)
                 }
                 
                 // Status indicator in top right
@@ -59,7 +50,7 @@ struct GyroToggle: View {
                 Text(label)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundColor(isOn && fillPercentage > 0.5 ? isAccentColorDark ? .white : .black : .primary)
-                    .animation(.easeInOut(duration: 0.3), value: isOn)
+                    .animation(.easeInOut(duration: 0.1), value: isOn)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .padding(.horizontal)

@@ -25,7 +25,7 @@ struct ClipNumberBadge: View {
         switch realOrientation {
         case "Landscape Left", "Landscape Right": return 8
         case "Upside Down": return 12
-        default: return 0
+        default: return -5
         }
     }
 
@@ -37,16 +37,16 @@ struct ClipNumberBadge: View {
                 // Main badge container
                 ZStack {
                     // Outer blur effect - moves slightly with gyroscope
-                    Capsule()
+                    RoundedRectangle(cornerRadius: 12)
                         .fill(.ultraThinMaterial)
                         .overlay(
-                            Capsule()
+                            RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                         )
                         .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
                         .offset(
-                            x: motionManager.roll * 2.6,
-                            y: motionManager.pitch * 2.6
+                            x: motionManager.roll * 1.5,
+                            y: motionManager.pitch * 1.5
                         )
                     
                     // Text layer - moves slightly more to create parallax
@@ -55,12 +55,12 @@ struct ClipNumberBadge: View {
 //                        .fontWidth(.condensed)
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                         .offset(
-                            x: motionManager.roll * 2.8,
-                            y: motionManager.pitch * 2.8
+                            x: motionManager.roll * 1.6,
+                            y: motionManager.pitch * 1.6
                         )
                         .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
                 }
-                .frame(width: rotationAngle != .zero ? 90 : 90, height: rotationAngle != .zero ? 35 : 35)
+                .frame(width: rotationAngle != .zero ? 75 : 75, height: rotationAngle != .zero ? 35 : 35)
                 .rotationEffect(rotationAngle)
                 .padding(.trailing, horizontalPadding)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)

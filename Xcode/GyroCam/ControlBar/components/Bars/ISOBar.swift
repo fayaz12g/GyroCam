@@ -25,6 +25,11 @@ struct ISOBar: View {
                         .frame(height: 4)
                         .foregroundColor(colorScheme == .dark ? .gray.opacity(0.5) : .white.opacity(0.7))
                         .padding(.horizontal, 20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 2)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                            .padding(.horizontal, 20)
+                            )
                     
                     // Outer glass effect with blur
                     Circle()
@@ -37,7 +42,7 @@ struct ISOBar: View {
                         .overlay(
                             VStack(alignment: .center, spacing: 2) {
                                 Text("\(Int(cameraManager.manualISO))")
-                                    .font(.system(size: 12, weight: .bold))
+                                    .font(.system(size: 10, weight: .bold))
                                 Text("ISO")
                                     .font(.system(size: 6, weight: .bold))
                             }

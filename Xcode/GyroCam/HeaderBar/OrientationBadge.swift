@@ -74,8 +74,8 @@ struct OrientationBadge: View {
                             .foregroundColor(colorScheme == .dark ? .white : .black)
                             .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
                             .offset(
-                                x: motionManager.roll * 2.8,
-                                y: motionManager.pitch * 2.8
+                                x: motionManager.roll * 2.5,
+                                y: motionManager.pitch * 2.5
                             )
                     }
                 }
@@ -89,21 +89,21 @@ struct OrientationBadge: View {
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
                 .background(
-                    Capsule()
+                    RoundedRectangle(cornerRadius: 12)
                         .fill(.ultraThinMaterial)
                         .overlay(
-                            Capsule()
+                            RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                         )
                         .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
                         .offset(
-                            x: motionManager.roll * 2.6,
-                            y: motionManager.pitch * 2.6
+                            x: motionManager.roll * 1.5,
+                            y: motionManager.pitch * 1.5
                         )
                 )
                 .rotationEffect(rotationAngle)
                 .fixedSize()
-                .frame(width: rotationAngle != .zero ? 100 : nil,
+                .frame(width: rotationAngle != .zero ? 90 : nil,
                        height: rotationAngle != .zero ? 25 : nil)
                 .padding(.leading, horizontalPadding)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? 28 : 20)

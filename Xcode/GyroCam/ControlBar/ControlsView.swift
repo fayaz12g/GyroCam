@@ -67,18 +67,18 @@ struct ControlsView: View {
                     } label: {
                         ZStack {
                             // Outer glass effect with blur
-                            Circle()
+                            RoundedRectangle(cornerRadius: 12)
                                 .fill(.ultraThinMaterial)
                                 .frame(width: 60, height: 60)
                                 .overlay(
-                                    Circle()
+                                    RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                                 )
                                 .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
                             
                             // Gear icon
                             Image(systemName: "gear")
-                                .font(.system(size: 30, weight: .thin))
+                                .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
                                 .matchedGeometryEffect(id: "gear", in: animationNamespace)

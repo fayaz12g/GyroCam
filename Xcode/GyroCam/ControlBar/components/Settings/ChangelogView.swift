@@ -32,6 +32,10 @@ struct ChangelogView: View {
                             changes: [
                                 .init(type: .changed, description: "Restored badge fonts and settings circle"),
                                 .init(type: .changed, description: "Updated bars to have the new glassy circles"),
+                                .init(type: .changed, description: "Restored settings button shape, bigger bolder icon"),
+                                .init(type: .changed, description: "Made the badges have rounded rectangular edges"),
+                                .init(type: .changed, description: "Updated the bars to fit the number better and have descriptors in line with ISO bar"),
+                                .init(type: .changed, description: "Updated the bars to all be the same length"),
                                
                             ],
                             fixedIssues: []

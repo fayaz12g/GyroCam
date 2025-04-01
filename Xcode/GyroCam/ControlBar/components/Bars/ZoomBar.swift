@@ -28,6 +28,11 @@ struct ZoomBar: View {
                     .frame(height: 4)
                     .foregroundColor(colorScheme == .dark ? Color.gray.opacity(0.5) : Color.white.opacity(0.7))
                     .padding(.horizontal, 20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 2)
+                        .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                        .padding(.horizontal, 20)
+                        )
                 
                 // Outer glass effect with blur
                 Circle()
@@ -38,8 +43,12 @@ struct ZoomBar: View {
                             .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                     )
                     .overlay(
-                        Text("\(String(format: "%.1f", cameraManager.currentZoom))x")
-                            .font(.system(size: 12, weight: .bold))
+                        VStack(alignment: .center, spacing: 2) {
+                            Text("\(String(format: "%.1f", cameraManager.currentZoom))")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("ZOOM")
+                                .font(.system(size: 6, weight: .bold))
+                        }
                     )
                     .rotationEffect(rotationAngle)
                     .shadow(radius: 3)
