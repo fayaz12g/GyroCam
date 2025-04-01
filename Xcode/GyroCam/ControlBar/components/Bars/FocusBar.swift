@@ -26,14 +26,19 @@ struct FocusBar: View {
                     .foregroundColor(colorScheme == .dark ? Color.gray.opacity(0.5) : Color.white.opacity(0.7))
                     .padding(.horizontal, 20)
                 
-                // Focus Level Circle
+                // Outer glass effect with blur
                 Circle()
+                    .fill(.ultraThinMaterial)
                     .frame(width: 40, height: 40)
-                    .foregroundColor(continuousFocusMode ? Color.yellow : (colorScheme == .dark ? Color.black.opacity(0.7) : Color.white))
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                    )
                     .overlay(
                         Text(continuousFocusMode ? "AUTO" : "\(String(format: "%.1f", (cameraManager.focusValue * 10)))f")
                             .font(.system(size: 12, weight: .bold))
                     )
+                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
                     .rotationEffect(rotationAngle)
                     .animation(.easeInOut(duration: 0.2), value: cameraManager.focusValue)  // Animate focus value changes
                     .shadow(radius: 3)

@@ -29,10 +29,14 @@ struct ZoomBar: View {
                     .foregroundColor(colorScheme == .dark ? Color.gray.opacity(0.5) : Color.white.opacity(0.7))
                     .padding(.horizontal, 20)
                 
-                // Zoom Level Circle
+                // Outer glass effect with blur
                 Circle()
+                    .fill(.ultraThinMaterial)
                     .frame(width: 40, height: 40)
-                    .foregroundColor(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                    )
                     .overlay(
                         Text("\(String(format: "%.1f", cameraManager.currentZoom))x")
                             .font(.system(size: 12, weight: .bold))

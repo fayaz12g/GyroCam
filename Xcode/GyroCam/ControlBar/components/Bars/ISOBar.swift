@@ -26,10 +26,14 @@ struct ISOBar: View {
                         .foregroundColor(colorScheme == .dark ? .gray.opacity(0.5) : .white.opacity(0.7))
                         .padding(.horizontal, 20)
                     
-                    // Draggable thumb
+                    // Outer glass effect with blur
                     Circle()
+                        .fill(.ultraThinMaterial)
                         .frame(width: 40, height: 40)
-                        .foregroundColor(colorScheme == .dark ? .black.opacity(0.7) : .white)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                        )
                         .overlay(
                             VStack(alignment: .center, spacing: 2) {
                                 Text("\(Int(cameraManager.manualISO))")

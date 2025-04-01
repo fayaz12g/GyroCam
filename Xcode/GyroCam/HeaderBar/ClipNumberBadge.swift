@@ -51,8 +51,8 @@ struct ClipNumberBadge: View {
                     
                     // Text layer - moves slightly more to create parallax
                     Text("Clip #\(number)")
-                        .font(.title.weight(.medium))
-                        .fontWidth(.condensed)
+                        .font(.title3.bold())
+//                        .fontWidth(.condensed)
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                         .offset(
                             x: motionManager.roll * 2.8,

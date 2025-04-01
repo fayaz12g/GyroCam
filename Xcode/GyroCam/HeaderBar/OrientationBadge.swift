@@ -69,8 +69,8 @@ struct OrientationBadge: View {
                         }
                     } else {
                         Text(currentOrientation)
-                            .font(.title.weight(.medium))
-                            .fontWidth(.condensed)
+                            .font(.title3.bold())
+//                            .fontWidth(.condensed)
                             .foregroundColor(colorScheme == .dark ? .white : .black)
                             .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
                             .offset(

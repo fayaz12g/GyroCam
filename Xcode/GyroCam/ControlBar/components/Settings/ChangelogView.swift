@@ -26,6 +26,18 @@ struct ChangelogView: View {
                     VStack(spacing: 20) {
                         
                         VersionEntry(
+                            version: "0.1.7",
+                            date: "March 31, 2025",
+                            type: .beta(version: 4),
+                            changes: [
+                                .init(type: .changed, description: "Restored badge fonts and settings circle"),
+                                .init(type: .changed, description: "Updated bars to have the new glassy circles"),
+                               
+                            ],
+                            fixedIssues: []
+                        )
+                        
+                        VersionEntry(
                             version: "0.1.6",
                             date: "March 31, 2025",
                             type: .beta(version: 4),
