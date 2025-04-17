@@ -26,11 +26,35 @@ struct FloatingTabBar: View {
         return CGFloat(offset) * 70
     }
     
+    var isAccentColorDark: Bool {
+        return UIColor(cameraManager.accentColor).isDarkColor
+    }
+    
+    var barColorDark: Bool {
+        if colorScheme == .light {
+            return isAccentColorDark
+        } else {
+            return isAccentColorDark
+        }
+    }
+    
+    func barBackgroundOverlay() -> Color {
+        if colorScheme == .light {
+            return isAccentColorDark ? Color.white.opacity(0.1) : Color.black.opacity(0.8)
+        } else {
+            return isAccentColorDark ? Color.white.opacity(0.8) : Color.black.opacity(0.1)
+        }
+    }
+    
     var body: some View {
         ZStack {
             // Unified glassy belt background
             Capsule()
                 .fill(.ultraThinMaterial)
+                .background(
+                    Capsule()
+                        .fill(barBackgroundOverlay())
+                )
                 .overlay(
                     Capsule()
                         .stroke(Color.white.opacity(0.2), lineWidth: 0.5) // Subtle stroke
@@ -41,10 +65,15 @@ struct FloatingTabBar: View {
             // Center tab bubble, merged and aligned lower
             Capsule()
                 .fill(.ultraThinMaterial)
+                .background(
+                    Capsule()
+                        .fill(barBackgroundOverlay())
+                )
                 .frame(width: 75, height: 75)
                 .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
                 .offset(y: 0)
 
+            
             // Tab items
             ForEach(tabs) { tab in
                 let isCenter = selectedTab == tab.tag
@@ -61,15 +90,15 @@ struct FloatingTabBar: View {
                     VStack(spacing: 4) {
                         Image(systemName: tab.icon)
                             .font(.system(size: isCenter ? 32 : 16)) // Adjusted icon size
-                            .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
-                            .shadow(color: colorScheme == .dark ? .white : .black, radius: 1, x: 0, y: 0)
+                            .foregroundColor(isCenter ? cameraManager.accentColor : (barColorDark ? Color.white.opacity(0.8) : Color.black.opacity(0.8))
+                            .shadow(color: colorScheme == .dark ? .white : .black, radius: 0.1, x: 0, y: 0)
                             .frame(maxWidth: .infinity, alignment: .center) // Center the icon
                         
                         Text(tab.title)
                             .font(.system(size: isCenter ? 10 : 8, weight: .bold))
                             .fontWidth(.compressed)
-                            .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
-                            .shadow(color: colorScheme == .dark ? .white : .black, radius: 1, x: 0, y: 0)
+                            .foregroundColor(isCenter ? cameraManager.accentColor : (barColorDark ? Color.white.opacity(0.8) : Color.black.opacity(0.8))
+                            .shadow(color: colorScheme == .dark ? .white : .black, radius: 0.1, x: 0, y: 0)
                             .frame(maxWidth: .infinity, alignment: .center) // Center the text
                     }
                     .frame(width: 60)
