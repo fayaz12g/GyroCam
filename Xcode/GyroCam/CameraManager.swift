@@ -802,8 +802,10 @@ class CameraManager: NSObject, ObservableObject {
     
     private func startSession() {
         guard !session.isRunning else { return }
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            self?.session.startRunning()
+        
+        Task.detached { [weak self] in
+            guard let session = await self?.session else { return }
+            session.startRunning()
         }
     }
     
