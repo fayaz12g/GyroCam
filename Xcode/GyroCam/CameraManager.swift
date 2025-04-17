@@ -529,28 +529,29 @@ class CameraManager: NSObject, ObservableObject {
     private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
         isExporting = true
         exportProgress = 0.0
-        
+
         let exportId = UUID()
         let filename = getNextClipNumber()
-        let exportProgress = ExportProgress(id: exportId, filename: filename, progress: 0.0, isCompleted: false, startTime: Date())
-        
+        let exportProgressEntry = ExportProgress(id: exportId, filename: filename, progress: 0.0, isCompleted: false, startTime: Date())
+
         await MainActor.run {
-            activeExports.append(exportProgress)
+            activeExports.append(exportProgressEntry)
             if allowRecordingWhileSaving {
                 showExportSheet = true
             }
         }
-        
-        // Get background task identifier
+
+        // Begin background task
         var backgroundTaskID = UIBackgroundTaskIdentifier.invalid
         backgroundTaskID = UIApplication.shared.beginBackgroundTask {
             UIApplication.shared.endBackgroundTask(backgroundTaskID)
             backgroundTaskID = .invalid
         }
-        
-        guard let exporter = AVAssetExportSession(asset: composition,
-                                                  presetName: self.exportQuality.preset) else {
-            self.showError("Export failed")
+
+        guard let exporter = AVAssetExportSession(asset: composition, presetName: self.exportQuality.preset) else {
+            await MainActor.run {
+                self.showError("Export failed")
+            }
             UIApplication.shared.endBackgroundTask(backgroundTaskID)
             return
         }
@@ -558,38 +559,39 @@ class CameraManager: NSObject, ObservableObject {
         let outputURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("stitched-\(UUID().uuidString)")
             .appendingPathExtension("mov")
-        
+
         exporter.outputURL = outputURL
         exporter.outputFileType = .mov
         exporter.videoComposition = videoComposition
         exporter.shouldOptimizeForNetworkUse = false
         exportDuration = CMTimeGetSeconds(composition.duration)
-        
-        // Set up progress monitoring
-        let progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            let progress = Float(exporter.progress)
-            
-            Task { @MainActor in
-                self.exportProgress = progress
-                // Update progress in activeExports
-                if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
-                    self.activeExports[index].progress = progress
+
+        // Monitor export states
+        let stateSequence = exporter.states(updateInterval: 0.1)
+        Task.detached {
+            for await state in stateSequence {
+                switch state {
+                case .exporting(let progress):
+                    await MainActor.run {
+                        self.exportProgress = Float(progress.fractionCompleted)
+                        if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
+                            self.activeExports[index].progress = Float(progress.fractionCompleted)
+                        }
+                    }
+                default:
+                    break
                 }
             }
         }
-        
+
         print("📤 [10] Starting export")
         print("   📍 Output URL: \(outputURL)")
         print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
         print("   ⏳ Video duration: \(exportDuration)s")
         print("   🎥 Export Quality: \(exportQuality)")
-        
-        await exporter.export()
-        progressTimer.invalidate()
-        
-        if exporter.status == .completed {
-            print("✅ [11] Export succeeded")
+
+        do {
+            try await exporter.export(to: outputURL, as: .mov)
             await MainActor.run {
                 if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
                     self.activeExports[index].isCompleted = true
@@ -599,11 +601,17 @@ class CameraManager: NSObject, ObservableObject {
                 self.cleanupClips()
                 print("🧹 [12] Cleanup completed")
             }
+        } catch {
+            await MainActor.run {
+                self.showError("Export failed: \(error.localizedDescription)")
+            }
         }
-        
-        isExporting = false
-        self.exportProgress = 1.0
-        
+
+        await MainActor.run {
+            self.isExporting = false
+            self.exportProgress = 1.0
+        }
+
         // Clean up completed export after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             Task { @MainActor in
@@ -613,7 +621,7 @@ class CameraManager: NSObject, ObservableObject {
                 }
             }
         }
-        
+
         // End background task
         UIApplication.shared.endBackgroundTask(backgroundTaskID)
     }
@@ -971,27 +979,35 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
-                session.beginConfiguration()
-                defer { session.commitConfiguration() }
-                guard let connection = movieOutput.connection(with: .video) else { return }
-                let videoOrientation: AVCaptureVideoOrientation
-                switch orientation {
-                case .portrait: videoOrientation = .portrait
-                case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
-                case .landscapeLeft: videoOrientation = .landscapeRight
-                case .landscapeRight: videoOrientation = .landscapeLeft
-                default: videoOrientation = .portrait
-                }
-                connection.videoOrientation = videoOrientation
-                if connection.isVideoMirroringSupported {
-                    connection.isVideoMirrored = (currentLens == .frontWide)
-                }
-            }
-    
-    @MainActor private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
+    @MainActor
+    private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+
+        guard let connection = movieOutput.connection(with: .video),
+              let device = currentCaptureDevice else { return }
+
+        // Initialize the rotation coordinator with the current device
+        let rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+
+        // Retrieve the rotation angle for horizon-level capture
+        let angle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
+
+        // Check if the angle is supported and apply it
+        if connection.isVideoRotationAngleSupported(angle) {
+            connection.videoRotationAngle = angle
+        }
+
+        // Set video mirroring if supported
+        if connection.isVideoMirroringSupported {
+            connection.isVideoMirrored = (currentLens == .frontWide)
+        }
+    }
+
+    @MainActor
+    private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
         guard isRecording else { return }
-        
+
         if shouldStitchClips {
             // Log orientation change with timestamp
             let elapsedTime = Date().timeIntervalSince(recordingStartTime!)
@@ -1000,9 +1016,12 @@ class CameraManager: NSObject, ObservableObject {
             print("Orientation changed to \(newOrientationDesc) at \(elapsedTime)s")
         } else {
             recordingQueue.async { [weak self] in
-                guard let self = self, !self.isRestarting else { return }
-                self.isRestarting = true
-                DispatchQueue.main.async { // Ensure main thread
+                guard let self = self else { return }
+
+                Task { @MainActor in
+                    guard !self.isRestarting else { return }
+                    self.isRestarting = true
+
                     self.stopRecording { [weak self] in
                         guard let self = self else { return }
                         self.currentClipNumber += 1
@@ -1014,19 +1033,24 @@ class CameraManager: NSObject, ObservableObject {
             }
         }
     }
+
     
-    @MainActor func startRecording() {
-       stitchingGroup = DispatchGroup()
-       recordingStartTime = Date()
-       orientationChanges.removeAll()
-        
+    @MainActor
+    func startRecording() {
+        stitchingGroup = DispatchGroup()
+        recordingStartTime = Date()
+        orientationChanges.removeAll()
+
         if !isRestarting {
             durationTimer?.invalidate()
             videoDuration = 0.0
             
             // Start the timer to update every 0.01 seconds
-            durationTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-                self.videoDuration += 0.01
+            durationTimer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { [weak self] _ in
+                guard let self = self else { return }
+                Task { @MainActor in
+                    self.videoDuration += 0.01
+                }
             }
         }
         

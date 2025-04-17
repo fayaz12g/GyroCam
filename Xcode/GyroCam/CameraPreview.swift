@@ -511,25 +511,17 @@ struct CameraPreview: UIViewRepresentable {
 }
 
 
-extension AVCaptureVideoOrientation {
-    init?(interfaceOrientation: UIInterfaceOrientation) {
-        switch interfaceOrientation {
-        case .portrait: self = .portrait
-        case .portraitUpsideDown: self = .portraitUpsideDown
-        case .landscapeLeft: self = .landscapeLeft
-        case .landscapeRight: self = .landscapeRight
-        default: return nil
+extension AVCaptureConnection {
+    func updateVideoRotationAngle(using device: AVCaptureDevice) {
+        // Initialize the rotation coordinator with the current device
+        let rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+        
+        // Retrieve the rotation angle for horizon-level capture
+        let angle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
+        
+        // Check if the angle is supported and apply it
+        if self.isVideoRotationAngleSupported(angle) {
+            self.videoRotationAngle = angle
         }
     }
-    
-    var description: String {
-        switch self {
-        case .portrait: return "Portrait"
-        case .portraitUpsideDown: return "Upside Down"
-        case .landscapeLeft: return "Landscape Left"
-        case .landscapeRight: return "Landscape Right"
-        @unknown default: return "Unknown"
-        }
-    }
-    
 }
