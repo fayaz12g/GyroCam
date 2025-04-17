@@ -509,19 +509,3 @@ struct CameraPreview: UIViewRepresentable {
         }
     }
 }
-
-
-extension AVCaptureConnection {
-    func updateVideoRotationAngle(using device: AVCaptureDevice) {
-        // Initialize the rotation coordinator with the current device
-        let rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
-        
-        // Retrieve the rotation angle for horizon-level capture
-        let angle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
-        
-        // Check if the angle is supported and apply it
-        if self.isVideoRotationAngleSupported(angle) {
-            self.videoRotationAngle = angle
-        }
-    }
-}
