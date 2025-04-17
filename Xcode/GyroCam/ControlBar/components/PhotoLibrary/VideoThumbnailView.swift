@@ -131,15 +131,16 @@ struct VideoThumbnailView: View {
             guard let avAsset = avAsset,
                   let creationDate = asset.creationDate else { return }
             
-            let videoTracks = avAsset.tracks(withMediaType: .video)
-            guard let track = videoTracks.first else { return }
-            
-            let formatter = DateFormatter()
-            formatter.timeStyle = .short
             
             // try using updated syntax for natrual size and nominal framerate (async)
             Task {
                 do {
+                    let videoTracks = try await avAsset.loadTracks(withMediaType: .video)
+                    guard let track = videoTracks.first else { return }
+                    
+                    let formatter = DateFormatter()
+                    formatter.timeStyle = .short
+                    
                     // Asynchronously load the natural size and frame rate
                     let naturalSize = try await track.load(.naturalSize)
                     let nominalFrameRate = try await track.load(.nominalFrameRate)
