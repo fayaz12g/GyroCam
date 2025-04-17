@@ -137,13 +137,24 @@ struct VideoThumbnailView: View {
             let formatter = DateFormatter()
             formatter.timeStyle = .short
             
-            DispatchQueue.main.async {
-                self.videoInfo = VideoInfo(
-                    resolution: "\(Int(track.naturalSize.width))x\(Int(track.naturalSize.height))",
-                    fps: "\(Int(track.nominalFrameRate)) fps",
-                    creationTime: formatter.string(from: creationDate)
-                )
+            // try using updated syntax for natrual size and nominal framerate (async)
+            Task {
+                do {
+                    // Asynchronously load the natural size and frame rate
+                    let naturalSize = try await track.load(.naturalSize)
+                    let nominalFrameRate = try await track.load(.nominalFrameRate)
+                    
+                    DispatchQueue.main.async {
+                        self.videoInfo = VideoInfo(
+                            resolution: "\(Int(naturalSize.width))x\(Int(naturalSize.height))",
+                            fps: "\(Int(nominalFrameRate)) fps",
+                            creationTime: formatter.string(from: creationDate)
+                        )
+                    }
+                }
             }
+            
+  
         }
     }
 }

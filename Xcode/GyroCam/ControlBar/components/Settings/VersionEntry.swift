@@ -114,7 +114,7 @@ struct VersionEntry: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(UIColor.secondarySystemGroupedBackground))
         )
-        .onChange(of: isExpanded) { expanded in
+        .onChange(of: isExpanded) { _, expanded in
             if expanded, let issueNumbers = fixedIssues {
                 // Initialize issues array with loading state
                 issues = issueNumbers.map { GitHubIssue(id: $0) }

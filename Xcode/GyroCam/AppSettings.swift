@@ -35,7 +35,7 @@ struct AppSettings: Codable {
     
     // Video Settings
     var isSavingVideo: Bool = false
-    var shouldStitchClips: Bool = false
+    var shouldStitchClips: Bool = true
     var stabilizeVideo: StabilizationMode = .auto
     
     // Focus Settings
@@ -63,7 +63,7 @@ struct AppSettings: Codable {
     var showClipBadge: Bool = true
     
     // Orientation and Landscape Lock
-    var lockLandscape: Bool = false
+    var lockLandscape: Bool = true
     
     // Audio and Haptic Feedback
     var playHaptics: Bool = true

@@ -130,12 +130,14 @@ struct SavingDotsView: View {
             }
             
             // Haptic setup
+            let playHaptics = cameraManager.playHaptics
+            let playSounds = cameraManager.playSounds
             impactFeedback.prepare()
             feedbackTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
-                if cameraManager.playHaptics {
+                if playHaptics {
                     impactFeedback.impactOccurred(intensity: 1.0)
                 }
-                if cameraManager.playSounds {
+                if playSounds {
                     AudioServicesPlaySystemSound(1117)
                 }
             }

@@ -448,7 +448,7 @@ struct CaptureSettingsTab: View {
                                     items: cameraManager.availableFrameRates,
                                     title: "Frame Rate",
                                     accentColor: cameraManager.accentColor,
-                                    displayValue: { $0.description }
+                                    displayValue: { String($0.description.dropLast(3)) }
                                 )
                             
                             GyroPicker(
@@ -609,27 +609,6 @@ struct CaptureSettingsTab: View {
                 .padding(.top, 20)
             }
             .padding()
-        }
-    }
-}
-
-struct FeatureToggle: View {
-    let title: String
-    let status: String
-    @Binding var isOn: Bool
-    let statusColor: Color
-    @ObservedObject var cameraManager: CameraManager
-    
-    var body: some View {
-        HStack {
-            Text(title)
-            Spacer()
-            Text(status)
-                .badgeModifier(backgroundColor: statusColor)
-            Toggle("", isOn: $isOn)
-                .tint(cameraManager.accentColor)
-                .padding(.trailing, 5)
-                .disabled(status == "Coming Soon")
         }
     }
 }

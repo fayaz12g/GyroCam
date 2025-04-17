@@ -194,38 +194,40 @@ extension PHAsset {
                 return
             }
             
-            let videoTracks = asset.tracks(withMediaType: .video)
-            if let firstTrack = videoTracks.first,
-               let formatDescription = firstTrack.formatDescriptions.first {
-                
-//                // Check codec type (added clutter)
-//                let codec = CMFormatDescriptionGetMediaSubType(formatDescription as! CMFormatDescription)
-//                if codec == kCMVideoCodecType_HEVC {
-//                    badges.append(.hevc)
-//                }
-//                
-                // Check HDR characteristics
-                let colorPrimaries = CMFormatDescriptionGetExtension(formatDescription as! CMFormatDescription, extensionKey: kCVImageBufferColorPrimariesKey)
-                let transferFunction = CMFormatDescriptionGetExtension(formatDescription as! CMFormatDescription, extensionKey: kCVImageBufferTransferFunctionKey)
-                
-                if let transferFunction = transferFunction as? String,
-                   (transferFunction == (kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String) ||
-                    transferFunction == (kCVImageBufferTransferFunction_ITU_R_2100_HLG as String)) {
-                    badges.append(.hdr)
+            Task {
+                do {
+                    let videoTracks = try await asset.loadTracks(withMediaType: .video)
+                    if let firstTrack = videoTracks.first {
+                        let formatDescriptions = try await firstTrack.load(.formatDescriptions)
+                        if let formatDescription = formatDescriptions.first {
+                            // Check HDR characteristics
+                            let colorPrimaries = CMFormatDescriptionGetExtension(formatDescription , extensionKey: kCVImageBufferColorPrimariesKey)
+                            let transferFunction = CMFormatDescriptionGetExtension(formatDescription , extensionKey: kCVImageBufferTransferFunctionKey)
+                            
+                            if let transferFunction = transferFunction as? String,
+                               (transferFunction == (kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String) ||
+                                transferFunction == (kCVImageBufferTransferFunction_ITU_R_2100_HLG as String)) {
+                                badges.append(.hdr)
+                            }
+                            else if let colorPrimaries = colorPrimaries as? String,
+                                    (colorPrimaries == (kCVImageBufferColorPrimaries_ITU_R_2020 as String) ||
+                                     colorPrimaries == (kCVImageBufferColorPrimaries_P3_D65 as String)) {
+                                badges.append(.hdrFallback)
+                            }
+                        }
+                    }
+                } catch {
+                    // Handle error
                 }
-                else if let colorPrimaries = colorPrimaries as? String,
-                        (colorPrimaries == (kCVImageBufferColorPrimaries_ITU_R_2020 as String) ||
-                         colorPrimaries == (kCVImageBufferColorPrimaries_P3_D65 as String)) {
-                    badges.append(.hdrFallback)
-                }
+                semaphore.signal()
             }
-            semaphore.signal()
         }
-        
+
         semaphore.wait()
         return badges.uniqued()
     }
 }
+
 
 extension Sequence where Element: Hashable {
     func uniqued() -> [Element] {
