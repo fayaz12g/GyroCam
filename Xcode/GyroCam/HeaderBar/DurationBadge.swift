@@ -16,15 +16,21 @@ struct DurationBadge: View {
         }
     }
     
-    private func formatDuration(_ duration: Double) -> (minutes: String, seconds: String, milliseconds: String) {
+    private var isLandscape: Bool {
+        return cameraManager.realOrientation == "Landscape Left" || cameraManager.realOrientation == "Landscape Right"
+    }
+    
+    private func formatDuration(_ duration: Double) -> (hours: String, minutes: String, seconds: String, milliseconds: String) {
         let totalSeconds = Int(duration)
         let milliseconds = Int((duration - Double(totalSeconds)) * 1000 / 10)
-        let minutes = totalSeconds / 60
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
         let seconds = totalSeconds % 60
         
         // Return tuple of formatted strings
         return (
-            String(format: "%d", minutes),
+            String(format: "%d", hours),
+            String(format: "%02d", minutes),
             String(format: "%02d", seconds),
             String(format: "%02d", milliseconds)
         )
@@ -37,54 +43,98 @@ struct DurationBadge: View {
     var body: some View {
         let duration = formatDuration(cameraManager.videoDuration)
         
-        GeometryReader { geometry in
-            HStack {
-                Spacer()
+        VStack {
+            if cameraManager.lockLandscape {
+                Spacer().frame(height: 80)
+            }
+            else {
+                Spacer().frame(height: 20)
+            }
+            
+            ZStack {
+                // Single rounded glassy rectangle that adapts to orientation
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(cameraManager.accentColor)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.ultraThinMaterial)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
+                    )
+                    .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+                    .offset(
+                        x: motionManager.roll * 1.5,
+                        y: motionManager.pitch * 1.5
+                    )
                 
-                HStack(spacing: 0) {
-                    Text(duration.minutes)
-                        .rotationEffect(rotationAngle)
-                    Text(":")
-                        .rotationEffect(rotationAngle)
-                    Text(duration.seconds)
-                        .rotationEffect(rotationAngle)
-                    Text(":")
-                        .rotationEffect(rotationAngle)
-                    Text(duration.milliseconds)
-                        .rotationEffect(rotationAngle)
-                }
-                .font(.title3.weight(.semibold))
-                .foregroundColor(isAccentColorDark ? .white : .black)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(.ultraThinMaterial)
-                        .background(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
-                        )
-                        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-                        .offset(
-                            x: motionManager.roll * 1.5,
-                            y: motionManager.pitch * 1.5
-                        )
-                )
-                .frame(height: 40)
-                .padding(.top, geometry.safeAreaInsets.top > 47 ? cameraManager.lockLandscape ? 50 : 28 : 20)
-                .contextMenu {
-                    Button {
-                        showDurationBadge.toggle()
-                    } label: {
-                        Label(showDurationBadge ? "Hide Badge" : "Show Badge",
-                              systemImage: showDurationBadge ? "eye.slash" : "eye")
+                // Time components container that rotates as a unit
+                Group {
+                    if isLandscape {
+                        VStack(spacing: 8) {
+                            timeComponentView(value: duration.hours, label: "HOURS")
+                            separatorView()
+                            timeComponentView(value: duration.minutes, label: "MINUTES")
+                            separatorView()
+                            timeComponentView(value: duration.seconds, label: "SECONDS")
+                            separatorView()
+                            timeComponentView(value: duration.milliseconds, label: "MILLI")
+                        }
+                        .frame(width: 60)
+                    } else {
+                        HStack(spacing: 8) {
+                            timeComponentView(value: duration.hours, label: "HOURS")
+                            separatorView()
+                            timeComponentView(value: duration.minutes, label: "MINUTES")
+                            separatorView()
+                            timeComponentView(value: duration.seconds, label: "SECONDS")
+                            separatorView()
+                            timeComponentView(value: duration.milliseconds, label: "MILLI")
+                        }
+                        .frame(height: 60)
                     }
                 }
-                
-                Spacer()
+                .foregroundColor(isAccentColorDark ? .white : .black)
+                .rotationEffect(rotationAngle)
+            }
+            .frame(width: 220, height: 60)
+            .contextMenu {
+                Button {
+                    showDurationBadge.toggle()
+                } label: {
+                    Label(showDurationBadge ? "Hide Badge" : "Show Badge",
+                          systemImage: showDurationBadge ? "eye.slash" : "eye")
+                }
+            }
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .animation(.easeInOut(duration: 0.2), value: cameraManager.realOrientation)
+    }
+    
+    private func timeComponentView(value: String, label: String) -> some View {
+        VStack(spacing: 1) {
+            Text(value)
+                .font(.title3.weight(.semibold))
+            Text(label)
+                .font(.system(size: 8))
+                .fontWeight(.medium)
+        }
+    }
+    
+    private func separatorView() -> some View {
+        Group {
+            if isLandscape {
+                Rectangle()
+                    .fill(isAccentColorDark ? Color.white.opacity(0.5) : Color.black.opacity(0.3))
+                    .frame(width: 20, height: 1)
+            } else {
+                Rectangle()
+                    .fill(isAccentColorDark ? Color.white.opacity(0.5) : Color.black.opacity(0.3))
+                    .frame(width: 1, height: 20)
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: cameraManager.realOrientation)
     }
 }
