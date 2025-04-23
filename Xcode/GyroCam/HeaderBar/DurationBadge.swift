@@ -5,6 +5,7 @@ struct DurationBadge: View {
     @Binding var currentOrientation: String
     @Binding var showDurationBadge: Bool
     @Environment(\.colorScheme) var colorScheme
+    @StateObject private var motionManager = MotionManager()
     
     private var rotationAngle: Angle {
         switch cameraManager.realOrientation {
@@ -57,8 +58,18 @@ struct DurationBadge: View {
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
                 .background(
-                    RoundedRectangle(cornerSize: CGSize(width: 10, height: 10))
-                        .fill(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9))
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.ultraThinMaterial)
+                        .background(colorScheme == .dark ? cameraManager.accentColor.opacity(0.9) : cameraManager.accentColor.opacity(0.9))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                        )
+                        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+                        .offset(
+                            x: motionManager.roll * 1.5,
+                            y: motionManager.pitch * 1.5
+                        )
                 )
                 .frame(height: 40)
                 .padding(.top, geometry.safeAreaInsets.top > 47 ? cameraManager.lockLandscape ? 50 : 28 : 20)
@@ -75,13 +86,5 @@ struct DurationBadge: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: cameraManager.realOrientation)
-    }
-}
-
-extension UIColor {
-    var isDarkColor: Bool {
-        var white: CGFloat = 0
-        self.getWhite(&white, alpha: nil)
-        return white < 0.8
     }
 }

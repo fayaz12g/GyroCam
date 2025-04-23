@@ -27,6 +27,8 @@ class CameraManager: NSObject, ObservableObject {
     private let recordingQueue = DispatchQueue(label: "recording.queue")
     public var isRestarting = false
     
+    public var hapticsConfigured = false
+    
     public var loadLatestThumbnail: Bool = false
     
     private var clipURLs: [URL] = []
@@ -44,8 +46,8 @@ class CameraManager: NSObject, ObservableObject {
     private weak var previewLayer: AVCaptureVideoPreviewLayer?
     
     @MainActor @Published var isRecording = false
-    @MainActor @Published var currentOrientation = "Portrait"
-    @MainActor @Published var realOrientation = "Portrait"
+    @MainActor @Published var currentOrientation = "Loading..."
+    @MainActor @Published var realOrientation = "Loading..."
     @MainActor @Published var presentMessage = ""
     @MainActor @Published var messageType = ""
     
@@ -95,6 +97,11 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor var stabilizeVideo: StabilizationMode {
         get { settings.stabilizeVideo }
         set { settings.stabilizeVideo = newValue }
+    }
+    
+    @MainActor var rotationHaptics: RotationHaptic {
+        get { settings.rotationHaptics }
+        set { settings.rotationHaptics = newValue }
     }
     
     @MainActor var currentFormat: VideoFormat {
@@ -525,6 +532,7 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.allowRecordingWhileSaving }
         set { settings.allowRecordingWhileSaving = newValue }
     }
+
     
     private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
         isExporting = true
@@ -560,10 +568,27 @@ class CameraManager: NSObject, ObservableObject {
             .appendingPathComponent("stitched-\(UUID().uuidString)")
             .appendingPathExtension("mov")
 
+        // set device metadata
+        let deviceMetadata = AVMutableMetadataItem()
+        deviceMetadata.keySpace = .common
+        deviceMetadata.key = AVMetadataKey.commonKeyModel as (NSCopying & NSObjectProtocol)?
+        deviceMetadata.value = UIDevice.modelName as (NSCopying & NSObjectProtocol)?
+    
+        let makeMetadata = AVMutableMetadataItem()
+        makeMetadata.keySpace = .common
+        makeMetadata.key = AVMetadataKey.commonKeyMake as (NSCopying & NSObjectProtocol)?
+        makeMetadata.value = "Apple" as (NSCopying & NSObjectProtocol)?
+
+        let softwareMetadata = AVMutableMetadataItem()
+        softwareMetadata.keySpace = .common
+        softwareMetadata.key = AVMetadataKey.commonKeySource as (NSCopying & NSObjectProtocol)?
+        softwareMetadata.value = "GyroCam" as (NSCopying & NSObjectProtocol)?
+        
         exporter.outputURL = outputURL
         exporter.outputFileType = .mov
         exporter.videoComposition = videoComposition
         exporter.shouldOptimizeForNetworkUse = false
+        exporter.metadata =  [deviceMetadata, softwareMetadata, makeMetadata]
         exportDuration = CMTimeGetSeconds(composition.duration)
 
         // Monitor export states
@@ -736,6 +761,7 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor func configureSession() {
         session.beginConfiguration()
+        configureHaptics()
         defer {
             session.commitConfiguration()
             print("Session configuration committed")
@@ -751,7 +777,7 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     public func configureHaptics() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             // get the haptics working
             do {
                 let audioSession = AVAudioSession.sharedInstance()
@@ -764,6 +790,8 @@ class CameraManager: NSObject, ObservableObject {
                 print("Error configuring AVAudioSession: \(error)")
             }
         }
+        
+        hapticsConfigured = true
     }
     
     @MainActor private func setupInputs() throws {
@@ -962,7 +990,7 @@ class CameraManager: NSObject, ObservableObject {
             showError("Motion data unavailable")
             return
         }
-        motionManager.deviceMotionUpdateInterval = 0.1
+        motionManager.deviceMotionUpdateInterval = 0.01
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
             guard let self = self else { return }
             guard let motion = motion, error == nil else {
@@ -1006,10 +1034,28 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
 
+    
+    private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        if !hapticsConfigured {
+            configureHaptics()
+        }
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            generator.impactOccurred()
+        }
+    }
+    
     @MainActor
     private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
-        guard isRecording else { return }
 
+        // play the associated haptic
+        if self.playHaptics && (self.rotationHaptics == .always || (self.rotationHaptics == .recording && self.isRecording)) {
+            triggerHaptic(style: .light)
+        }
+        
+        guard isRecording else { return }
+        
         if shouldStitchClips {
             // Log orientation change with timestamp
             let elapsedTime = Date().timeIntervalSince(recordingStartTime!)

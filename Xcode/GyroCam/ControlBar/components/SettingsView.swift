@@ -152,7 +152,17 @@ struct CustomizationSettingsTab: View {
                             GyroToggle(isOn: $cameraManager.playHaptics,
                                     label: "Play Haptics",
                                     accentColor: cameraManager.accentColor)
-                        
+                           
+                            if cameraManager.playHaptics {
+                                GyroPicker(
+                                    selection: $cameraManager.rotationHaptics,
+                                    items: RotationHaptic.allCases,
+                                    title: "Rotation Haptics",
+                                    accentColor: cameraManager.accentColor,
+                                    displayValue: { $0.rawValue }
+                                )
+                            }
+                            
                         }
                         .padding(.horizontal)
                     }

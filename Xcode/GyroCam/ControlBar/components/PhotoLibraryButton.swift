@@ -13,7 +13,6 @@ struct PhotoLibraryButton: View {
     @ObservedObject var cameraManager: CameraManager
     @Environment(\.colorScheme) var colorScheme
     @State private var showingPhotoLibrary = false
-    @State var hapticsConfigured: Bool
     @State private var latestThumbnail: UIImage?
     
     private var rotationAngle: Angle {
@@ -48,9 +47,9 @@ struct PhotoLibraryButton: View {
     
     var body: some View {
         Button {
-            if !hapticsConfigured {
+            if !cameraManager.hapticsConfigured {
                 cameraManager.configureHaptics()
-                hapticsConfigured = true
+                cameraManager.hapticsConfigured = true
             }
             if cameraManager.playHaptics {
                 triggerHaptic(style: .light)

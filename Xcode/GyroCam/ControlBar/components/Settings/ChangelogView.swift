@@ -25,6 +25,20 @@ struct ChangelogView: View {
                     
                     VStack(spacing: 20) {
                         
+                        
+                        VersionEntry(
+                            version: "0.1.8",
+                            date: "April 23, 2025",
+                            type: .beta(version: 4),
+                            changes: [
+                                .init(type: .added, description: "Implemented a customizable haptic on orientation change."),
+                                .init(type: .changed, description: "The duration badge now matches the new glassy UI."),
+                                .init(type: .changed, description: "The duration badge is now split into sections with subheadings."),
+                                .init(type: .fixed, description: "Video metadata now properly shows the device the video was taken on. Lens metadata coming TBD."),
+                            ],
+                            fixedIssues: [22]
+                        )
+                        
                         VersionEntry(
                             version: "0.1.7",
                             date: "March 31, 2025",

@@ -68,6 +68,7 @@ struct AppSettings: Codable {
     // Audio and Haptic Feedback
     var playHaptics: Bool = true
     var playSounds: Bool = true
+    var rotationHaptics: RotationHaptic = .recording
 }
 
 
@@ -109,6 +110,14 @@ enum StabilizationMode: String, CaseIterable, Codable, Identifiable {
     case cinematic = "2"
     case cinematicExtended = "3"
     case auto = "Auto"
+}
+
+enum RotationHaptic: String, CaseIterable, Codable, Identifiable {
+    var id: String { self.rawValue }
+    
+    case never = "Never"
+    case recording = "While Recording"
+    case always = "Always"
 }
 
 enum VideoFormat: String, CaseIterable, Identifiable {
@@ -253,5 +262,13 @@ enum ExportQuality: String, CaseIterable, Identifiable {
         case .high: return AVAssetExportPresetHighestQuality
         case .highest: return AVAssetExportPresetHEVCHighestQuality
         }
+    }
+}
+
+extension UIColor {
+    var isDarkColor: Bool {
+        var white: CGFloat = 0
+        self.getWhite(&white, alpha: nil)
+        return white < 0.8
     }
 }
