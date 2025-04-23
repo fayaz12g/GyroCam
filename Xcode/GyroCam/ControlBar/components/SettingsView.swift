@@ -161,6 +161,14 @@ struct CustomizationSettingsTab: View {
                                     accentColor: cameraManager.accentColor,
                                     displayValue: { $0.rawValue }
                                 )
+                                
+                                GyroPicker(
+                                    selection: $cameraManager.rotationHapticsStrength,
+                                    items: RotationHapticStrength.allCases,
+                                    title: "Strength",
+                                    accentColor: cameraManager.accentColor,
+                                    displayValue: { $0.rawValue }
+                                )
                             }
                             
                         }

@@ -69,6 +69,7 @@ struct AppSettings: Codable {
     var playHaptics: Bool = true
     var playSounds: Bool = true
     var rotationHaptics: RotationHaptic = .recording
+    var rotationHapticsStrength: RotationHapticStrength = .light
 }
 
 
@@ -118,6 +119,22 @@ enum RotationHaptic: String, CaseIterable, Codable, Identifiable {
     case never = "Never"
     case recording = "While Recording"
     case always = "Always"
+}
+
+enum RotationHapticStrength: String, CaseIterable, Codable, Identifiable {
+    var id: String { self.rawValue }
+    
+    case light = "Light"
+    case medium = "Medium"
+    case hard = "Rough"
+    
+    var feedbackStyle: UIImpactFeedbackGenerator.FeedbackStyle {
+        switch self {
+        case .light: return .light
+        case .medium: return .medium
+        case .hard: return .heavy 
+        }
+    }
 }
 
 enum VideoFormat: String, CaseIterable, Identifiable {

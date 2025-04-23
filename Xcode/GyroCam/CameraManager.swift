@@ -104,6 +104,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.rotationHaptics = newValue }
     }
     
+    @MainActor var rotationHapticsStrength: RotationHapticStrength {
+        get { settings.rotationHapticsStrength }
+        set { settings.rotationHapticsStrength = newValue }
+    }
+    
     @MainActor var currentFormat: VideoFormat {
         get { settings.currentFormat }
         set { settings.currentFormat = newValue }
@@ -1035,11 +1040,11 @@ class CameraManager: NSObject, ObservableObject {
     }
 
     
-    private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle) {
+    private func triggerHaptic(strength: RotationHapticStrength) {
         if !hapticsConfigured {
             configureHaptics()
         }
-        let generator = UIImpactFeedbackGenerator(style: style)
+        let generator = UIImpactFeedbackGenerator(style: strength.feedbackStyle)
         generator.prepare()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             generator.impactOccurred()
@@ -1051,7 +1056,7 @@ class CameraManager: NSObject, ObservableObject {
 
         // play the associated haptic
         if self.playHaptics && (self.rotationHaptics == .always || (self.rotationHaptics == .recording && self.isRecording)) {
-            triggerHaptic(style: .light)
+            triggerHaptic(strength: rotationHapticsStrength)
         }
         
         guard isRecording else { return }
