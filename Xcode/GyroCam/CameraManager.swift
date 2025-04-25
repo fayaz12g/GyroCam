@@ -1091,7 +1091,7 @@ class CameraManager: NSObject, ObservableObject {
             // Log orientation change with timestamp
             let elapsedTime = Date().timeIntervalSince(recordingStartTime!)
             let newOrientationDesc = newOrientation.description
-            orientationChanges.append((time: elapsedTime - 0.18, orientation: newOrientationDesc))
+            orientationChanges.append((time: elapsedTime - 0.15, orientation: newOrientationDesc))
             print("Orientation changed to \(newOrientationDesc) at \(elapsedTime)s")
         } else {
             recordingQueue.async { [weak self] in
