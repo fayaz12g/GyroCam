@@ -32,6 +32,7 @@ struct ChangelogView: View {
                             type: .beta(version: 4),
                             changes: [
                                 .init(type: .added, description: "Implemented a customizable haptic on orientation change."),
+                                .init(type: .fixed, description: "Fixed an issue in the capture tab causing the reset defaults button to become inaccessible."),
                                 .init(type: .changed, description: "The duration badge now matches the new glassy UI."),
                                 .init(type: .changed, description: "The duration badge is now split into sections with subheadings."),
                                 .init(type: .added, description: "New double dictating how long to close the export sheet after queueing."),
