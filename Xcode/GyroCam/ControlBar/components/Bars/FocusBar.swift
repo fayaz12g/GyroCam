@@ -49,7 +49,7 @@ struct FocusBar: View {
                         }
                     )
                     .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
-                    .rotationEffect(rotationAngle)
+                    .rotationEffect(cameraManager.rotationAngle)
                     .animation(.easeInOut(duration: 0.2), value: cameraManager.focusValue)  // Animate focus value changes
                     .shadow(radius: 3)
                     .offset(x: position)
@@ -116,15 +116,6 @@ struct FocusBar: View {
             if continuousFocusMode {
                 cameraManager.focusValue = newValue  // Update value as autofocus sets it
             }
-        }
-    }
-    
-    private var rotationAngle: Angle {
-        switch cameraManager.realOrientation {
-        case "Landscape Left": return .degrees(90)
-        case "Landscape Right": return .degrees(-90)
-        case "Upside Down": return .degrees(180)
-        default: return .degrees(0)
         }
     }
 }

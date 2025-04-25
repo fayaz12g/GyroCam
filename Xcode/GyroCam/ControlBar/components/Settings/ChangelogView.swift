@@ -34,6 +34,12 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "Implemented a customizable haptic on orientation change."),
                                 .init(type: .changed, description: "The duration badge now matches the new glassy UI."),
                                 .init(type: .changed, description: "The duration badge is now split into sections with subheadings."),
+                                .init(type: .added, description: "New double dictating how long to close the export sheet after queueing."),
+                                .init(type: .added, description: "The export sheet now animates in and out properly."),
+                                .init(type: .added, description: "New variable default to false to show export sheet right after recording."),
+                                .init(type: .changed, description: "A rudimentary updated algorithem flips the orientation sooner. Future update will log gyroscope data periodically as reference."),
+                                .init(type: .changed, description: "The export sheet now shows a green checkmark upon completion before dissapearing."),
+
                                 .init(type: .fixed, description: "Video metadata now properly shows the device the video was taken on. Lens metadata coming TBD."),
                             ],
                             fixedIssues: [22]

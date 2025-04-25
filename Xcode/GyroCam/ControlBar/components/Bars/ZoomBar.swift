@@ -50,7 +50,7 @@ struct ZoomBar: View {
                                 .font(.system(size: 6, weight: .bold))
                         }
                     )
-                    .rotationEffect(rotationAngle)
+                    .rotationEffect(cameraManager.rotationAngle)
                     .shadow(radius: 3)
                     .animation(.easeInOut(duration: 0.2), value: cameraManager.currentOrientation)
                     .offset(x: position)
@@ -107,14 +107,5 @@ struct ZoomBar: View {
         let logMax = log(max)
         
         return exp(normalized * (logMax - logMin) + logMin)
-    }
-    
-    private var rotationAngle: Angle {
-        switch cameraManager.realOrientation {
-        case "Landscape Left": return .degrees(90)
-        case "Landscape Right": return .degrees(-90)
-        case "Upside Down": return .degrees(180)
-        default: return .degrees(0)
-        }
     }
 }

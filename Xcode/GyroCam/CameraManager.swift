@@ -23,6 +23,15 @@ class CameraManager: NSObject, ObservableObject {
     @Published var isExporting: Bool = false
     @State private var durationTimer: Timer? = nil
     
+    public var rotationAngle: Angle {
+        switch self.realOrientation {
+        case "Landscape Left": return .degrees(90)
+        case "Landscape Right": return .degrees(-90)
+        case "Upside Down": return .degrees(180)
+        default: return .degrees(0)
+        }
+    }
+    
     private var previousOrientation: UIDeviceOrientation = .portrait
     private let recordingQueue = DispatchQueue(label: "recording.queue")
     public var isRestarting = false
@@ -537,7 +546,18 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.allowRecordingWhileSaving }
         set { settings.allowRecordingWhileSaving = newValue }
     }
-
+    
+    @MainActor var showQuickExport: Bool {
+        get { settings.showQuickExport }
+        set { settings.showQuickExport = newValue }
+    }
+    
+    
+    @MainActor var exportSheetDuration:  Double  {
+        get { settings.exportSheetDuration }
+        set { settings.exportSheetDuration = newValue }
+    }
+    
     
     private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
         isExporting = true
@@ -548,8 +568,10 @@ class CameraManager: NSObject, ObservableObject {
         let exportProgressEntry = ExportProgress(id: exportId, filename: filename, progress: 0.0, isCompleted: false, startTime: Date())
 
         await MainActor.run {
-            activeExports.append(exportProgressEntry)
-            if allowRecordingWhileSaving {
+            withAnimation {
+                activeExports.append(exportProgressEntry)
+            }
+            if allowRecordingWhileSaving && showQuickExport {
                 showExportSheet = true
             }
         }
@@ -643,9 +665,13 @@ class CameraManager: NSObject, ObservableObject {
         }
 
         // Clean up completed export after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + exportSheetDuration) { [weak self] in
             Task { @MainActor in
-                self?.activeExports.removeAll(where: { $0.id == exportId })
+                // ensure the animation plays while removing the sheet
+                withAnimation {
+                    self?.activeExports.removeAll(where: { $0.id == exportId })
+                }
+                // automatically close the export sheet if it empties while open
                 if self?.activeExports.isEmpty == true {
                     self?.showExportSheet = false
                 }
@@ -1065,7 +1091,7 @@ class CameraManager: NSObject, ObservableObject {
             // Log orientation change with timestamp
             let elapsedTime = Date().timeIntervalSince(recordingStartTime!)
             let newOrientationDesc = newOrientation.description
-            orientationChanges.append((time: elapsedTime, orientation: newOrientationDesc))
+            orientationChanges.append((time: elapsedTime - 0.18, orientation: newOrientationDesc))
             print("Orientation changed to \(newOrientationDesc) at \(elapsedTime)s")
         } else {
             recordingQueue.async { [weak self] in

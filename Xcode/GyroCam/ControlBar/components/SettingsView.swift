@@ -605,6 +605,14 @@ struct CaptureSettingsTab: View {
                                 label: "Allow Recording While Saving",
                                 accentColor: cameraManager.accentColor)
                         
+                        GyroToggle(isOn: $cameraManager.showQuickExport,
+                                label: "Show Export Sheet Immediately After Recording",
+                                accentColor: cameraManager.accentColor)
+                        
+                        GyroScroll(value: $cameraManager.exportSheetDuration, rangeStart: 0, rangeEnd: 100,
+                                label: "Hide Export Sheet After Queue Finish (seconds)",
+                                accentColor: cameraManager.accentColor)
+                        
                     }
                     .padding(.vertical, 8)
                     .padding(.horizontal)

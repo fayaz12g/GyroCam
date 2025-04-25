@@ -94,15 +94,27 @@ struct ContentView: View {
                                             .font(.system(size: 14, weight: .medium))
                                             .foregroundColor(.primary)
                                         
-                                        // Badge showing number of exports
+                                        // Badge showing number of exports or checkmark
                                         if cameraManager.activeExports.count > 0 {
-                                            Text("\(cameraManager.activeExports.count)")
-                                                .font(.system(size: 12, weight: .bold))
-                                                .foregroundColor(.white)
-                                                .padding(4)
-                                                .background(Circle().fill(Color.red))
-                                                .frame(width: 20, height: 20)
+                                            if cameraManager.activeExports.count == 1,
+                                               let export = cameraManager.activeExports.first,
+                                               export.isCompleted {
+                                                Image(systemName: "checkmark")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(.white)
+                                                    .padding(4)
+                                                    .background(Circle().fill(Color.green))
+                                                    .frame(width: 20, height: 20)
+                                            } else {
+                                                Text("\(cameraManager.activeExports.count)")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(.white)
+                                                    .padding(4)
+                                                    .background(Circle().fill(Color.red))
+                                                    .frame(width: 20, height: 20)
+                                            }
                                         }
+
                                     }
                                     .padding(.vertical, 8)
                                     .padding(.horizontal, 12)
@@ -117,7 +129,7 @@ struct ContentView: View {
                                     .padding(.trailing, 12)
                                 }
                                 .transition(.scale.combined(with: .opacity))
-                                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: cameraManager.activeExports.isEmpty)
+                                .animation(.bouncy, value: cameraManager.activeExports.isEmpty)
                             }
 
                         }

@@ -47,7 +47,7 @@ struct ISOBar: View {
                                     .font(.system(size: 6, weight: .bold))
                             }
                         )
-                        .rotationEffect(rotationAngle)
+                        .rotationEffect(cameraManager.rotationAngle)
                         .shadow(radius: 3)
                         .offset(x: position)
                         .gesture(
@@ -61,13 +61,5 @@ struct ISOBar: View {
                 }
         }
         .frame(height: 40)
-    }
-    private var rotationAngle: Angle {
-        switch cameraManager.realOrientation {
-        case "Landscape Left": return .degrees(90)
-        case "Landscape Right": return .degrees(-90)
-        case "Upside Down": return .degrees(180)
-        default: return .degrees(0)
-        }
     }
 }

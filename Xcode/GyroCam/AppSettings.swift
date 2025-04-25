@@ -23,6 +23,8 @@ struct AppSettings: Codable {
     var isProMode: Bool = true
     var preserveAspectRatios: Bool = true
     var allowRecordingWhileSaving: Bool = true
+    var showQuickExport: Bool = false
+    var exportSheetDuration = 3.0
     
     // Camera Settings
     var cameraPosition: AVCaptureDevice.Position = .back
