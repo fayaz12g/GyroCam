@@ -9,18 +9,26 @@
 import SwiftUI
 
 struct AccentColorPicker: View {
-    @Binding var selectedColor: Color
-    @State private var isShowingColorPicker = false
+    @Binding var accentColor: Color
+    @Binding var primaryColor: Color
+    @State private var isShowingAccentColorPicker = false
+    @State private var isShowingPrimaryColorPicker = false
     @State private var fillPercentage: CGFloat = 1.0
     
     var isAccentColorDark: Bool {
-        return UIColor(selectedColor).isDarkColor
+        return UIColor(accentColor).isDarkColor
+    }
+    
+    var isPrimaryColorDark: Bool {
+        return UIColor(primaryColor).isDarkColor
     }
     
     var body: some View {
+        
+        // Primary Color Changer
         Button(action: {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-                isShowingColorPicker.toggle()
+                isShowingPrimaryColorPicker.toggle()
             }
         }) {
             ZStack {
@@ -31,14 +39,60 @@ struct AccentColorPicker: View {
                 // Fluid fill effect
                 GeometryReader { geometry in
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(selectedColor)
+                        .fill(primaryColor)
                         .frame(width: geometry.size.width * fillPercentage)
                         .animation(.easeInOut(duration: 0.5), value: fillPercentage)
                 }
                 
                 // Status indicator in top right
                 Circle()
-                    .fill(selectedColor)
+                    .fill(primaryColor)
+                    .frame(width: 12, height: 12)
+                    .position(x: 16, y: 16)
+                
+                // Centered text with color preview
+                HStack {
+                    Text("Customize Primary Color")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(isPrimaryColorDark ? .white : .black)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .padding(.horizontal, 16)
+            }
+            .frame(height: 50)
+            .padding(.horizontal, 3)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $isShowingPrimaryColorPicker) {
+            ColorPickerSheet(selectedColor: $primaryColor, isPresented: $isShowingPrimaryColorPicker)
+        }
+        .padding(.horizontal, -20)
+        
+        
+        // Accent Color changer
+        Button(action: {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                isShowingAccentColorPicker.toggle()
+            }
+        }) {
+            ZStack {
+                // Background container
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color.gray.opacity(0.1))
+                
+                // Fluid fill effect
+                GeometryReader { geometry in
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(accentColor)
+                        .frame(width: geometry.size.width * fillPercentage)
+                        .animation(.easeInOut(duration: 0.5), value: fillPercentage)
+                }
+                
+                // Status indicator in top right
+                Circle()
+                    .fill(accentColor)
                     .frame(width: 12, height: 12)
                     .position(x: 16, y: 16)
                 
@@ -57,12 +111,13 @@ struct AccentColorPicker: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
-        .sheet(isPresented: $isShowingColorPicker) {
-            ColorPickerSheet(selectedColor: $selectedColor, isPresented: $isShowingColorPicker)
+        .sheet(isPresented: $isShowingAccentColorPicker) {
+            ColorPickerSheet(selectedColor: $accentColor, isPresented: $isShowingAccentColorPicker)
         }
         .padding(.horizontal, -20)
     }
 }
+
 
 struct ColorPickerSheet: View {
     @Binding var selectedColor: Color
@@ -131,7 +186,7 @@ struct ColorPickerSheet: View {
                 
                 Spacer()
             }
-            .navigationTitle("Select Accent Color")
+            .navigationTitle("Select a Color")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

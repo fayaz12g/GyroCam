@@ -54,7 +54,7 @@ struct SettingsView: View {
                         Button("Close") {
                             isPresented = false
                         }
-                        .foregroundColor(cameraManager.accentColor)
+                        .foregroundColor(cameraManager.primaryColor)
                     }
                 }
             }
@@ -85,7 +85,7 @@ struct CustomizationSettingsTab: View {
                     VStack(spacing: 16) {
                         Group {
                             
-                            AccentColorPicker(selectedColor: $cameraManager.accentColor)
+                            AccentColorPicker(accentColor: $cameraManager.accentColor, primaryColor: $cameraManager.primaryColor)
                             
                             GyroToggle(isOn: $cameraManager.maximizePreview,
                                     label: "Maximize Preview",
@@ -329,7 +329,7 @@ struct InformationSettingsTab: View {
                 Button("Show Onboarding") {
                     showOnboarding = true
                 }
-                .foregroundColor(cameraManager.accentColor)
+                .foregroundColor(cameraManager.primaryColor)
                 .padding()
             }
             .padding()

@@ -20,7 +20,7 @@ struct RecordingButton: View {
                 
                 // Animated red shape (square when recording, circle when not)
                 RoundedRectangle(cornerRadius: isRecording ? 7 : 60)
-                    .fill(cameraManager.accentColor)
+                    .fill(cameraManager.primaryColor)
                     .frame(width: isRecording ? 28 : 60, height: isRecording ? 28 : 60)
                     .opacity(shouldShowSavingDots ? 0 : 1)
                     .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isRecording)
@@ -38,7 +38,7 @@ struct RecordingButton: View {
                 
                 // Saving video animation (only show if not allowing recording while saving)
                 if shouldShowSavingDots {
-                    SavingDotsView(cameraManager: cameraManager, color: cameraManager.accentColor)
+                    SavingDotsView(cameraManager: cameraManager, color: cameraManager.primaryColor)
                         .transition(.scale.combined(with: .opacity))
                 }
             }

@@ -60,17 +60,17 @@ struct FloatingTabBar: View {
                 }) {
                     VStack(spacing: 4) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: isCenter ? 32 : 16)) // Adjusted icon size
-                            .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
+                            .font(.system(size: isCenter ? 32 : 16))
+                            .foregroundColor(isCenter ? cameraManager.primaryColor : .gray)
                             .shadow(color: colorScheme == .dark ? .white : .black, radius: 0.1, x: 0, y: 0)
-                            .frame(maxWidth: .infinity, alignment: .center) // Center the icon
+                            .frame(maxWidth: .infinity, alignment: .center) 
                         
                         Text(tab.title)
                             .font(.system(size: isCenter ? 10 : 8, weight: .bold))
                             .fontWidth(.compressed)
-                            .foregroundColor(isCenter ? cameraManager.accentColor : .gray)
+                            .foregroundColor(isCenter ? cameraManager.primaryColor : .gray)
                             .shadow(color: colorScheme == .dark ? .white : .black, radius: 0.1, x: 0, y: 0)
-                            .frame(maxWidth: .infinity, alignment: .center) // Center the text
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .frame(width: 60)
                 }

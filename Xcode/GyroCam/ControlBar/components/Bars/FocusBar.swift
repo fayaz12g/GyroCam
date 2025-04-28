@@ -1,15 +1,12 @@
-//  FocusBar.swift
-//  GyroCam
-//
-//  Created by Fayaz Shaikh on 2/20/25.
-//
-
 import SwiftUI
 
 struct FocusBar: View {
     @ObservedObject var cameraManager: CameraManager
     @Environment(\.colorScheme) var colorScheme
-    @State private var continuousFocusMode: Bool = false
+    @State private var lastFocusPosition: Float = 0.5
+    
+    // Timer for focus updates
+    @State private var focusUpdateTimer: Timer? = nil
     
     var body: some View {
         GeometryReader { geometry in
@@ -37,28 +34,35 @@ struct FocusBar: View {
                     .frame(width: 40, height: 40)
                     .overlay(
                         Circle()
-                            .fill(continuousFocusMode ? Color.yellow.opacity(0.9) : Color.yellow.opacity(0))
-                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                            .stroke(cameraManager.autoFocus ? cameraManager.accentColor : Color.white.opacity(0.25),
+                                   lineWidth: cameraManager.autoFocus ? 2 : 0.5)
                     )
+                    .shadow(color: cameraManager.autoFocus ? cameraManager.accentColor.opacity(0.6) : Color.black.opacity(0.1),
+                           radius: cameraManager.autoFocus ? 4 : 3,
+                           x: 0, y: 0)
                     .overlay(
                         VStack(alignment: .center, spacing: 2) {
-                            Text(continuousFocusMode ? "AUTO" : "\(String(format: "%.1f", (cameraManager.focusValue * 10)))")
+                            Text(cameraManager.autoFocus ? "AUTO" : "\(String(format: "%.1f", (cameraManager.focusValue * 10)))")
                                 .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(cameraManager.autoFocus ? cameraManager.accentColor : .primary)
                             Text("FOCUS")
                                 .font(.system(size: 6, weight: .bold))
                         }
                     )
-                    .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
                     .rotationEffect(cameraManager.rotationAngle)
-                    .animation(.easeInOut(duration: 0.2), value: cameraManager.focusValue)  // Animate focus value changes
+                    .animation(.easeInOut(duration: 0.2), value: cameraManager.focusValue)
                     .shadow(radius: 3)
                     .offset(x: position)
                     .gesture(
                         TapGesture()
                             .onEnded {
-                                continuousFocusMode.toggle()
+                                // Toggle autofocus in the camera manager
+                                cameraManager.autoFocus.toggle()
                                 
-                                if continuousFocusMode {
+                                if cameraManager.autoFocus {
+                                    // Save current focus position before enabling autofocus
+                                    lastFocusPosition = cameraManager.focusValue
+                                    
                                     // Enable continuous autofocus
                                     if let device = cameraManager.captureDevice {
                                         do {
@@ -87,7 +91,7 @@ struct FocusBar: View {
                     .gesture(
                         DragGesture()
                             .onChanged { value in
-                                if !continuousFocusMode {
+                                if !cameraManager.autoFocus {
                                     // Calculate new focus based on drag position
                                     let dragPosition = min(max(0, value.location.x - 20), barWidth)
                                     let newFocus = minFocus + (dragPosition / barWidth) * (maxFocus - minFocus)
@@ -111,10 +115,37 @@ struct FocusBar: View {
             }
         }
         .frame(height: 40)
-        .onChange(of: cameraManager.focusValue) { _, newValue in
-            // Update circle position as autofocus changes
-            if continuousFocusMode {
-                cameraManager.focusValue = newValue  // Update value as autofocus sets it
+        .onAppear {
+            // Start the focus observation timer
+            startFocusUpdateTimer()
+        }
+        .onDisappear {
+            // Clean up timer when view disappears
+            focusUpdateTimer?.invalidate()
+            focusUpdateTimer = nil
+        }
+        // Watch for changes to autofocus setting
+        .onChange(of: cameraManager.autoFocus) { _, newValue in
+            // Restart timer when autofocus changes
+            startFocusUpdateTimer()
+        }
+    }
+    
+    // Start the timer that updates focus position when autofocus is on
+    private func startFocusUpdateTimer() {
+        // Invalidate existing timer if any
+        focusUpdateTimer?.invalidate()
+        
+        // Create a new timer that updates more frequently during autofocus
+        focusUpdateTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            if cameraManager.autoFocus {
+                DispatchQueue.main.async {
+                    // Update UI with the current lens position from the camera
+                    if let currentLensPosition = cameraManager.captureDevice?.lensPosition {
+                        // This updates the focusValue which will move the indicator
+                        cameraManager.focusValue = currentLensPosition
+                    }
+                }
             }
         }
     }

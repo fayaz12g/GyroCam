@@ -19,7 +19,8 @@ extension LensType: Codable {}
 struct AppSettings: Codable {
     
     // General Settings
-    var accentColor: Color = Color(red: 1.0, green: 0.204, blue: 0.169) // #FF000D
+    var accentColor: Color = Color(red: 1.0, green: 0.843, blue: 0.0) // #FFD700
+    var primaryColor: Color = Color(red: 1.0, green: 0.204, blue: 0.169) // #FF000D
     var isProMode: Bool = true
     var preserveAspectRatios: Bool = true
     var allowRecordingWhileSaving: Bool = true

@@ -214,6 +214,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.accentColor = newValue }
     }
     
+    @MainActor var primaryColor: Color {
+        get { settings.primaryColor }
+        set { settings.primaryColor = newValue }
+    }
+    
     @MainActor var isFlashOn: Bool {
         get { settings.isFlashOn }
         set { settings.isFlashOn = newValue }

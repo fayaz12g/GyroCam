@@ -42,7 +42,7 @@ struct GyroPicker<Item: Identifiable & Hashable>: View {
                             // Display the item's description using the closure
                             Text(displayValue(item))
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                                .foregroundColor(selection == item && isAccentColorDark ? .white : .primary)
+                                .foregroundColor(isAccentColorDark ? .primary : selection == item ? .black : .primary)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                                 .padding(.horizontal)

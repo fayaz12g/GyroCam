@@ -13,6 +13,7 @@ struct PermissionRow: View {
         let granted: Bool
         let action: () -> Void
         @ObservedObject var cameraManager: CameraManager
+        var isFromSettings: Bool
         
         var body: some View {
             HStack {
@@ -25,7 +26,7 @@ struct PermissionRow: View {
                     ZStack {
                         Circle()
                             .stroke(granted ? LinearGradient(
-                                gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                gradient: Gradient(colors: isFromSettings ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ) :  LinearGradient(
@@ -40,7 +41,7 @@ struct PermissionRow: View {
                             Circle()
                                 .fill(
                                     granted ? LinearGradient(
-                                        gradient: Gradient(colors: UserDefaults.standard.bool(forKey: "hasSeenOnboarding") ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
+                                        gradient: Gradient(colors: isFromSettings ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ) :  LinearGradient(

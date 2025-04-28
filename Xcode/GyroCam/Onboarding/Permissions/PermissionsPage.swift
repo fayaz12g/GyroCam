@@ -55,35 +55,35 @@ struct PermissionsPage: View {
                         title: "Camera",
                         description: "This app needs access to your camera for recording videos.",
                         granted: permissionsManager.cameraPermissionGranted,
-                        action: permissionsManager.requestCameraPermission, cameraManager: cameraManager
+                        action: permissionsManager.requestCameraPermission, cameraManager: cameraManager, isFromSettings: isFromSettings
                     )
                     
                     PermissionRow(
                         title: "Microphone",
                         description: "The microphone is required for audio recording along with the video.",
                         granted: permissionsManager.microphonePermissionGranted,
-                        action: permissionsManager.requestMicrophonePermission, cameraManager: cameraManager
+                        action: permissionsManager.requestMicrophonePermission, cameraManager: cameraManager, isFromSettings: isFromSettings
                     )
                     
                     PermissionRow(
                         title: "Photo Library",
                         description: "Access to your photo library is necessary to save your videos.",
                         granted: permissionsManager.photoLibraryPermissionGranted,
-                        action: permissionsManager.requestPhotoLibraryPermission, cameraManager: cameraManager
+                        action: permissionsManager.requestPhotoLibraryPermission, cameraManager: cameraManager, isFromSettings: isFromSettings
                     )
                     
                     PermissionRow(
                         title: "Notifications",
                         description: "Allow GyroCam to send you notifications when an export completes or fails. This is optional.",
                         granted: permissionsManager.notificationsPermissionGranted,
-                        action: permissionsManager.requestNotificationPermission, cameraManager: cameraManager
+                        action: permissionsManager.requestNotificationPermission, cameraManager: cameraManager, isFromSettings: isFromSettings
                     )
                     
                     PermissionRow(
                         title: "Location",
                         description: "We request your location to offer location-based video tagging. This is optional.",
                         granted: permissionsManager.locationPermissionGranted,
-                        action: permissionsManager.requestLocationPermission, cameraManager: cameraManager
+                        action: permissionsManager.requestLocationPermission, cameraManager: cameraManager, isFromSettings: isFromSettings
                     )
                     
                 }
