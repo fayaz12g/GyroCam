@@ -261,6 +261,10 @@ struct AboutView: View {
                     .bold()
                     .foregroundColor(colorScheme == .dark ? .white : .black)
                 
+                Text("The following features are available in GyroCam given your device's capabilities (with iPhones reccommended)")
+                    .font(.system(size: 16))
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                
                 AboutFeatureSection(
                     title: "📐 Orientation Intelligence",
                     items: [

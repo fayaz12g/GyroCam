@@ -38,6 +38,7 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "Notifications are now delivered upon succesful exports."),
                                 .init(type: .added, description: "Notifications can be allowed or skipped in onboarding, and configured later in settings."),
                                 .init(type: .added, description: "Animations have been added to the export sheet, with a pulsing progress bar and spinning hourglass."),
+                                .init(type: .changed, description: "Slightly updated the about view to have more conformant sizing."),
                                 .init(type: .added, description: "Location privledges are now optional."),
                             ],
                             fixedIssues: []

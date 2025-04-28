@@ -5,7 +5,6 @@
 //  Created by Fayaz Shaikh on 2/19/25.
 //
 
-
 import SwiftUI
 import AVFoundation
 import CoreLocation
@@ -356,13 +355,7 @@ struct PermissionsPage: View {
 
             // Permission Rows
             VStack(spacing: 20) {
-                PermissionRow(
-                    title: "Location",
-                    description: "We need your location to offer location-based video settings.",
-                    granted: permissionsManager.locationPermissionGranted,
-                    action: permissionsManager.requestLocationPermission, cameraManager: cameraManager
-                )
-                
+            
                 PermissionRow(
                     title: "Camera",
                     description: "This app needs access to your camera for recording videos.",
@@ -383,6 +376,21 @@ struct PermissionsPage: View {
                     granted: permissionsManager.photoLibraryPermissionGranted,
                     action: permissionsManager.requestPhotoLibraryPermission, cameraManager: cameraManager
                 )
+                
+                PermissionRow(
+                    title: "Notifications",
+                    description: "Allow GyroCam to send you notifications when an export completes or fails. This is optional.",
+                    granted: permissionsManager.notificationsPermissionGranted,
+                    action: permissionsManager.requestNotificationPermission, cameraManager: cameraManager
+                )
+                
+                PermissionRow(
+                    title: "Location",
+                    description: "We request your location to offer location-based video tagging. This is optional.",
+                    granted: permissionsManager.locationPermissionGranted,
+                    action: permissionsManager.requestLocationPermission, cameraManager: cameraManager
+                )
+                
             }
             
             Spacer()
@@ -454,123 +462,3 @@ struct PermissionRow: View {
         .padding(.horizontal)
     }
 }
-
-
-class PermissionsManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    private var locationManager = CLLocationManager()
-    
-    @Published var locationPermissionGranted = false
-    @Published var cameraPermissionGranted = false
-    @Published var microphonePermissionGranted = false
-    @Published var photoLibraryPermissionGranted = false
-    
-    var allPermissionsGranted: Bool {
-        locationPermissionGranted && cameraPermissionGranted && microphonePermissionGranted && photoLibraryPermissionGranted
-    }
-    
-    override init() {
-        super.init()
-        locationManager.delegate = self
-        checkPermissionsStatus()
-    }
-    
-    func checkPermissionsStatus() {
-        // Location
-        let status = locationManager.authorizationStatus
-        locationPermissionGranted = (status == .authorizedWhenInUse || status == .authorizedAlways)
-        
-        // Camera
-        let cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
-        cameraPermissionGranted = (cameraStatus == .authorized)
-        
-        // Microphone
-        let microphoneStatus = AVCaptureDevice.authorizationStatus(for: .audio)
-        microphonePermissionGranted = (microphoneStatus == .authorized)
-        
-        // Photo Library
-        let photoStatus = PHPhotoLibrary.authorizationStatus()
-        photoLibraryPermissionGranted = (photoStatus == .authorized)
-    }
-    
-    func requestLocationPermission() {
-        let status = locationManager.authorizationStatus
-        switch status {
-        case .denied, .restricted:
-            // Open settings if permission was previously denied
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                DispatchQueue.main.async {
-                    UIApplication.shared.open(url)
-                }
-            }
-        default:
-            locationManager.requestWhenInUseAuthorization()
-        }
-    }
-    
-    func requestCameraPermission() {
-        let status = AVCaptureDevice.authorizationStatus(for: .video)
-        switch status {
-        case .denied, .restricted:
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                DispatchQueue.main.async {
-                    UIApplication.shared.open(url)
-                }
-            }
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                DispatchQueue.main.async {
-                    self.cameraPermissionGranted = granted
-                }
-            }
-        default:
-            break
-        }
-    }
-    
-    func requestMicrophonePermission() {
-        let status = AVCaptureDevice.authorizationStatus(for: .audio)
-        switch status {
-        case .denied, .restricted:
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                DispatchQueue.main.async {
-                    UIApplication.shared.open(url)
-                }
-            }
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .audio) { granted in
-                DispatchQueue.main.async {
-                    self.microphonePermissionGranted = granted
-                }
-            }
-        default:
-            break
-        }
-    }
-    
-    func requestPhotoLibraryPermission() {
-        let status = PHPhotoLibrary.authorizationStatus()
-        switch status {
-        case .denied, .restricted:
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                DispatchQueue.main.async {
-                    UIApplication.shared.open(url)
-                }
-            }
-        case .notDetermined:
-            PHPhotoLibrary.requestAuthorization { status in
-                DispatchQueue.main.async {
-                    self.photoLibraryPermissionGranted = status == .authorized
-                }
-            }
-        default:
-            break
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        DispatchQueue.main.async {
-            self.locationPermissionGranted = (status == .authorizedWhenInUse || status == .authorizedAlways)
-        }
-    }
-}
-

@@ -9,6 +9,8 @@ import UserNotifications
 @MainActor
 class CameraManager: NSObject, ObservableObject {
     
+    var permissionsManager = PermissionsManager()
+    
     let session = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()
     private let motionManager = CMMotionManager()
@@ -609,7 +611,9 @@ class CameraManager: NSObject, ObservableObject {
                     self.cleanupBackgroundTask(backgroundTaskID)
                     entry.errorMessage = "Export timed out"
                     self.persistSession(entry)
-                    self.postNotification(title: "Export Failed", body: "\(filename) export timed out.", timeSensitive: true)
+                    if self.permissionsManager.notificationsPermissionGranted {
+                        self.postNotification(title: "Export Failed", body: "\(filename) export timed out.", timeSensitive: true)
+                    }
                 }
             }
 
@@ -625,7 +629,9 @@ class CameraManager: NSObject, ObservableObject {
             guard let exporter = AVAssetExportSession(asset: composition, presetName: exportQuality.preset) else {
                 entry.errorMessage = "Failed to create exporter"
                 persistSession(entry)
-                postNotification(title: "Export Failed", body: "\(filename) failed to start.", timeSensitive: true)
+                if permissionsManager.notificationsPermissionGranted {
+                    postNotification(title: "Export Failed", body: "\(filename) failed to start.", timeSensitive: true)
+                }
                 cleanupBackgroundTask(backgroundTaskID)
                 return
             }
@@ -677,14 +683,18 @@ class CameraManager: NSObject, ObservableObject {
                     self.saveFinalVideo(outputURL)
                     
                 }
-                postNotification(title: "Export Complete", body: "\(filename) exported successfully.")
+                if permissionsManager.notificationsPermissionGranted {
+                    postNotification(title: "Export Complete", body: "\(filename) exported successfully.")
+                }
             } catch {
                 entry.errorMessage = error.localizedDescription
                 await MainActor.run {
                     self.persistSession(entry)
                     self.showError("Export failed: \(error.localizedDescription)")
                 }
-                postNotification(title: "Export Failed", body: "\(filename) failed: \(error.localizedDescription)", timeSensitive: true)
+                if permissionsManager.notificationsPermissionGranted {
+                    postNotification(title: "Export Failed", body: "\(filename) failed: \(error.localizedDescription)", timeSensitive: true)
+                }
             }
 
             await MainActor.run {
@@ -731,11 +741,14 @@ class CameraManager: NSObject, ObservableObject {
         
         @MainActor
         private func saveFinalVideo(_ url: URL) {
+            
             let currentLocation = lastKnownLocation
             
             PHPhotoLibrary.shared().performChanges {
                 let creationRequest = PHAssetCreationRequest.forAsset()
-                creationRequest.location = currentLocation
+                if self.permissionsManager.locationPermissionGranted {
+                    creationRequest.location = currentLocation
+                }
                 creationRequest.creationDate = Date()
                 
                 let options = PHAssetResourceCreationOptions()
@@ -818,19 +831,13 @@ class CameraManager: NSObject, ObservableObject {
         
         loadSettings()
         loadActiveExports()
-        requestNotificationPermissions()
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 5
-        
+    
     }
     
-    private func requestNotificationPermissions() {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                // Handle errors tba
-            }
-        }
 
     public func setupFreshStart() {
         requestCameraAccess()
@@ -1275,7 +1282,9 @@ class CameraManager: NSObject, ObservableObject {
         
         movieOutput.startRecording(to: tempURL, recordingDelegate: self)
         isRecording = true
-        startLocationUpdates()
+        if permissionsManager.locationPermissionGranted {
+            startLocationUpdates()
+        }
         print("▶️ Started recording clip #\(currentClipNumber)")
         print("Starting recording with orientation: \(self.previousOrientation.description)")
     }
