@@ -9,7 +9,7 @@ import UserNotifications
 @MainActor
 class CameraManager: NSObject, ObservableObject {
     
-    var permissionsManager = PermissionsManager()
+    @State var permissionsManager = PermissionsManager()
     
     let session = AVCaptureSession()
     private let movieOutput = AVCaptureMovieFileOutput()

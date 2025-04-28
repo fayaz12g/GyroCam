@@ -12,7 +12,7 @@ struct GyroPicker<Item: Identifiable & Hashable>: View {
     var items: [Item]
     var title: String
     var accentColor: Color
-    var displayValue: (Item) -> String  // Closure to get display value from Item
+    var displayValue: (Item) -> String  
     
     var isAccentColorDark: Bool {
         return UIColor(accentColor).isDarkColor

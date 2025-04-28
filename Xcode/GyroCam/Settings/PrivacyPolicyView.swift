@@ -9,16 +9,12 @@ import SwiftUI
 
 struct PrivacyPolicyView: View {
     @ObservedObject var cameraManager: CameraManager
-    @Environment(\.colorScheme) var colorScheme
     @State private var scrollOffset: CGFloat = 0
     @State private var deviceRotation: Double = 0
     @State private var motionManager = MotionManager()
     
+    
     var body: some View {
-        ZStack {
-            // Dynamic gradient background
-            backgroundGradient
-                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 25) {
@@ -37,28 +33,16 @@ struct PrivacyPolicyView: View {
                 .padding(.horizontal)
                 .padding(.top, 10)
             }
-        }
+        
         .navigationTitle("Privacy Policy")
         .navigationBarTitleDisplayMode(.inline)
+        .gradientBackground(when: cameraManager.useBlurredBackground)
         .onAppear {
             motionManager.start()
         }
         .onDisappear {
             motionManager.stop()
         }
-    }
-    
-    // MARK: - Components
-    
-    private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                colorScheme == .dark ? Color(red: 0.1, green: 0.1, blue: 0.2) : Color(red: 0.9, green: 0.95, blue: 1.0),
-                colorScheme == .dark ? Color(red: 0.05, green: 0.05, blue: 0.1) : Color(red: 0.8, green: 0.9, blue: 1.0)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
     }
     
     private var policyHeader: some View {
@@ -89,7 +73,7 @@ struct PrivacyPolicyView: View {
                 PrivacySectionHeader(icon: "lock.shield.fill", title: "Our Privacy Promise")
                 
                 PrivacyBullet(
-                    icon: "device.iphone",
+                    icon: "iphone",
                     title: "100% Device Processing",
                     content: "All data stays on your device - no cloud storage or external servers"
                 )

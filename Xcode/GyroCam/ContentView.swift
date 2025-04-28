@@ -1,17 +1,18 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var permissionsManager = PermissionsManager()
     @StateObject private var cameraManager = CameraManager()
+    
     @State private var focusValue: Float = 0.5
     @State private var clipNumber = 1
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
-    @StateObject private var permissionsManager = PermissionsManager()
     @State private var forceOnboarding = (!PermissionsManager().allPermissionsGranted && (UserDefaults.standard.bool(forKey: "hasSeenOnboarding")))
     
     var body: some View {
         Group {
             if showOnboarding || forceOnboarding {
-                OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding, setPage: forceOnboarding ? 4 : 0)
+                OnboardingView(cameraManager: cameraManager, permissionsManager: permissionsManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding, setPage: forceOnboarding ? 4 : 0)
             } else {
                 NavigationView {
                     ZStack {
@@ -62,7 +63,7 @@ struct ContentView: View {
                             
                             Spacer()
                             
-                            ControlsView(cameraManager: cameraManager, currentOrientation: $cameraManager.realOrientation)
+                            ControlsView(cameraManager: cameraManager, permissionsManager: permissionsManager, currentOrientation: $cameraManager.realOrientation)
                                 .padding(.bottom, 15)
                                 .padding(.leading, -35)
                             

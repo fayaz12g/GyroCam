@@ -312,3 +312,14 @@ struct ClipData: Codable, Identifiable {
     let url: URL
     var orientationChanges: [OrientationChange]
 }
+
+extension View {
+    func gradientBackground(when condition: Bool = true) -> some View {
+        ZStack {
+            if condition {
+                GradientBackground()
+            }
+            self
+        }
+    }
+}

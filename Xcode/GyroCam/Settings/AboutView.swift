@@ -22,11 +22,8 @@ struct AboutView: View {
         return Bundle.main.infoDictionary?["BuildDate"] as? String ?? "Unknown"
     }
     
+
     var body: some View {
-        ZStack {
-            // Dynamic background
-            backgroundGradient
-                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 25) {
@@ -75,28 +72,16 @@ struct AboutView: View {
                     scrollOffset = value
                 }
             }
-        }
+        
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
+        .gradientBackground(when: cameraManager.useBlurredBackground)
         .onAppear {
             motionManager.start()
         }
         .onDisappear {
             motionManager.stop()
         }
-    }
-    
-    // MARK: - Background
-    
-    private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                colorScheme == .dark ? Color(red: 0.1, green: 0.1, blue: 0.2) : Color(red: 0.9, green: 0.95, blue: 1.0),
-                colorScheme == .dark ? Color(red: 0.05, green: 0.05, blue: 0.1) : Color(red: 0.8, green: 0.9, blue: 1.0)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
     }
     
     // MARK: - Components

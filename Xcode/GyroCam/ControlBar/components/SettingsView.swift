@@ -3,6 +3,8 @@ import AVFoundation
 
 struct SettingsView: View {
     @ObservedObject var cameraManager: CameraManager
+    @ObservedObject var permissionsManager: PermissionsManager
+    
     @Binding var isPresented: Bool
     @State private var selectedTab = 1
     @State private var showOnboarding = false
@@ -17,7 +19,7 @@ struct SettingsView: View {
     
     var body: some View {
         if showOnboarding {
-            OnboardingView(cameraManager: cameraManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding)
+            OnboardingView(cameraManager: cameraManager, permissionsManager: permissionsManager, showOnboarding: $showOnboarding, forceOnboarding: $forceOnboarding)
         } else {
             NavigationStack {
                 ZStack {
@@ -34,7 +36,7 @@ struct SettingsView: View {
                         CustomizationSettingsTab(cameraManager: cameraManager)
                             .tag(1)
                         
-                        InformationSettingsTab(cameraManager: cameraManager, showOnboarding: $showOnboarding)
+                        InformationSettingsTab(cameraManager: cameraManager, permissionsManager: permissionsManager, showOnboarding: $showOnboarding)
                             .tag(2)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
@@ -262,6 +264,8 @@ struct SettingsRow: View {
 
 struct InformationSettingsTab: View {
     @ObservedObject var cameraManager: CameraManager
+    @ObservedObject var permissionsManager: PermissionsManager
+    
     @Binding var showOnboarding: Bool
     
     var body: some View {
@@ -306,6 +310,21 @@ struct InformationSettingsTab: View {
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination: PermissionsPage(
+                   permissionsManager: permissionsManager,
+                   cameraManager: cameraManager,
+                   message: "You can disable these permissions from settings at any time, or enable them from here at any time.",
+                   isFromSettings: true
+               )) {
+                   SettingsRow(
+                       title: "App Permissions",
+                       icon: "lock.shield.fill",
+                       description: "Manage camera, microphone, and other permissions",
+                       iconColor: .teal
+                   )
+               }
+               .buttonStyle(PlainButtonStyle())
                 
                 Button("Show Onboarding") {
                     showOnboarding = true

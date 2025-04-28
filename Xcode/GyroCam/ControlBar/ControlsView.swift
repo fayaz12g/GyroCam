@@ -3,6 +3,8 @@ import AVFAudio
 
 struct ControlsView: View {
     @ObservedObject var cameraManager: CameraManager
+    @ObservedObject var permissionsManager: PermissionsManager
+    
     @Binding var currentOrientation: String
     @State private var showingSettings = false
     @State private var showingQuickSettings = false
@@ -106,7 +108,7 @@ struct ControlsView: View {
 
         }
         .fullScreenCover(isPresented: $showingSettings) {
-            SettingsView(cameraManager: cameraManager, isPresented: $showingSettings)
+            SettingsView(cameraManager: cameraManager, permissionsManager: permissionsManager, isPresented: $showingSettings)
         }
     }
     

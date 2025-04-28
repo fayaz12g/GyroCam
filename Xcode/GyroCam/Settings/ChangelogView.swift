@@ -11,12 +11,6 @@ struct ChangelogView: View {
     @ObservedObject var cameraManager: CameraManager
     
     var body: some View {
-        ZStack {
-            if cameraManager.useBlurredBackground {
-                Color.clear
-                    .background(.ultraThinMaterial)
-                    .ignoresSafeArea()
-            }
             ScrollView {
                 VStack(spacing: 24) {
                     
@@ -40,6 +34,9 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "Animations have been added to the export sheet, with a pulsing progress bar and spinning hourglass."),
                                 .init(type: .changed, description: "Slightly updated the about view to have more conformant sizing."),
                                 .init(type: .added, description: "Location privileges are now optional."),
+                                .init(type: .changed, description: "Background colors across navigation views are now consistent and conform to in app contrast settings."),
+                                .init(type: .added, description: "A new misc navigation page for permissions is visible. Accent color only appears when navigated to from settings, with the correct background too."),
+                                .init(type: .added, description: "The background gradient is now a single custom view extension that can be used anywhere. This background indicates subsections of settings."),
                             ],
                             fixedIssues: []
                         )
@@ -58,8 +55,8 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "New variable default to false to show export sheet right after recording."),
                                 .init(type: .changed, description: "A rudimentary updated algorithem flips the orientation sooner. Future update will log gyroscope data periodically as reference."),
                                 .init(type: .changed, description: "The export sheet now shows a green checkmark upon completion before dissapearing."),
-
-                                .init(type: .fixed, description: "Video metadata now properly shows the device the video was taken on. Lens metadata coming TBD."),
+                                
+                                    .init(type: .fixed, description: "Video metadata now properly shows the device the video was taken on. Lens metadata coming TBD."),
                             ],
                             fixedIssues: [22]
                         )
@@ -78,7 +75,7 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Revamped the provacy policy view to match the new about view"),
                                 .init(type: .changed, description: "Updated the gyrocam icon in the about view to match onboarding"),
                                 .init(type: .changed, description: "Reduced animation timings in settings"),
-                               
+                                
                             ],
                             fixedIssues: []
                         )
@@ -377,23 +374,13 @@ struct ChangelogView: View {
                         )
                     }
                 }
+                
                 .padding()
             }
-            .navigationTitle("Version History")
-            .navigationBarTitleDisplayMode(.inline)
-        }
+        .navigationTitle("Version History")
+        .navigationBarTitleDisplayMode(.inline)
+        .gradientBackground(when: cameraManager.useBlurredBackground)
     }
 }
 
-struct SectionHeader: View {
-    let title: String
     
-    var body: some View {
-        Text(title)
-            .font(.system(size: 18, weight: .semibold))
-            .foregroundColor(.primary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 8)
-            .padding(.bottom, 4)
-    }
-}
