@@ -37,6 +37,7 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Background colors across navigation views are now consistent and conform to in app contrast settings."),
                                 .init(type: .added, description: "A new misc navigation page for permissions is visible. Accent color only appears when navigated to from settings, with the correct background too."),
                                 .init(type: .added, description: "The background gradient is now a single custom view extension that can be used anywhere. This background indicates subsections of settings."),
+                                .init(type: .fixed, description: "Fixed an incorrect SF Symbol in the Privacy Policy."),
                             ],
                             fixedIssues: []
                         )
