@@ -255,7 +255,7 @@ struct AboutView: View {
     
     private var featuresCard: some View {
         GlassCard {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 15) {
                 Text("Features 🚀")
                     .font(.title2)
                     .bold()

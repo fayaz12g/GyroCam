@@ -25,6 +25,23 @@ struct ChangelogView: View {
                     
                     VStack(spacing: 20) {
                         
+                        VersionEntry(
+                            version: "0.1.9",
+                            date: "April 28, 2025",
+                            type: .beta(version: 4),
+                            changes: [
+                                .init(type: .fixed, description: "Concurrent exports now support the proper orientation handling."),
+                                .init(type: .added, description: "Failed exports can now be restarted."),
+                                .init(type: .fixed, description: "Junk from failed exports can now be purged."),
+                                .init(type: .changed, description: "The exports sheet now remains showing exports across force quitting the app."),
+                                .init(type: .changed, description: "Many internal overhauls to the system that handles mapping orientation changes to URLs."),
+                                .init(type: .added, description: "Notifications are now delivered upon succesful exports."),
+                                .init(type: .added, description: "Notifications can be allowed or skipped in onboarding, and configured later in settings."),
+                                .init(type: .added, description: "Animations have been added to the export sheet, with a pulsing progress bar and spinning hourglass."),
+                                .init(type: .added, description: "Location privledges are now optional."),
+                            ],
+                            fixedIssues: []
+                        )
                         
                         VersionEntry(
                             version: "0.1.8",

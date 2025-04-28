@@ -4,6 +4,7 @@ import UIKit
 import Photos
 import SwiftUI
 import CoreLocation
+import UserNotifications
 
 @MainActor
 class CameraManager: NSObject, ObservableObject {
@@ -16,11 +17,14 @@ class CameraManager: NSObject, ObservableObject {
     private var activeInput: AVCaptureDeviceInput?
     private var stopCompletion: (() -> Void)?
     private var recordingStartTime: Date?
-    private var orientationChanges: [(time: TimeInterval, orientation: String)] = []
+    
+    private var orientationChanges: [OrientationChange] = []
+
     var exportDuration: Double = 0.0
     var videoDuration: Double = 0.0
     @Published var exportProgress: Float = 0.0
     @Published var isExporting: Bool = false
+    @AppStorage("savedExports") private var savedExportsData: Data?
     @State private var durationTimer: Timer? = nil
     
     public var rotationAngle: Angle {
@@ -40,9 +44,15 @@ class CameraManager: NSObject, ObservableObject {
     
     public var loadLatestThumbnail: Bool = false
     
-    private var clipURLs: [URL] = []
+    @Published var clipDataList: [ClipData] = [] {
+            didSet { saveClipDataState() }
+        }
+    
+    private let clipDataKey = "savedClipData"
+    
     private var stitchingGroup: DispatchGroup?
     @Published var currentClipNumber = 1
+
     
     // location
     private let locationManager = CLLocationManager()
@@ -395,22 +405,36 @@ class CameraManager: NSObject, ObservableObject {
         print("⏳ [1] Starting stitch process")
         self.isSavingVideo = true
         
-        guard let clipURL = self.clipURLs.first else {
+        guard let clipData = self.clipDataList.last else {
             print("❌ [1.1] No clips to stitch")
             self.showError("No video to stitch")
             return
         }
         
+        
         Task(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             
             do {
-                let asset = AVURLAsset(url: clipURL)
+                let url = clipData.url
+                print("📸 Clip URL: \(url)")
+
+                
+                if !FileManager.default.fileExists(atPath: clipData.url.path) {
+                    print("❌ File does not exist at \(clipData.url.path)")
+                    self.showError("Clip file missing")
+                    return
+                }
+                
+                let asset = AVURLAsset(url: url)
                 
                 // Load tracks synchronously to ensure they exist
                 let videoTracks = try await asset.loadTracks(withMediaType: .video)
-                let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+                print("🎞️ Video tracks loaded: \(videoTracks.count)")
                 
+                let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+                print("🔊 Audio tracks loaded: \(audioTracks.count)")
+
                 guard let videoTrack = videoTracks.first,
                       let audioTrack = audioTracks.first else {
                     print("❌ Missing video/audio track")
@@ -458,7 +482,7 @@ class CameraManager: NSObject, ObservableObject {
                 var segments: [(range: CMTimeRange, orientation: String)] = []
                 var prevTime = CMTime.zero
                 
-                for change in self.orientationChanges {
+                for change in clipData.orientationChanges {
                     let time = CMTime(seconds: change.time, preferredTimescale: 600)
                     if time > prevTime {
                         segments.append((
@@ -479,7 +503,7 @@ class CameraManager: NSObject, ObservableObject {
                     saveOrientation = "Landscape Left"
                 }
                 
-                if let lastChange = self.orientationChanges.last {
+                if let lastChange = clipData.orientationChanges.last {
                     let lastTime = CMTime(seconds: lastChange.time, preferredTimescale: 600)
                     segments.append((
                         range: CMTimeRange(start: lastTime, end: assetDuration),
@@ -531,15 +555,10 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    struct ExportProgress: Identifiable {
-        let id: UUID
-        let filename: String
-        var progress: Float
-        var isCompleted: Bool
-        let startTime: Date
-    }
+    @Published private(set) var activeExports: [ExportProgress] = [] {
+            didSet { saveActiveExports() }
+        }
     
-    @Published private(set) var activeExports: [ExportProgress] = []
     @Published var showExportSheet: Bool = false
     
     @MainActor var allowRecordingWhileSaving: Bool {
@@ -559,129 +578,150 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     
-    private func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
-        isExporting = true
-        exportProgress = 0.0
+    func exportVideo(composition: AVMutableComposition, videoComposition: AVMutableVideoComposition) async {
+            isExporting = true
+            exportProgress = 0.0
 
-        let exportId = UUID()
-        let filename = getNextClipNumber()
-        let exportProgressEntry = ExportProgress(id: exportId, filename: filename, progress: 0.0, isCompleted: false, startTime: Date())
+            let exportId = UUID()
+            let filename = getNextClipNumber()
+            var entry = ExportProgress(id: exportId,
+                                       filename: filename,
+                                       progress: 0.0,
+                                       isCompleted: false,
+                                       startTime: Date())
+            // Store presetName for possible restart
+            entry.presetName = exportQuality.preset
+            persistSession(entry)
 
-        await MainActor.run {
-            withAnimation {
-                activeExports.append(exportProgressEntry)
-            }
-            if allowRecordingWhileSaving && showQuickExport {
-                showExportSheet = true
-            }
-        }
-
-        // Begin background task
-        var backgroundTaskID = UIBackgroundTaskIdentifier.invalid
-        backgroundTaskID = UIApplication.shared.beginBackgroundTask {
-            UIApplication.shared.endBackgroundTask(backgroundTaskID)
-            backgroundTaskID = .invalid
-        }
-
-        guard let exporter = AVAssetExportSession(asset: composition, presetName: self.exportQuality.preset) else {
             await MainActor.run {
-                self.showError("Export failed")
+                withAnimation {
+                    if allowRecordingWhileSaving && showQuickExport {
+                        showExportSheet = true
+                    }
+                }
             }
-            UIApplication.shared.endBackgroundTask(backgroundTaskID)
-            return
-        }
 
-        let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("stitched-\(UUID().uuidString)")
-            .appendingPathExtension("mov")
-
-        // set device metadata
-        let deviceMetadata = AVMutableMetadataItem()
-        deviceMetadata.keySpace = .common
-        deviceMetadata.key = AVMetadataKey.commonKeyModel as (NSCopying & NSObjectProtocol)?
-        deviceMetadata.value = UIDevice.modelName as (NSCopying & NSObjectProtocol)?
-    
-        let makeMetadata = AVMutableMetadataItem()
-        makeMetadata.keySpace = .common
-        makeMetadata.key = AVMetadataKey.commonKeyMake as (NSCopying & NSObjectProtocol)?
-        makeMetadata.value = "Apple" as (NSCopying & NSObjectProtocol)?
-
-        let softwareMetadata = AVMutableMetadataItem()
-        softwareMetadata.keySpace = .common
-        softwareMetadata.key = AVMetadataKey.commonKeySource as (NSCopying & NSObjectProtocol)?
-        softwareMetadata.value = "GyroCam" as (NSCopying & NSObjectProtocol)?
+            // Begin background task
+            var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
         
-        exporter.outputURL = outputURL
-        exporter.outputFileType = .mov
-        exporter.videoComposition = videoComposition
-        exporter.shouldOptimizeForNetworkUse = false
-        exporter.metadata =  [deviceMetadata, softwareMetadata, makeMetadata]
-        exportDuration = CMTimeGetSeconds(composition.duration)
+            func startBackgroundTask() {
+                backgroundTaskID = UIApplication.shared.beginBackgroundTask(withName: "exportVideo") {
+                    self.cleanupBackgroundTask(backgroundTaskID)
+                    entry.errorMessage = "Export timed out"
+                    self.persistSession(entry)
+                    self.postNotification(title: "Export Failed", body: "\(filename) export timed out.", timeSensitive: true)
+                }
+            }
 
-        // Monitor export states
-        let stateSequence = exporter.states(updateInterval: 0.1)
-        Task.detached {
-            for await state in stateSequence {
-                switch state {
-                case .exporting(let progress):
-                    await MainActor.run {
-                        self.exportProgress = Float(progress.fractionCompleted)
-                        if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
-                            self.activeExports[index].progress = Float(progress.fractionCompleted)
+            func endBackgroundTask() {
+                if backgroundTaskID != .invalid {
+                    UIApplication.shared.endBackgroundTask(backgroundTaskID)
+                    backgroundTaskID = .invalid
+                }
+            }
+
+            startBackgroundTask()
+            
+            guard let exporter = AVAssetExportSession(asset: composition, presetName: exportQuality.preset) else {
+                entry.errorMessage = "Failed to create exporter"
+                persistSession(entry)
+                postNotification(title: "Export Failed", body: "\(filename) failed to start.", timeSensitive: true)
+                cleanupBackgroundTask(backgroundTaskID)
+                return
+            }
+
+            let outputURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("stitched-\(exportId.uuidString)")
+                .appendingPathExtension("mov")
+
+            // Metadata
+            let deviceMetadata = AVMutableMetadataItem()
+            deviceMetadata.keySpace = .common
+            deviceMetadata.key = AVMetadataKey.commonKeyModel as (NSCopying & NSObjectProtocol)?
+            deviceMetadata.value = UIDevice.modelName as (NSCopying & NSObjectProtocol)?
+            let makeMetadata = AVMutableMetadataItem()
+            makeMetadata.keySpace = .common
+            makeMetadata.key = AVMetadataKey.commonKeyMake as (NSCopying & NSObjectProtocol)?
+            makeMetadata.value = "Apple" as (NSCopying & NSObjectProtocol)?
+            let softwareMetadata = AVMutableMetadataItem()
+            softwareMetadata.keySpace = .common
+            softwareMetadata.key = AVMetadataKey.commonKeySource as (NSCopying & NSObjectProtocol)?
+            softwareMetadata.value = "GyroCam" as (NSCopying & NSObjectProtocol)?
+
+            exporter.outputURL = outputURL
+            exporter.outputFileType = .mov
+            exporter.videoComposition = videoComposition
+            exporter.shouldOptimizeForNetworkUse = false
+            exporter.metadata = [deviceMetadata, makeMetadata, softwareMetadata]
+
+            // Monitor progress
+            let stateSeq = exporter.states(updateInterval: 0.1)
+            Task.detached {
+                for await state in stateSeq {
+                    if case .exporting(let progress) = state {
+                        entry.progress = Float(progress.fractionCompleted)
+                        await MainActor.run {
+                            self.exportProgress = entry.progress
+                            self.persistSession(entry)
                         }
                     }
-                default:
-                    break
                 }
             }
-        }
 
-        print("📤 [10] Starting export")
-        print("   📍 Output URL: \(outputURL)")
-        print("   🎞 Video composition attached: \(exporter.videoComposition != nil ? "YES" : "NO")")
-        print("   ⏳ Video duration: \(exportDuration)s")
-        print("   🎥 Export Quality: \(exportQuality)")
-
-        do {
-            try await exporter.export(to: outputURL, as: .mov)
-            await MainActor.run {
-                if let index = self.activeExports.firstIndex(where: { $0.id == exportId }) {
-                    self.activeExports[index].isCompleted = true
-                    self.activeExports[index].progress = 1.0
+            do {
+                try await exporter.export(to: outputURL, as: .mov)
+                entry.isCompleted = true
+                entry.progress = 1.0
+                await MainActor.run {
+                    self.persistSession(entry)
+                    self.saveFinalVideo(outputURL)
+                    
                 }
-                self.saveFinalVideo(outputURL)
+                postNotification(title: "Export Complete", body: "\(filename) exported successfully.")
+            } catch {
+                entry.errorMessage = error.localizedDescription
+                await MainActor.run {
+                    self.persistSession(entry)
+                    self.showError("Export failed: \(error.localizedDescription)")
+                }
+                postNotification(title: "Export Failed", body: "\(filename) failed: \(error.localizedDescription)", timeSensitive: true)
+            }
+
+            await MainActor.run {
+                self.isExporting = false
+                self.exportProgress = entry.progress
+            }
+
+            // Auto-remove completed entries after delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + exportSheetDuration) { [weak self] in
+                Task { @MainActor in
+                    withAnimation {
+                        self?.activeExports.removeAll(where: { $0.id == exportId && $0.isCompleted })
+                    }
+                    if self?.activeExports.isEmpty == true {
+                        self?.showExportSheet = false
+                    }
+                }
+            }
+
+            cleanupBackgroundTask(backgroundTaskID)
+            if activeExports.count == 0 {
                 self.cleanupClips()
-                print("🧹 [12] Cleanup completed")
-            }
-        } catch {
-            await MainActor.run {
-                self.showError("Export failed: \(error.localizedDescription)")
             }
         }
 
-        await MainActor.run {
-            self.isExporting = false
-            self.exportProgress = 1.0
-        }
-
-        // Clean up completed export after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + exportSheetDuration) { [weak self] in
-            Task { @MainActor in
-                // ensure the animation plays while removing the sheet
-                withAnimation {
-                    self?.activeExports.removeAll(where: { $0.id == exportId })
-                }
-                // automatically close the export sheet if it empties while open
-                if self?.activeExports.isEmpty == true {
-                    self?.showExportSheet = false
-                }
-            }
-        }
-
-        // End background task
-        UIApplication.shared.endBackgroundTask(backgroundTaskID)
-    }
         
+        func restartExport(_ entry: ExportProgress) {
+            // Remove old failed entry
+            DispatchQueue.main.async {
+                withAnimation {
+                    self.activeExports.removeAll(where: { $0.id == entry.id })
+                }
+            }
+            // Re-run stitching pipeline
+            stitchClips()
+        }
+    
         private let videoDateFormatter: DateFormatter = {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyyMMdd-HHmmss"
@@ -711,6 +751,17 @@ class CameraManager: NSObject, ObservableObject {
                         try? FileManager.default.removeItem(at: url)
                         self.isSavingVideo = false
                         self.loadLatestThumbnail.toggle()
+                        if let firstClip = self.clipDataList.first {
+                            do {
+                                try FileManager.default.removeItem(at: firstClip.url)
+                                print("Deleted old clip.")
+                            } catch {
+                                print("Failed to delete clip file: \(error)")
+                            }
+                            self.clipDataList.removeFirst()
+                            self.saveClipDataState()
+                        }
+
                     } else {
                         print("Save error: \(error?.localizedDescription ?? "Unknown error")")
                         self.showError(error?.localizedDescription ?? "Failed to save video")
@@ -722,9 +773,8 @@ class CameraManager: NSObject, ObservableObject {
     
     @MainActor
     private func cleanupClips() {
-        clipURLs.forEach { try? FileManager.default.removeItem(at: $0) }
-        clipURLs.removeAll()
-        orientationChanges.removeAll()
+        print("🧹 All tasks done! Cleaninin Up Clips...")
+        clearClipDataState()
         currentClipNumber = 1
         exportDuration = 0.0
     }
@@ -767,6 +817,8 @@ class CameraManager: NSObject, ObservableObject {
         }
         
         loadSettings()
+        loadActiveExports()
+        requestNotificationPermissions()
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -774,6 +826,12 @@ class CameraManager: NSObject, ObservableObject {
         
     }
     
+    private func requestNotificationPermissions() {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                // Handle errors tba
+            }
+        }
+
     public func setupFreshStart() {
         requestCameraAccess()
         requestLocationAccess()
@@ -1077,6 +1135,75 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
+    private func saveActiveExports() {
+           if let data = try? JSONEncoder().encode(activeExports) {
+               savedExportsData = data
+           }
+       }
+
+    private func loadActiveExports() {
+            guard let data = savedExportsData,
+                  let exports = try? JSONDecoder().decode([ExportProgress].self, from: data)
+            else { return }
+            // Mark any previously in-progress exports as failed due to app termination
+            let updatedExports = exports.map { exp -> ExportProgress in
+                var e = exp
+                if !e.isCompleted {
+                    e.errorMessage = e.errorMessage ?? "Export interrupted"
+                }
+                return e
+            }
+            activeExports = updatedExports
+            saveActiveExports()
+            loadClipDataState()
+        }
+
+        private func saveClipDataState() {
+            if let data = try? JSONEncoder().encode(clipDataList) {
+                UserDefaults.standard.set(data, forKey: clipDataKey)
+            }
+        }
+
+        private func loadClipDataState() {
+            guard let data = UserDefaults.standard.data(forKey: clipDataKey),
+                  let list = try? JSONDecoder().decode([ClipData].self, from: data)
+            else { return }
+            clipDataList = list
+        }
+
+        private func clearClipDataState() {
+            UserDefaults.standard.removeObject(forKey: clipDataKey)
+        }
+        
+    
+       private func postNotification(title: String, body: String, timeSensitive: Bool = false) {
+           let content = UNMutableNotificationContent()
+           content.title = title
+           content.body = body
+           content.sound = .default
+           if timeSensitive {
+               content.interruptionLevel = .timeSensitive
+           }
+           let request = UNNotificationRequest(
+               identifier: UUID().uuidString,
+               content: content,
+               trigger: nil
+           )
+           UNUserNotificationCenter.current().add(request)
+       }
+
+       private func cleanupBackgroundTask(_ id: UIBackgroundTaskIdentifier) {
+           UIApplication.shared.endBackgroundTask(id)
+       }
+
+       private func persistSession(_ entry: ExportProgress) {
+           if !activeExports.contains(where: { $0.id == entry.id }) {
+               activeExports.append(entry)
+           } else if let idx = activeExports.firstIndex(where: { $0.id == entry.id }) {
+               activeExports[idx] = entry
+           }
+       }
+    
     @MainActor
     private func handleOrientationChange(newOrientation: UIDeviceOrientation) {
 
@@ -1091,7 +1218,7 @@ class CameraManager: NSObject, ObservableObject {
             // Log orientation change with timestamp
             let elapsedTime = Date().timeIntervalSince(recordingStartTime!)
             let newOrientationDesc = newOrientation.description
-            orientationChanges.append((time: elapsedTime - 0.15, orientation: newOrientationDesc))
+            orientationChanges.append((OrientationChange(time: elapsedTime - 0.15, orientation: newOrientationDesc)))
             print("Orientation changed to \(newOrientationDesc) at \(elapsedTime)s")
         } else {
             recordingQueue.async { [weak self] in
@@ -1135,7 +1262,7 @@ class CameraManager: NSObject, ObservableObject {
         
        // Record initial orientation
        let initialOrientation = previousOrientation.description
-       orientationChanges.append((time: 0.0, orientation: initialOrientation))
+        orientationChanges.append((OrientationChange(time: 0.0, orientation: initialOrientation)))
        if playSounds {
             AudioServicesPlaySystemSound(1117)
         }
@@ -1166,7 +1293,7 @@ class CameraManager: NSObject, ObservableObject {
             
             stitchingGroup?.notify(queue: .main) { [weak self] in
                 guard let self = self else { return }
-                if self.shouldStitchClips && !self.clipURLs.isEmpty {
+                if self.shouldStitchClips && !self.clipDataList.isEmpty {
                     self.stitchClips()
                 }
                 else {
@@ -1202,7 +1329,7 @@ extension CameraManager: @preconcurrency AVCaptureFileOutputRecordingDelegate {
         
         if shouldStitchClips {
             DispatchQueue.main.async {
-                self.clipURLs.append(outputFileURL)
+                self.clipDataList.append(ClipData(id: UUID(), url: outputFileURL, orientationChanges: self.orientationChanges))
             }
         } else {
             saveFinalVideo(outputFileURL)

@@ -291,3 +291,24 @@ extension UIColor {
         return white < 0.8
     }
 }
+
+struct ExportProgress: Codable, Identifiable {
+    let id: UUID
+    var filename: String
+    var progress: Float
+    var isCompleted: Bool
+    var startTime: Date
+    var errorMessage: String? = nil
+    var presetName: String? = nil 
+}
+
+struct OrientationChange: Codable {
+    let time: TimeInterval
+    let orientation: String
+}
+
+struct ClipData: Codable, Identifiable {
+    let id: UUID
+    let url: URL
+    var orientationChanges: [OrientationChange]
+}
