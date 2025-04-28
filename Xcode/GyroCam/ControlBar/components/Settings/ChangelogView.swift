@@ -35,11 +35,11 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Junk from failed exports can now be purged."),
                                 .init(type: .changed, description: "The exports sheet now remains showing exports across force quitting the app."),
                                 .init(type: .changed, description: "Many internal overhauls to the system that handles mapping orientation changes to URLs."),
-                                .init(type: .added, description: "Notifications are now delivered upon succesful exports."),
+                                .init(type: .added, description: "Notifications are now delivered upon successful exports."),
                                 .init(type: .added, description: "Notifications can be allowed or skipped in onboarding, and configured later in settings."),
                                 .init(type: .added, description: "Animations have been added to the export sheet, with a pulsing progress bar and spinning hourglass."),
                                 .init(type: .changed, description: "Slightly updated the about view to have more conformant sizing."),
-                                .init(type: .added, description: "Location privledges are now optional."),
+                                .init(type: .added, description: "Location privileges are now optional."),
                             ],
                             fixedIssues: []
                         )

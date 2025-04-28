@@ -81,7 +81,7 @@ struct DurationBadge: View {
                             separatorView()
                             timeComponentView(value: duration.milliseconds, label: "MILLI")
                         }
-                        .frame(width: 60)
+                        .frame(width: 100) // Fix the width to keep it constant in landscape
                     } else {
                         HStack(spacing: 8) {
                             timeComponentView(value: duration.hours, label: "HOURS")
@@ -92,13 +92,13 @@ struct DurationBadge: View {
                             separatorView()
                             timeComponentView(value: duration.milliseconds, label: "MILLI")
                         }
-                        .frame(height: 60)
+                        .frame(height: 60) // Fix the height to keep it constant in portrait
                     }
                 }
                 .foregroundColor(isAccentColorDark ? .white : .black)
                 .rotationEffect(rotationAngle)
             }
-            .frame(width: 220, height: 60)
+            .frame(width: 220, height: 60) // Fix the frame size to stay consistent
             .contextMenu {
                 Button {
                     showDurationBadge.toggle()
