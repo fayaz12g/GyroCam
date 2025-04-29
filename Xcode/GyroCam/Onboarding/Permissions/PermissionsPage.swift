@@ -92,6 +92,6 @@ struct PermissionsPage: View {
             }
             .padding()
         
-        .gradientBackground(when: (isFromSettings && cameraManager.useBlurredBackground))
+        .gradientBackground(when: (isFromSettings && cameraManager.useBlurredBackground), accentColor: cameraManager.accentColor)
     }
 }

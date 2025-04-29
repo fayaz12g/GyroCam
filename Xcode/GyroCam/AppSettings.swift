@@ -315,10 +315,10 @@ struct ClipData: Codable, Identifiable {
 }
 
 extension View {
-    func gradientBackground(when condition: Bool = true) -> some View {
+    func gradientBackground(when condition: Bool = true, accentColor: Color) -> some View {
         ZStack {
             if condition {
-                GradientBackground()
+                GradientBackground(accentColor: accentColor)
             }
             self
         }

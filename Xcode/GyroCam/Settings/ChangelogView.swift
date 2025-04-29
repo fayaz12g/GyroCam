@@ -40,6 +40,8 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Fixed an incorrect SF Symbol in the Privacy Policy."),
                                 .init(type: .added, description: "Introduced a new color option: Primary Color"),
                                 .init(type: .fixed, description: "The focus bar updates position correctly in auto focus now, and has a better ring."),
+                                .init(type: .changed, description: "Privacy policy now conforms to accent color."),
+                                .init(type: .changed, description: "Settings backgrounds now conforms to primary color."),
                             ],
                             fixedIssues: []
                         )
@@ -382,7 +384,7 @@ struct ChangelogView: View {
             }
         .navigationTitle("Version History")
         .navigationBarTitleDisplayMode(.inline)
-        .gradientBackground(when: cameraManager.useBlurredBackground)
+        .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
     }
 }
 

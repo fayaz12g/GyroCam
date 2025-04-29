@@ -36,7 +36,7 @@ struct PrivacyPolicyView: View {
         
         .navigationTitle("Privacy Policy")
         .navigationBarTitleDisplayMode(.inline)
-        .gradientBackground(when: cameraManager.useBlurredBackground)
+        .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
         .onAppear {
             motionManager.start()
         }
@@ -49,11 +49,11 @@ struct PrivacyPolicyView: View {
         VStack(spacing: 15) {
             Image(systemName: "hand.raised.fill")
                 .font(.system(size: 40))
-                .foregroundColor(.blue)
+                .foregroundColor(cameraManager.accentColor)
                 .padding()
                 .background(
                     Circle()
-                        .fill(Color.blue.opacity(0.2))
+                        .fill(cameraManager.accentColor.opacity(0.2))
                         .frame(width: 80, height: 80)
                 )
             
@@ -70,21 +70,24 @@ struct PrivacyPolicyView: View {
     private var privacyPromiseCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "lock.shield.fill", title: "Our Privacy Promise")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "lock.shield.fill", title: "Our Privacy Promise")
                 
                 PrivacyBullet(
+                    accentColor: cameraManager.accentColor,
                     icon: "iphone",
                     title: "100% Device Processing",
                     content: "All data stays on your device - no cloud storage or external servers"
                 )
                 
                 PrivacyBullet(
+                    accentColor: cameraManager.accentColor,
                     icon: "eye.slash",
                     title: "No Hidden Access",
                     content: "We only access what's needed for core functionality"
                 )
                 
                 PrivacyBullet(
+                    accentColor: cameraManager.accentColor,
                     icon: "arrow.triangle.2.circlepath",
                     title: "Automatic Cleanup",
                     content: "Temporary files deleted immediately after processing"
@@ -97,10 +100,11 @@ struct PrivacyPolicyView: View {
     private var dataUsageCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "chart.pie.fill", title: "Data Usage Breakdown")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "chart.pie.fill", title: "Data Usage Breakdown")
                 
                 VStack(alignment: .leading, spacing: 10) {
                     DataUsageRow(
+                        accentColor: cameraManager.accentColor,
                         icon: "camera.fill",
                         title: "Camera Access",
                         description: "Required for video capture",
@@ -108,6 +112,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
+                        accentColor: cameraManager.accentColor,
                         icon: "gyroscope",
                         title: "Motion Sensors",
                         description: "Orientation detection",
@@ -115,6 +120,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
+                        accentColor: cameraManager.accentColor,
                         icon: "photo.on.rectangle.angled",
                         title: "Photo Library Access",
                         description: "Used to save videos and display recorded videos",
@@ -122,6 +128,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
+                        accentColor: cameraManager.accentColor,
                         icon: "mic.fill",
                         title: "Microphone",
                         description: "Audio recording for videos",
@@ -129,6 +136,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
+                        accentColor: cameraManager.accentColor,
                         icon: "location.fill",
                         title: "Location",
                         description: "Embedded in video metadata",
@@ -144,23 +152,26 @@ struct PrivacyPolicyView: View {
     private var permissionsCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "checkerboard.shield", title: "Permission Control")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "checkerboard.shield", title: "Permission Control")
                 
                 Text("You have complete control over what GyroCam can access. All permissions can be managed through:")
                     .font(.subheadline)
                 
                 HStack(spacing: 20) {
                     PermissionBadge(
+                        accentColor: cameraManager.accentColor,
                         systemImage: "gearshape.fill",
                         label: "Settings App"
                     )
                     
                     PermissionBadge(
+                        accentColor: cameraManager.accentColor,
                         systemImage: "lock.fill",
                         label: "Privacy Settings"
                     )
                     
                     PermissionBadge(
+                        accentColor: cameraManager.accentColor,
                         systemImage: "app.badge.fill",
                         label: "Runtime Prompts"
                     )
@@ -178,7 +189,7 @@ struct PrivacyPolicyView: View {
     private var securityCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "shield.lefthalf.filled", title: "Security Measures")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "shield.lefthalf.filled", title: "Security Measures")
                 
                 SecurityFeature(
                     icon: "touchid",
@@ -205,7 +216,7 @@ struct PrivacyPolicyView: View {
     private var yourRightsCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "checkmark.circle.fill", title: "Your Rights")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "checkmark.circle.fill", title: "Your Rights")
                 
                 RightFeature(
                     icon: "trash.fill",
@@ -232,7 +243,7 @@ struct PrivacyPolicyView: View {
     private var changesCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "clock.badge.exclamationmark.fill", title: "Policy Updates")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "clock.badge.exclamationmark.fill", title: "Policy Updates")
                 
                 VStack(alignment: .leading, spacing: 10) {
                     
@@ -248,9 +259,9 @@ struct PrivacyPolicyView: View {
                         .padding(.top, 8)
                     
                     HStack(spacing: 15) {
-                        NotificationBadge(icon: "app.badge.fill", label: "App Update")
+                        NotificationBadge(accentColor: cameraManager.accentColor, icon: "app.badge.fill", label: "App Update")
 //                        NotificationBadge(icon: "envelope.fill", label: "Email")
-                        NotificationBadge(icon: "bell.badge.fill", label: "In-App Alert")
+                        NotificationBadge(accentColor: cameraManager.accentColor, icon: "bell.badge.fill", label: "In-App Alert")
                     }
                 }
             }
@@ -261,16 +272,18 @@ struct PrivacyPolicyView: View {
     private var contactCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 15) {
-                PrivacySectionHeader(icon: "person.fill.questionmark", title: "Contact Us")
+                PrivacySectionHeader(accentColor: cameraManager.accentColor, icon: "person.fill.questionmark", title: "Contact Us")
                 
                 VStack(alignment: .leading, spacing: 10) {
                     ContactMethod(
+                        accentColor: cameraManager.accentColor,
                         icon: "envelope.fill",
                         label: "Email Support:",
                         value: "1@fayaz.one"
                     )
                     
                     ContactMethod(
+                        accentColor: cameraManager.accentColor,
                         icon: "clock.fill",
                         label: "Response Time:",
                         value: "Typically < 24 hours"
@@ -295,6 +308,7 @@ struct PrivacyPolicyView: View {
 // MARK: - Reusable Components
 
 struct PrivacySectionHeader: View {
+    var accentColor: Color
     let icon: String
     let title: String
     
@@ -302,7 +316,7 @@ struct PrivacySectionHeader: View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(.blue)
+                .foregroundColor(accentColor)
             
             Text(title)
                 .font(.title2)
@@ -313,6 +327,7 @@ struct PrivacySectionHeader: View {
 }
 
 struct PrivacyBullet: View {
+    var accentColor: Color
     let icon: String
     let title: String
     let content: String
@@ -322,7 +337,7 @@ struct PrivacyBullet: View {
             Image(systemName: icon)
                 .font(.title3)
                 .frame(width: 30)
-                .foregroundColor(.blue)
+                .foregroundColor(accentColor)
             
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
@@ -337,6 +352,7 @@ struct PrivacyBullet: View {
 }
 
 struct DataUsageRow: View {
+    var accentColor: Color
     let icon: String
     let title: String
     let description: String
@@ -361,13 +377,14 @@ struct DataUsageRow: View {
             Text(accessType)
                 .font(.caption)
                 .padding(5)
-                .background(Capsule().fill(Color.blue.opacity(0.2)))
+                .background(Capsule().fill(accentColor.opacity(0.2)))
         }
     }
 }
 
 // MARK: - Permission Badge
 struct PermissionBadge: View {
+    var accentColor: Color
     let systemImage: String
     let label: String
     @Environment(\.colorScheme) var colorScheme
@@ -376,9 +393,9 @@ struct PermissionBadge: View {
         VStack(spacing: 8) {
             Image(systemName: systemImage)
                 .font(.system(size: 20))
-                .foregroundColor(.blue)
+                .foregroundColor(accentColor)
                 .frame(width: 40, height: 40)
-                .background(Color.blue.opacity(0.2))
+                .background(accentColor.opacity(0.2))
                 .clipShape(Circle())
             
             Text(label)
@@ -446,6 +463,7 @@ struct RightFeature: View {
 
 // MARK: - Contact Method
 struct ContactMethod: View {
+    var accentColor: Color
     let icon: String
     let label: String
     let value: String
@@ -453,7 +471,7 @@ struct ContactMethod: View {
     var body: some View {
         HStack(spacing: 15) {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(accentColor)
                 .frame(width: 20)
             
             VStack(alignment: .leading) {
@@ -472,6 +490,7 @@ struct ContactMethod: View {
 
 // MARK: - Notification Badge
 struct NotificationBadge: View {
+    var accentColor: Color
     let icon: String
     let label: String
     
@@ -485,7 +504,7 @@ struct NotificationBadge: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Color.blue.opacity(0.2))
+        .background(accentColor.opacity(0.2))
         .clipShape(Capsule())
     }
 }

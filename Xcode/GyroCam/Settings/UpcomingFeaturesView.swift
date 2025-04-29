@@ -24,7 +24,7 @@ struct UpcomingFeaturesView: View {
                 }
                 .navigationTitle("Upcoming Features")
                 .navigationBarTitleDisplayMode(.inline)
-                .gradientBackground(when: cameraManager.useBlurredBackground)
+                .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
                 
             }
            

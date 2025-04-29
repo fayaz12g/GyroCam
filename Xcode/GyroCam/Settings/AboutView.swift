@@ -75,7 +75,7 @@ struct AboutView: View {
         
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
-        .gradientBackground(when: cameraManager.useBlurredBackground)
+        .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
         .onAppear {
             motionManager.start()
         }
