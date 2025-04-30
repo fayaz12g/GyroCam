@@ -115,6 +115,21 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.useBlurredBackground = newValue }
     }
     
+    @MainActor var sheetSettings: Bool {
+        get { settings.sheetSettings }
+        set { settings.sheetSettings = newValue }
+    }
+    
+    @MainActor var recordingPulse: Bool {
+        get { settings.recordingPulse }
+        set { settings.recordingPulse = newValue }
+    }
+    
+    @MainActor var developerMode: Bool {
+        get { settings.developerMode }
+        set { settings.developerMode = newValue }
+    }
+    
     @MainActor var stabilizeVideo: StabilizationMode {
         get { settings.stabilizeVideo }
         set { settings.stabilizeVideo = newValue }
@@ -228,7 +243,6 @@ class CameraManager: NSObject, ObservableObject {
         get { settings.autoExposure }
         set {
             settings.autoExposure = newValue
-            configureExposureMode()
         }
     }
     
@@ -304,7 +318,7 @@ class CameraManager: NSObject, ObservableObject {
         return captureDevice?.activeFormat.maxISO ?? 0.0
     }
 
-    private func configureExposureMode() {
+    public func configureExposureMode() {
         guard let device = captureDevice else { return }
         do {
             try device.lockForConfiguration()
@@ -929,12 +943,27 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func startSession() {
+    public func startSession() {
         guard !session.isRunning else { return }
         
         Task.detached { [weak self] in
             guard let session = await self?.session else { return }
             session.startRunning()
+        }
+    }
+    
+    public func stopSession() {
+        guard session.isRunning
+        else {
+            print("Session not running")
+            return
+        }
+        
+        print("Killing session")
+        Task.detached { [weak self] in
+            guard let session = await self?.session else { return }
+            session.stopRunning()
+            print("Session killed")
         }
     }
     

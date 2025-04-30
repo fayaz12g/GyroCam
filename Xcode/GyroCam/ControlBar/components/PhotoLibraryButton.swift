@@ -82,6 +82,13 @@ struct PhotoLibraryButton: View {
         .sheet(isPresented: $showingPhotoLibrary) {
             PhotoLibraryView(cameraManager: cameraManager)
         }
+        .onChange(of: showingPhotoLibrary) { _, newValue in
+            if newValue {
+                cameraManager.stopSession()
+            } else {
+                cameraManager.startSession()
+            }
+        }
         .onAppear(perform: loadLatestThumbnail)
         .onChange(of: cameraManager.loadLatestThumbnail) { _, _ in
             loadLatestThumbnail()

@@ -7,6 +7,7 @@ struct GyroScroll<T: BinaryFloatingPoint>: View where T.Stride: BinaryFloatingPo
     var step: T = 1
     var label: String
     var accentColor: Color
+    var showBar: Bool = true
     
     // Configure UI constants
     private let lineWidth: CGFloat = 4
@@ -60,61 +61,64 @@ struct GyroScroll<T: BinaryFloatingPoint>: View where T.Stride: BinaryFloatingPo
                 }
             }
             
-            // Scroll indicator
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    // Background track
-                    RoundedRectangle(cornerRadius: lineWidth/2)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: lineWidth)
-                    
-                    // Filled portion
-                    RoundedRectangle(cornerRadius: lineWidth/2)
-                        .fill(accentColor)
-                        .frame(width: progressWidth(in: geometry.size.width), height: lineWidth)
-                    
-                    // Tick marks
-                    tickMarks(in: geometry.size.width)
-                    
-                    // Knob
-                    Circle()
-                        .fill(accentColor)
-                        .frame(width: knobSize, height: knobSize)
-                        .overlay(
-                            Circle()
-                                .stroke(Color.white, lineWidth: 2)
-                        )
-                        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
-                        .offset(x: knobPosition(in: geometry.size.width) - knobSize/2)
-                        .scaleEffect(isDragging ? 1.2 : 1.0)
-                        .animation(.spring(response: 0.3), value: isDragging)
+            if showBar {
+                // Scroll indicator
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Background track
+                        RoundedRectangle(cornerRadius: lineWidth/2)
+                            .fill(Color.gray.opacity(0.2))
+                            .frame(height: lineWidth)
+                        
+                        // Filled portion
+                        RoundedRectangle(cornerRadius: lineWidth/2)
+                            .fill(accentColor)
+                            .frame(width: progressWidth(in: geometry.size.width), height: lineWidth)
+                        
+                        // Tick marks
+                        tickMarks(in: geometry.size.width)
+                        
+                        // Knob
+                        Circle()
+                            .fill(accentColor)
+                            .frame(width: knobSize, height: knobSize)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white, lineWidth: 2)
+                            )
+                            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            .offset(x: knobPosition(in: geometry.size.width) - knobSize/2)
+                            .scaleEffect(isDragging ? 1.2 : 1.0)
+                            .animation(.spring(response: 0.3), value: isDragging)
+                    }
+                    .frame(height: height)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { gesture in
+                                isDragging = true
+                                let newOffset = previousDragValue + gesture.translation.width
+                                let ratio = newOffset / geometry.size.width
+                                let newValue = T(rangeStart) + T(ratio) * (T(rangeEnd) - T(rangeStart))
+                                let steppedValue = round(newValue / step) * step
+                                value = min(max(steppedValue, rangeStart), rangeEnd)
+                                dragOffset = newOffset
+                            }
+                            .onEnded { _ in
+                                previousDragValue = knobPosition(in: geometry.size.width)
+                                isDragging = false
+                            }
+                    )
+                    .onAppear {
+                        previousDragValue = knobPosition(in: geometry.size.width)
+                    }
                 }
                 .frame(height: height)
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { gesture in
-                            isDragging = true
-                            let newOffset = previousDragValue + gesture.translation.width
-                            let ratio = newOffset / geometry.size.width
-                            let newValue = T(rangeStart) + T(ratio) * (T(rangeEnd) - T(rangeStart))
-                            let steppedValue = round(newValue / step) * step
-                            value = min(max(steppedValue, rangeStart), rangeEnd)
-                            dragOffset = newOffset
-                        }
-                        .onEnded { _ in
-                            previousDragValue = knobPosition(in: geometry.size.width)
-                            isDragging = false
-                        }
-                )
-                .onAppear {
-                    previousDragValue = knobPosition(in: geometry.size.width)
-                }
             }
-            .frame(height: height)
         }
         .padding(.horizontal, 20)
     }
+        
     
     // Numpad sheet view
     private func numpadView() -> some View {

@@ -49,7 +49,8 @@ struct GyroToggle: View {
                 // Centered text
                 Text(label)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(isOn && fillPercentage > 0.5 ? isAccentColorDark ? .white : .black : .primary)
+                    .foregroundColor(
+                        isOn && fillPercentage > 0.5 ? (isAccentColorDark ? .white : .primary) : .primary)
                     .animation(.easeInOut(duration: 0.1), value: isOn)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)

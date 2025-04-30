@@ -81,7 +81,7 @@ struct ControlsView: View {
                             Image(systemName: "gear")
                                 .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
-                                .rotationEffect(.degrees(isQuickSettingsVisible ? 90 : 0))
+                                .rotationEffect(.degrees(showingSettings ? 90 : 0))
                                 .matchedGeometryEffect(id: "gear", in: animationNamespace)
                         }
                     }
@@ -107,10 +107,21 @@ struct ControlsView: View {
             }
 
         }
-        .fullScreenCover(isPresented: $showingSettings) {
+        .sheet(isPresented: cameraManager.sheetSettings ? $showingSettings : .constant(false)) {
+                        SettingsView(cameraManager: cameraManager, permissionsManager: permissionsManager, isPresented: $showingSettings)
+                    }
+        .fullScreenCover(isPresented: !cameraManager.sheetSettings ? $showingSettings : .constant(false)) {
             SettingsView(cameraManager: cameraManager, permissionsManager: permissionsManager, isPresented: $showingSettings)
         }
+        .onChange(of: showingSettings) { _, newValue in
+            if newValue {
+                cameraManager.stopSession()
+            } else {
+                cameraManager.startSession()
+            }
+        }
     }
+    
     
     private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle) {
         let generator = UIImpactFeedbackGenerator(style: style)

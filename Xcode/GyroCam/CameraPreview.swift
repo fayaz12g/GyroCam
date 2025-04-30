@@ -48,8 +48,6 @@ struct CameraPreview: UIViewRepresentable {
                                                 action: #selector(Coordinator.handleTap(_:)))
         let doubleTapGesture = UITapGestureRecognizer(target: context.coordinator,
                                                       action: #selector(Coordinator.handleDoubleTap(_:)))
-        let panGesture = UIPanGestureRecognizer(target: context.coordinator,
-                                                action: #selector(Coordinator.handlePan(_:)))
         let longPressGesture = UILongPressGestureRecognizer(target: context.coordinator,
                                                             action: #selector(Coordinator.handleLongPress(_:)))
         
@@ -61,11 +59,7 @@ struct CameraPreview: UIViewRepresentable {
         view.addGestureRecognizer(pinchGesture)
         view.addGestureRecognizer(tapGesture)
         view.addGestureRecognizer(doubleTapGesture)
-        view.addGestureRecognizer(panGesture)
         view.addGestureRecognizer(longPressGesture)
-        
-        // Set initial focus mode based on autoFocus setting
-        context.coordinator.updateFocusMode()
         
         return view
     }
@@ -90,75 +84,12 @@ struct CameraPreview: UIViewRepresentable {
             self.cameraManager = cameraManager
             self.colorScheme = colorScheme
             super.init()
-            
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(autoFocusChanged),
-                name: NSNotification.Name("AutoFocusChanged"),
-                object: nil
-            )
         }
         
         deinit {
             NotificationCenter.default.removeObserver(self)
         }
         
-        @MainActor @objc func autoFocusChanged() {
-            updateFocusMode()
-            updateFocusValueFromDevice()
-        }
-        
-        @MainActor func updateFocusMode() {
-            guard let device = cameraManager.captureDevice else { return }
-            
-            do {
-                try device.lockForConfiguration()
-                
-                if cameraManager.autoFocus {
-                    // Reset any locked focus state
-                    device.focusPointOfInterest = CGPoint(x: 0.5, y: 0.5)
-                    device.exposurePointOfInterest = CGPoint(x: 0.5, y: 0.5)
-                    
-                    if device.isFocusModeSupported(.continuousAutoFocus) {
-                        device.focusMode = .continuousAutoFocus
-                    }
-                    if cameraManager.autoExposure {
-                        if device.isExposureModeSupported(.continuousAutoExposure) {
-                            device.exposureMode = .continuousAutoExposure
-                        }
-                    }
-                } else {
-                    if device.isFocusModeSupported(.autoFocus) {
-                        device.focusMode = .autoFocus
-                    }
-                    if device.isExposureModeSupported(.autoExpose) {
-                        device.exposureMode = .autoExpose
-                    }
-                }
-                
-                device.unlockForConfiguration()
-            } catch {
-                print("Error updating focus mode: \(error)")
-            }
-        }
-        
-        @MainActor func updateFocusValueFromDevice() {
-                    guard let device = cameraManager.captureDevice else { return }
-                    cameraManager.focusValue = Float(device.lensPosition)
-                }
-
-        @MainActor func updateFocusValue(to value: Float) {
-            guard let device = cameraManager.captureDevice else { return }
-            do {
-                try device.lockForConfiguration()
-                device.setFocusModeLocked(lensPosition: value) { _ in
-                    self.cameraManager.focusValue = value
-                }
-                device.unlockForConfiguration()
-            } catch {
-                print("Error adjusting focus: \(error)")
-            }
-        }
         
         @MainActor @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             guard let device = cameraManager.captureDevice else {
@@ -192,10 +123,6 @@ struct CameraPreview: UIViewRepresentable {
         }
         
         @MainActor @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            if cameraManager.autoFocus || cameraManager.showFocusBar {
-                return
-            }
-            
             guard let device = cameraManager.captureDevice,
                   device.isFocusPointOfInterestSupported else { return }
             
@@ -240,40 +167,6 @@ struct CameraPreview: UIViewRepresentable {
             cameraManager.switchCamera()
         }
         
-        
-        @objc @MainActor func handlePan(_ gesture: UIPanGestureRecognizer) {
-            guard !cameraManager.autoFocus else { return }
-
-            if cameraManager.autoExposure { return }
-            
-            let translation = gesture.translation(in: gesture.view)
-            let screenWidth = gesture.view?.bounds.width ?? 1
-            
-            switch gesture.state {
-            case .began:
-                initialPanPoint = translation.x
-            case .changed:
-                // Calculate the movement delta normalized to screen width
-                let delta = (translation.x - initialPanPoint) / screenWidth
-                
-                // Use the current focus value as the base
-                let currentFocus = Double(cameraManager.focusValue)
-                
-                // Apply a constant speed factor
-                let speedFactor = 0.1
-                let change = delta * speedFactor
-                
-                // Calculate new focus value
-                let newFocusValue = max(0, min(1, currentFocus + change))
-                
-                updateFocusValue(to: Float(newFocusValue))
-                cameraManager.showFocusBar = true
-                cameraManager.focusValue = Float(newFocusValue)
-                
-            default:
-                break
-            }
-        }
         
         @MainActor @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
             switch gesture.state {
@@ -346,7 +239,7 @@ struct CameraPreview: UIViewRepresentable {
                 (LensType.frontWide, "Front", "web.camera.fill"),
                 (LensType.ultraWide, "0.5x", "camera.viewfinder"),
                 (LensType.wide, "1x", "camera.fill"),
-                (LensType.telephoto, "3x", "camera.macro")
+                (LensType.telephoto, "Tele", "camera.macro")
             ]
             
             let optionSize = CGSize(width: 100, height: 100)
@@ -441,7 +334,7 @@ struct CameraPreview: UIViewRepresentable {
         }
 
         @MainActor private var rotationAngle: Angle {
-            switch cameraManager.currentOrientation {
+            switch cameraManager.realOrientation {
             case "Landscape Left": return .degrees(90)
             case "Landscape Right": return .degrees(-90)
             case "Upside Down": return .degrees(180)

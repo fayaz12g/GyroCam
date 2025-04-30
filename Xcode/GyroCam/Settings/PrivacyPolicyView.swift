@@ -104,7 +104,7 @@ struct PrivacyPolicyView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     DataUsageRow(
-                        accentColor: cameraManager.accentColor,
+                        accentColor: cameraManager.primaryColor,
                         icon: "camera.fill",
                         title: "Camera Access",
                         description: "Required for video capture",
@@ -112,7 +112,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
-                        accentColor: cameraManager.accentColor,
+                        accentColor: cameraManager.primaryColor,
                         icon: "gyroscope",
                         title: "Motion Sensors",
                         description: "Orientation detection",
@@ -120,7 +120,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
-                        accentColor: cameraManager.accentColor,
+                        accentColor: cameraManager.primaryColor,
                         icon: "photo.on.rectangle.angled",
                         title: "Photo Library Access",
                         description: "Used to save videos and display recorded videos",
@@ -128,7 +128,7 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
-                        accentColor: cameraManager.accentColor,
+                        accentColor: cameraManager.primaryColor,
                         icon: "mic.fill",
                         title: "Microphone",
                         description: "Audio recording for videos",
@@ -136,10 +136,18 @@ struct PrivacyPolicyView: View {
                     )
                     
                     DataUsageRow(
-                        accentColor: cameraManager.accentColor,
+                        accentColor: cameraManager.primaryColor,
                         icon: "location.fill",
                         title: "Location",
                         description: "Embedded in video metadata",
+                        accessType: "Optional"
+                    )
+                    
+                    DataUsageRow(
+                        accentColor: cameraManager.primaryColor,
+                        icon: "bell.fill",
+                        title: "Notifications",
+                        description: "Used to alert when exports finish/fail",
                         accessType: "Optional"
                     )
                     

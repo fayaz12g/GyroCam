@@ -54,6 +54,13 @@ struct AboutView: View {
                     // Version Info
                     versionInfoCard
                     
+                    // Developer mode toggle
+                    GyroToggle(isOn: $cameraManager.developerMode,
+                        label: "Developer Mode",
+                        accentColor: Color.gray.opacity(0.2),
+                    )
+                    
+                    
                     // Footer
                     Text("An app by Fayaz")
                         .font(.caption)

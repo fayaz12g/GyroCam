@@ -18,15 +18,7 @@ struct RecordingButton: View {
                     .stroke(colorScheme == .dark ? Color.black.opacity(0.7) : Color.white, lineWidth: 5)
                     .frame(width: 70, height: 70)
                 
-                // Animated red shape (square when recording, circle when not)
-                RoundedRectangle(cornerRadius: isRecording ? 7 : 60)
-                    .fill(cameraManager.primaryColor)
-                    .frame(width: isRecording ? 28 : 60, height: isRecording ? 28 : 60)
-                    .opacity(shouldShowSavingDots ? 0 : 1)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isRecording)
-                    .animation(.easeInOut(duration: 0.3), value: cameraManager.isSavingVideo)
-                
-                if isRecording {
+                if isRecording && cameraManager.recordingPulse {
                     // Scaling pulse effect - expanding from the center
                     Circle()
                         .stroke(cameraManager.accentColor.opacity(0.4), lineWidth: 2)
@@ -35,6 +27,15 @@ struct RecordingButton: View {
                         .opacity(animate ? 0 : 1)
                         .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: false), value: animate)
                 }
+                
+                // Animated red shape (square when recording, circle when not)
+                RoundedRectangle(cornerRadius: isRecording ? 7 : 60)
+                    .fill(cameraManager.primaryColor)
+                    .frame(width: isRecording ? 28 : 60, height: isRecording ? 28 : 60)
+                    .opacity(shouldShowSavingDots ? 0 : 1)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isRecording)
+                    .animation(.easeInOut(duration: 0.3), value: cameraManager.isSavingVideo)
+                
                 
                 // Saving video animation (only show if not allowing recording while saving)
                 if shouldShowSavingDots {
@@ -73,13 +74,16 @@ struct RecordingButton: View {
         }
     }
     
-    private var shouldShowSavingDots: Bool {
-        cameraManager.isSavingVideo && !cameraManager.allowRecordingWhileSaving
-    }
-    
+    // disable the button if saving and concurrent exports off
     private var isButtonDisabled: Bool {
         cameraManager.isSavingVideo && !cameraManager.allowRecordingWhileSaving
     }
+    
+    // show the saving dots view if disabled
+    private var shouldShowSavingDots: Bool {
+        isButtonDisabled
+    }
+    
 }
 
 struct SavingDotsView: View {
@@ -116,7 +120,7 @@ struct SavingDotsView: View {
             .rotationEffect(.degrees(rotation))
             
             if cameraManager.isExporting {
-                Text("\(Int(cameraManager.exportProgress * 100))%")
+                Text("\(Int(cameraManager.activeExports.last!.progress * 100))%")
                     .foregroundColor(.white)
                     .font(.system(size: 24, weight: .bold))
                     .monospacedDigit()

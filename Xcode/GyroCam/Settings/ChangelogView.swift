@@ -24,6 +24,34 @@ struct ChangelogView: View {
                             date: "April 28, 2025",
                             type: .beta(version: 4),
                             changes: [
+                                .init(type: .added, description: "The camera and microphone no longer remain in use with the settings menu and photo library views open."),
+                                .init(type: .fixed, description: "Addressed a bug where the new permissions page in settings used the wrong user color."),
+                                .init(type: .changed, description: "Adjusted badges in the privacy policy view to use the primary color."),
+                                .init(type: .changed, description: "Added notification usage descriptions to the privacy policy."),
+                                .init(type: .changed, description: "Settings Contrast renamed to Settings Backgrounds."),
+                                .init(type: .added, description: "Settings can now be toggled between a sheet and full screen cover."),
+                                .init(type: .added, description: "Added a new developer mode, which shows more settings"),
+                                .init(type: .changed, description: "Moved the settings sheet toggle, hide export sheet duration, and allow recording while savings options behind developer mode."),
+                                .init(type: .changed, description: "Updated the saving dots view to use an accurate export percentage."),
+                                .init(type: .changed, description: "Reordered the pulsing recording effect to be behind the stop button (now that they're different colors)."),
+                                .init(type: .added, description: "Added an option to disable the recording pulse"),
+                                .init(type: .fixed, description: "Removed old code for focal adjustments."),
+                                .init(type: .fixed, description: "The quick lens switcher now orients properly based on real orientation."),
+                                .init(type: .changed, description: "The ISO bar has been updated to have the new UI of the focus bar, including tap to switch to auto exposure, and moving the ISO thumb with value changes."),
+                                .init(type: .changed, description: "Manual ISO in settings is now more obvious with a header and uses the new GyroScroll"),
+                                .init(type: .fixed, description: "Removed all warnings (again)"),
+                                .init(type: .fixed, description: "Renamed hardcoded 3x in quick lens switcher to 'tele'. May change to real number later."),
+                                .init(type: .fixed, description: "Fixed an issue where returning from onboarding made the background show the camera."),
+                                .init(type: .fixed, description: "Having settings backgrounds off now results in a whiter white or blacker black regardless of sheet or full screen cover."),
+                            ],
+                            fixedIssues: [32, 33, 38, 44, 48]
+                        )
+                        
+                        VersionEntry(
+                            version: "0.1.9",
+                            date: "April 28, 2025",
+                            type: .beta(version: 4),
+                            changes: [
                                 .init(type: .fixed, description: "Concurrent exports now support the proper orientation handling."),
                                 .init(type: .added, description: "Failed exports can now be restarted."),
                                 .init(type: .fixed, description: "Junk from failed exports can now be purged."),
@@ -43,7 +71,7 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Privacy policy now conforms to accent color."),
                                 .init(type: .changed, description: "Settings backgrounds now conforms to primary color."),
                             ],
-                            fixedIssues: []
+                            fixedIssues: [45, 47]
                         )
                         
                         VersionEntry(

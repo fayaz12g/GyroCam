@@ -35,6 +35,9 @@ struct AppSettings: Codable {
     var isHDREnabled: Bool = true
     var isFlashOn: Bool = false
     var useBlurredBackground: Bool = true
+    var sheetSettings: Bool = false
+    var developerMode: Bool = false
+    var recordingPulse: Bool = true
     
     // Video Settings
     var isSavingVideo: Bool = false

@@ -28,6 +28,11 @@ struct SettingsView: View {
                             .background(.ultraThinMaterial)
                             .ignoresSafeArea()
                     }
+                    else {
+                        Color.clear
+                            .background(colorScheme == .dark ? Color.black : Color.white)
+                            .ignoresSafeArea()
+                    }
                     
                     TabView(selection: $selectedTab) {
                         CaptureSettingsTab(cameraManager: cameraManager)
@@ -92,9 +97,18 @@ struct CustomizationSettingsTab: View {
                                     accentColor: cameraManager.accentColor)
                             
                             GyroToggle(isOn: $cameraManager.useBlurredBackground,
-                                    label: "Settings Contrast",
+                                    label: "Settings Backgrounds",
                                     accentColor: cameraManager.accentColor)
-                                
+                            
+                            GyroToggle(isOn: $cameraManager.recordingPulse,
+                                    label: "Recording Pulse",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            if cameraManager.developerMode {
+                                GyroToggle(isOn: $cameraManager.sheetSettings,
+                                           label: "Sheet Settings",
+                                           accentColor: cameraManager.accentColor)
+                            }
                         }
                         .padding(.horizontal)
                     }
@@ -563,16 +577,11 @@ struct CaptureSettingsTab: View {
                             }
                         
                         if !cameraManager.autoExposure {
-                            TextField("ISO", value: $cameraManager.manualISO, format: .number)
-                                .keyboardType(.numberPad)
-                                .textFieldStyle(.roundedBorder)
-                                .onChange(of: cameraManager.manualISO) { _, newValue in
-                                    if newValue < cameraManager.minISO {
-                                        cameraManager.manualISO = cameraManager.minISO
-                                    } else if newValue > cameraManager.maxISO {
-                                        cameraManager.manualISO = cameraManager.maxISO
-                                    }
-                                }
+                            GyroScroll(value: $cameraManager.manualISO, rangeStart: cameraManager.minISO, rangeEnd: cameraManager.maxISO,
+                               label: "Manual ISO",
+                               accentColor: cameraManager.accentColor,
+                               showBar: false
+                           )
                         }
                     }
                     .padding(.vertical, 8)
@@ -620,17 +629,21 @@ struct CaptureSettingsTab: View {
                                 }
                             }
                     
-                        GyroToggle(isOn: $cameraManager.allowRecordingWhileSaving,
-                                label: "Allow Recording While Saving",
-                                accentColor: cameraManager.accentColor)
+                        if cameraManager.developerMode {
+                            GyroToggle(isOn: $cameraManager.allowRecordingWhileSaving,
+                                       label: "Allow Recording While Saving",
+                                       accentColor: cameraManager.accentColor)
+                        }
                         
                         GyroToggle(isOn: $cameraManager.showQuickExport,
                                 label: "Show Export Sheet Immediately After Recording",
                                 accentColor: cameraManager.accentColor)
                         
-                        GyroScroll(value: $cameraManager.exportSheetDuration, rangeStart: 0, rangeEnd: 100,
-                                label: "Hide Export Sheet After Queue Finish (seconds)",
-                                accentColor: cameraManager.accentColor)
+                        if cameraManager.developerMode {
+                            GyroScroll(value: $cameraManager.exportSheetDuration, rangeStart: 0, rangeEnd: 100,
+                                       label: "Hide Export Sheet After Queue Finish (seconds)",
+                                       accentColor: cameraManager.accentColor)
+                        }
                         
                     }
                     .padding(.vertical, 8)

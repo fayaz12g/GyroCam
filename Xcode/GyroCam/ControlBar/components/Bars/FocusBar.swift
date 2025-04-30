@@ -138,8 +138,8 @@ struct FocusBar: View {
         
         // Create a new timer that updates more frequently during autofocus
         focusUpdateTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
-            if cameraManager.autoFocus {
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                if cameraManager.autoFocus {
                     // Update UI with the current lens position from the camera
                     if let currentLensPosition = cameraManager.captureDevice?.lensPosition {
                         // This updates the focusValue which will move the indicator
