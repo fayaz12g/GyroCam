@@ -20,8 +20,8 @@ struct ChangelogView: View {
                     VStack(spacing: 20) {
                         
                         VersionEntry(
-                            version: "0.1.9",
-                            date: "April 28, 2025",
+                            version: "0.1.10",
+                            date: "May 1, 2025",
                             type: .beta(version: 4),
                             changes: [
                                 .init(type: .added, description: "The camera and microphone no longer remain in use with the settings menu and photo library views open."),
