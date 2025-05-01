@@ -55,6 +55,11 @@ struct AppSettings: Codable {
     var showISOBar: Bool = false
     var manualShutterSpeed: Double = 1/60
     
+    // Profile Info
+    var userName: String = ""
+    var userEmail: String = ""
+    var userDevice: String = UIDevice.modelName
+    
     // Preview Settings
     var maximizePreview: Bool = true
     var showZoomBar: Bool = false

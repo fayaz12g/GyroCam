@@ -20,8 +20,20 @@ struct ChangelogView: View {
                     VStack(spacing: 20) {
                         
                         VersionEntry(
-                            version: "0.1.10",
+                            version: "0.1.11",
                             date: "May 1, 2025",
+                            type: .beta(version: 4),
+                            changes: [
+                                .init(type: .added, description: "Added WishKit integration for a custom feature wish list."),
+                                .init(type: .added, description: "New profile view to manage a set name and email to be shared with WishKit."),
+                                .init(type: .changed, description: "Adjusted naming of 'Upcoming Features' to 'GitHub Roadmap' to better differentiate the new Wish List View."),
+                            ],
+                            fixedIssues: []
+                        )
+                        
+                        VersionEntry(
+                            version: "0.1.10",
+                            date: "April 30, 2025",
                             type: .beta(version: 4),
                             changes: [
                                 .init(type: .added, description: "The camera and microphone no longer remain in use with the settings menu and photo library views open."),

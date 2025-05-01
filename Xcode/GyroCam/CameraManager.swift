@@ -582,6 +582,22 @@ class CameraManager: NSObject, ObservableObject {
     
     @Published var showExportSheet: Bool = false
     
+    // Profile info
+    @MainActor var userName: String {
+        get { settings.userName }
+        set { settings.userName = newValue }
+    }
+   
+    @MainActor var userEmail: String {
+        get { settings.userEmail }
+        set { settings.userEmail = newValue }
+    }
+   
+    @MainActor var userDevice: String {
+        get { settings.userDevice }
+        set { settings.userDevice = newValue }
+    }
+    // Other Settings
     @MainActor var allowRecordingWhileSaving: Bool {
         get { settings.allowRecordingWhileSaving }
         set { settings.allowRecordingWhileSaving = newValue }

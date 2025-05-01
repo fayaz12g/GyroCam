@@ -18,11 +18,11 @@ struct UpcomingFeaturesView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         FeatureGroup(title: "GitHub Issues")
-                        ManualFeatureGroup(title: "Other Features")
+                        ManualFeatureGroup(title: "Other Planned Features")
                     }
                     .padding()
                 }
-                .navigationTitle("Upcoming Features")
+                .navigationTitle("GitHub Roadmap")
                 .navigationBarTitleDisplayMode(.inline)
                 .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
                 

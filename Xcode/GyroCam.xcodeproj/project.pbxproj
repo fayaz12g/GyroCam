@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F4951F902DC3BD3700871E58 /* WishKit in Frameworks */ = {isa = PBXBuildFile; productRef = F4951F8F2DC3BD3700871E58 /* WishKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		F4A0FC4F2D5006E4000DCC1A /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -49,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4951F902DC3BD3700871E58 /* WishKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +97,7 @@
 			);
 			name = GyroCam;
 			packageProductDependencies = (
+				F4951F8F2DC3BD3700871E58 /* WishKit */,
 			);
 			productName = GyroCam;
 			productReference = F45584CC2D40BF26005461E0 /* GyroCam.app */;
@@ -121,6 +127,9 @@
 			);
 			mainGroup = F45584C32D40BF26005461E0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F4951F8E2DC3BD3700871E58 /* XCRemoteSwiftPackageReference "wishkit-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F45584CD2D40BF26005461E0 /* Products */;
 			projectDirPath = "";
@@ -280,7 +289,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 384;
+				CURRENT_PROJECT_VERSION = 398;
 				DEVELOPMENT_TEAM = V4662QC35T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -303,7 +312,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.10;
+				MARKETING_VERSION = 0.1.11;
 				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCam2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -320,7 +329,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 384;
+				CURRENT_PROJECT_VERSION = 398;
 				DEVELOPMENT_TEAM = V4662QC35T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -343,7 +352,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.10;
+				MARKETING_VERSION = 0.1.11;
 				PRODUCT_BUNDLE_IDENTIFIER = one.fayaz.GyroCam2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -375,6 +384,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F4951F8E2DC3BD3700871E58 /* XCRemoteSwiftPackageReference "wishkit-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wishkit/wishkit-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F4951F8F2DC3BD3700871E58 /* WishKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F4951F8E2DC3BD3700871E58 /* XCRemoteSwiftPackageReference "wishkit-ios" */;
+			productName = WishKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F45584C42D40BF26005461E0 /* Project object */;
 }

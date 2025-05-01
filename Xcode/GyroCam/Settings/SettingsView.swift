@@ -309,7 +309,7 @@ struct InformationSettingsTab: View {
                     SettingsRow(
                         title: "Version History",
                         icon: "clock.badge.checkmark",
-                        description: "See what's changed in recent updates",
+                        description: "See what's changed throughout our update history",
                         iconColor: .gray
                     )
                 }
@@ -317,7 +317,7 @@ struct InformationSettingsTab: View {
                 
                 NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
                     SettingsRow(
-                        title: "Upcoming Features",
+                        title: "GitHub Roadmap",
                         icon: "road.lanes.curved.right",
                         description: "Preview what's coming next",
                         iconColor: .mint
@@ -335,10 +335,30 @@ struct InformationSettingsTab: View {
                        title: "App Permissions",
                        icon: "lock.shield.fill",
                        description: "Manage camera, microphone, and other permissions",
-                       iconColor: .teal
+                       iconColor: .green
                    )
                }
                .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination: WishView(cameraManager: cameraManager)) {
+                    SettingsRow(
+                        title: "Wish List",
+                        icon: "wand.and.sparkles.inverse",
+                        description: "Request features, and see other requests",
+                        iconColor: .yellow
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination: ProfileView(cameraManager: cameraManager)) {
+                    SettingsRow(
+                        title: "Profile",
+                        icon: "person.fill",
+                        description: "Enter your information",
+                        iconColor: .orange
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
                 
                 Button("Show Onboarding") {
                     showOnboarding = true

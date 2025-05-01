@@ -13,8 +13,8 @@ struct ManualFeatureGroup: View {
     @State private var isExpanded = false
     
     let features = [
-        (title: "Camera Control Support", type: FeatureType.enhancement),
-        (title: "Other bug fixes", type: FeatureType.bug)
+        (title: "Photo Library UI Overhaul", type: FeatureType.enhancement),
+        (title: "General speed improvements", type: FeatureType.bug)
     ]
     
     var body: some View {
