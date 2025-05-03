@@ -37,22 +37,10 @@ struct PhotoLibraryButton: View {
     }
     
     
-    private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle) {
-        let generator = UIImpactFeedbackGenerator(style: style)
-        generator.prepare()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            generator.impactOccurred()
-        }
-    }
-    
     var body: some View {
         Button {
-            if !cameraManager.hapticsConfigured {
-                cameraManager.configureHaptics()
-                cameraManager.hapticsConfigured = true
-            }
             if cameraManager.playHaptics {
-                triggerHaptic(style: .light)
+                cameraManager.triggerHaptic(strength: .light)
             }
             showingPhotoLibrary = true
         } label: {

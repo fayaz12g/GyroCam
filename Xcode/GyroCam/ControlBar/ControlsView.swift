@@ -34,13 +34,9 @@ struct ControlsView: View {
                         } else {
                             cameraManager.startRecording()
                         }
-                        if !cameraManager.hapticsConfigured {
-                            cameraManager.configureHaptics()
-                            cameraManager.hapticsConfigured = true
-                        }
                         DispatchQueue.main.async {
                             if cameraManager.playHaptics {
-                                triggerHaptic(style: .medium)
+                                cameraManager.triggerHaptic(strength: .medium)
                             }
                         }
                     }
@@ -55,12 +51,8 @@ struct ControlsView: View {
                     
                     // Settings Button (Right)
                     Button {
-                        if !cameraManager.hapticsConfigured {
-                            cameraManager.configureHaptics()
-                            cameraManager.hapticsConfigured = true
-                        }
                         if cameraManager.playHaptics {
-                            triggerHaptic(style: .light)
+                            cameraManager.triggerHaptic(strength: .light)
                         }
                         withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.7)) {
                             showingSettings.toggle()
@@ -119,15 +111,6 @@ struct ControlsView: View {
             } else {
                 cameraManager.startSession()
             }
-        }
-    }
-    
-    
-    private func triggerHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle) {
-        let generator = UIImpactFeedbackGenerator(style: style)
-        generator.prepare()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            generator.impactOccurred()
         }
     }
 }

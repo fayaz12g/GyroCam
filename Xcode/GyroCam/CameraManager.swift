@@ -981,6 +981,7 @@ class CameraManager: NSObject, ObservableObject {
             session.stopRunning()
             print("Session killed")
         }
+        hapticsConfigured = false
     }
     
     @MainActor private func getCurrentDevice() -> AVCaptureDevice? {
@@ -1181,7 +1182,7 @@ class CameraManager: NSObject, ObservableObject {
     }
 
     
-    private func triggerHaptic(strength: RotationHapticStrength) {
+    public func triggerHaptic(strength: RotationHapticStrength) {
         if !hapticsConfigured {
             configureHaptics()
         }
