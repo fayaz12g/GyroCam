@@ -1222,24 +1222,24 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
-                    session.beginConfiguration()
-                    defer { session.commitConfiguration() }
-                    guard let connection = movieOutput.connection(with: .video) else { return }
-        
-                    let videoAngle: CGFloat
-                    switch currentOrientation {
-                    case "Landscape Left": videoAngle = 0
-                    case "Portrait": videoAngle = 90
-                    case "Landscape Right": videoAngle = 180
-                    case "Upside Down": videoAngle = 270
-                    default: videoAngle = 90
-                    }
-        
-                    connection.videoRotationAngle = videoAngle
-                    if connection.isVideoMirroringSupported {
-                        connection.isVideoMirrored = (currentLens == .frontWide)
-                    }
-                }
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+        guard let connection = movieOutput.connection(with: .video) else { return }
+
+        let videoAngle: CGFloat
+        switch currentOrientation {
+        case "Landscape Left": videoAngle = 0
+        case "Portrait": videoAngle = 90
+        case "Landscape Right": videoAngle = 180
+        case "Upside Down": videoAngle = 270
+        default: videoAngle = 90
+        }
+
+        connection.videoRotationAngle = videoAngle
+        if connection.isVideoMirroringSupported {
+            connection.isVideoMirrored = (currentLens == .frontWide)
+        }
+    }
 
     
     public func triggerHaptic(strength: RotationHapticStrength) {
