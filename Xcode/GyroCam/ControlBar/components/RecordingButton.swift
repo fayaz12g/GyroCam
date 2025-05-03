@@ -49,12 +49,8 @@ struct RecordingButton: View {
                 if isRecording {
                     animate = true
                 }
-                volumeObserver.onVolumeButtonPressed = { isVolumeUp in
-                   if isVolumeUp {
-                       print("Volume Up Pressed")
-                       action()
-                   } else {
-                       print("Volume Down Pressed")
+                volumeObserver.onVolumeButtonPressed = { pressed in
+                   if pressed {
                        action()
                    }
                }
