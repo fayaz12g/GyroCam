@@ -1023,9 +1023,8 @@ class CameraManager: NSObject, ObservableObject {
     public func startSession() {
         guard !session.isRunning else { return }
         
-        Task.detached { [weak self] in
-            guard let session = await self?.session else { return }
-            session.startRunning()
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            self?.session.startRunning()
         }
     }
     
@@ -1217,30 +1216,23 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    @MainActor
-    private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
-        session.beginConfiguration()
-        defer { session.commitConfiguration() }
-
-        guard let connection = movieOutput.connection(with: .video),
-              let device = currentCaptureDevice else { return }
-
-        // Initialize the rotation coordinator with the current device
-        let rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
-
-        // Retrieve the rotation angle for horizon-level capture
-        let angle = rotationCoordinator.videoRotationAngleForHorizonLevelCapture
-
-        // Check if the angle is supported and apply it
-        if connection.isVideoRotationAngleSupported(angle) {
-            connection.videoRotationAngle = angle
-        }
-
-        // Set video mirroring if supported
-        if connection.isVideoMirroringSupported {
-            connection.isVideoMirrored = (currentLens == .frontWide)
-        }
-    }
+    @MainActor private func updateVideoOrientation(_ orientation: UIDeviceOrientation) {
+                    session.beginConfiguration()
+                    defer { session.commitConfiguration() }
+                    guard let connection = movieOutput.connection(with: .video) else { return }
+                    let videoOrientation: AVCaptureVideoOrientation
+                    switch orientation {
+                    case .portrait: videoOrientation = .portrait
+                    case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
+                    case .landscapeLeft: videoOrientation = .landscapeRight
+                    case .landscapeRight: videoOrientation = .landscapeLeft
+                    default: videoOrientation = .portrait
+                    }
+                    connection.videoOrientation = videoOrientation
+                    if connection.isVideoMirroringSupported {
+                        connection.isVideoMirrored = (currentLens == .frontWide)
+                    }
+                }
 
     
     public func triggerHaptic(strength: RotationHapticStrength) {
@@ -1380,8 +1372,10 @@ class CameraManager: NSObject, ObservableObject {
         }
         
        // Record initial orientation
-       let initialOrientation = previousOrientation.description
-        orientationChanges.append((OrientationChange(time: 0.0, orientation: initialOrientation)))
+        if shouldStitchClips {
+             orientationChanges.append((OrientationChange(time: 0.0, orientation: previousOrientation.description)))
+        }
+       
        if playSounds {
             AudioServicesPlaySystemSound(1117)
         }
