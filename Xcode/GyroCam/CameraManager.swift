@@ -1020,12 +1020,11 @@ class CameraManager: NSObject, ObservableObject {
         }
     }
     
+    @MainActor
     public func startSession() {
         guard !session.isRunning else { return }
+        self.session.startRunning()
         
-        DispatchQueue.main.async { [weak self] in
-            self?.session.startRunning()
-        }
     }
     
     public func stopSession() {
