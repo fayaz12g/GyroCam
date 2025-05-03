@@ -7,6 +7,7 @@ struct RecordingButton: View {
     var action: () -> Void
     @State private var animate = false
     @Environment(\.colorScheme) var colorScheme
+    @StateObject private var volumeObserver = VolumeButtonObserver()
     
     var body: some View {
         Button(action: {
@@ -48,6 +49,16 @@ struct RecordingButton: View {
                 if isRecording {
                     animate = true
                 }
+                volumeObserver.onVolumeButtonPressed = { isVolumeUp in
+                   if isVolumeUp {
+                       print("Volume Up Pressed")
+                       action()
+                   } else {
+                       print("Volume Down Pressed")
+                       action()
+                   }
+               }
+                       
             }
             .onChange(of: isRecording) { _, newValue in
                 // Toggle animation based on isRecording state
