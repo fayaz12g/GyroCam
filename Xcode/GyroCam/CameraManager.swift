@@ -422,6 +422,17 @@ class CameraManager: NSObject, ObservableObject {
     }
     
     
+    func stopMotionUpdates() {
+        motionManager.stopDeviceMotionUpdates()
+        print("Motion updates stopped")
+    }
+
+    func restartMotionUpdatesIfNeeded() {
+        guard !motionManager.isDeviceMotionActive else { return }
+        startOrientationUpdates()
+    }
+
+    
     private func stitchClips() {
         print("⏳ [1] Starting stitch process")
         self.isSavingVideo = true
@@ -859,6 +870,27 @@ class CameraManager: NSObject, ObservableObject {
     override init() {
         super.init()
         
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+                
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        
         if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
             requestCameraAccess()
             requestLocationAccess()
@@ -879,6 +911,30 @@ class CameraManager: NSObject, ObservableObject {
         requestLocationAccess()
     }
     
+    public func killThemAll() {
+        stopSession()
+        motionManager.stopDeviceMotionUpdates()
+        hapticsConfigured = false
+    }
+    
+    @objc func handleAppWillResignActive() {
+        // Called when app is interrupted (e.g. lock screen, call, Control Center, etc.)
+        killThemAll()
+    }
+
+    @objc func handleAppDidEnterBackground() {
+        // Called when app goes fully to background (e.g. home button swipe, lock)
+        killThemAll()
+    }
+    
+    @objc func handleAppDidBecomeActive() {
+        // Resume session or motion if needed
+        requestCameraAccess()
+        if !motionManager.isDeviceMotionActive {
+            startOrientationUpdates()
+        }
+    }
+
     private func requestCameraAccess() {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
             Task { @MainActor in

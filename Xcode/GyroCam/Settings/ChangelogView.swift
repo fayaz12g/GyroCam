@@ -31,6 +31,7 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Fixed changelog entries all saying beta 4"),
                                 .init(type: .changed, description: "Removed the motion manager"),
                                 .init(type: .fixed, description: "The app no longer crashes on startup due to async calls"),
+                                .init(type: .changed, description: "Camera, motion and haptics are now killed when the app is not in focus (and restarted when back in focus)"),
                             ],
                             fixedIssues: [51]
                         )
