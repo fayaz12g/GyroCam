@@ -22,29 +22,43 @@ struct OrientationHelper {
             realOrientation = gravity.y > 0 ? .portraitUpsideDown : .portrait
         }
         
-        // Always update the real orientation in cameraManager
-        cameraManager.realOrientation = realOrientation.description
+        if cameraManager.useRealOrientation {
+            cameraManager.realOrientation = realOrientation.description
+        }
         
         // If landscape lock is on, we need to determine what orientation to return
         if cameraManager.lockLandscape {
             // Skip face up/down check if locked to landscape
             if absZ > max(absX, absY) {
                 // Even with face up/down, we maintain current orientation if landscape locked
+                if !cameraManager.useRealOrientation {
+                    cameraManager.realOrientation = currentOrientation.description
+                }
                 return currentOrientation
             }
             
             // For landscape orientations, return the detected orientation
             if absX > absY {
+                if !cameraManager.useRealOrientation {
+                    cameraManager.realOrientation = gravity.x > 0 ? "Landscape Right" : "Landscape Left"
+                }
                 return gravity.x > 0 ? .landscapeRight : .landscapeLeft
             } else if absY > absX {
                 // If locked to landscape but device is in portrait, maintain current orientation
+                if !cameraManager.useRealOrientation {
+                    cameraManager.realOrientation = currentOrientation.description
+                }
                 return currentOrientation
             } else {
                 // If X and Y are nearly equal (device is centered), retain the current orientation
+                if !cameraManager.useRealOrientation {
+                    cameraManager.realOrientation = currentOrientation.description
+                }
                 return currentOrientation
             }
         } else {
             // If not locked to landscape, just return the real orientation we already determined
+            cameraManager.realOrientation = realOrientation.description
             return realOrientation
         }
     }

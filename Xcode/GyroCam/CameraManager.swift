@@ -115,6 +115,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.useBlurredBackground = newValue }
     }
     
+    @MainActor var useRealOrientation: Bool {
+        get { settings.useRealOrientation }
+        set { settings.useRealOrientation = newValue }
+    }
+    
     @MainActor var sheetSettings: Bool {
         get { settings.sheetSettings }
         set { settings.sheetSettings = newValue }

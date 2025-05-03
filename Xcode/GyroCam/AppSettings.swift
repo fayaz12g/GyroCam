@@ -63,6 +63,7 @@ struct AppSettings: Codable {
     // Preview Settings
     var maximizePreview: Bool = true
     var showZoomBar: Bool = false
+    var useRealOrientation: Bool = true
     
     // Quick Settings
     var showQuickSettings: Bool = true

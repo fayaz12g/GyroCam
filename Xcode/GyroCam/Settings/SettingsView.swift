@@ -104,6 +104,11 @@ struct CustomizationSettingsTab: View {
                                     label: "Recording Pulse",
                                     accentColor: cameraManager.accentColor)
                             
+                            
+                            GyroToggle(isOn: $cameraManager.useRealOrientation,
+                                    label: "Use Real Orientation for UI",
+                                    accentColor: cameraManager.accentColor)
+                            
                             if cameraManager.developerMode {
                                 GyroToggle(isOn: $cameraManager.sheetSettings,
                                            label: "Sheet Settings",
