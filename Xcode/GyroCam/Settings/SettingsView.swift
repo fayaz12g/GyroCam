@@ -665,7 +665,7 @@ struct CaptureSettingsTab: View {
                                 accentColor: cameraManager.accentColor)
                         
                         if cameraManager.developerMode {
-                            GyroScroll(value: $cameraManager.exportSheetDuration, rangeStart: 0, rangeEnd: 100,
+                            GyroScroll(value: $cameraManager.exportSheetDuration, rangeStart: 0, rangeEnd: 30,
                                        label: "Hide Export Sheet After Queue Finish (seconds)",
                                        accentColor: cameraManager.accentColor)
                         }

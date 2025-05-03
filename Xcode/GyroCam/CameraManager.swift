@@ -1197,6 +1197,11 @@ class CameraManager: NSObject, ObservableObject {
             showError("Motion data unavailable")
             return
         }
+        if lockLandscape {
+            if previousOrientation == .portrait {
+                previousOrientation = .landscapeLeft
+            }
+        }
         motionManager.deviceMotionUpdateInterval = 0.01
         motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, error in
             guard let self = self else { return }
