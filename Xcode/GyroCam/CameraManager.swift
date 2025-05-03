@@ -1225,15 +1225,17 @@ class CameraManager: NSObject, ObservableObject {
                     session.beginConfiguration()
                     defer { session.commitConfiguration() }
                     guard let connection = movieOutput.connection(with: .video) else { return }
-                    let videoOrientation: AVCaptureVideoOrientation
-                    switch orientation {
-                    case .portrait: videoOrientation = .portrait
-                    case .portraitUpsideDown: videoOrientation = .portraitUpsideDown
-                    case .landscapeLeft: videoOrientation = .landscapeRight
-                    case .landscapeRight: videoOrientation = .landscapeLeft
-                    default: videoOrientation = .portrait
+        
+                    let videoAngle: CGFloat
+                    switch currentOrientation {
+                    case "Landscape Left": videoAngle = 0
+                    case "Portrait": videoAngle = 90
+                    case "Landscape Right": videoAngle = 180
+                    case "Upside Down": videoAngle = 270
+                    default: videoAngle = 90
                     }
-                    connection.videoOrientation = videoOrientation
+        
+                    connection.videoRotationAngle = videoAngle
                     if connection.isVideoMirroringSupported {
                         connection.isVideoMirrored = (currentLens == .frontWide)
                     }
