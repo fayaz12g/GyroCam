@@ -30,6 +30,7 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Fixed haptics not working on rotation after accessing a sheet."),
                                 .init(type: .fixed, description: "Fixed changelog entries all saying beta 4"),
                                 .init(type: .changed, description: "Removed the motion manager"),
+                                .init(type: .fixed, description: "The app no longer crashes on startup due to async calls"),
                             ],
                             fixedIssues: [51]
                         )

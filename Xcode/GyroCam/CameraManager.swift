@@ -881,7 +881,7 @@ class CameraManager: NSObject, ObservableObject {
     
     private func requestCameraAccess() {
         AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 if granted {
                     self?.configureSession()
                     self?.startSession()
