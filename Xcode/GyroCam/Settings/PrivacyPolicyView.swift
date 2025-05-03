@@ -11,7 +11,6 @@ struct PrivacyPolicyView: View {
     @ObservedObject var cameraManager: CameraManager
     @State private var scrollOffset: CGFloat = 0
     @State private var deviceRotation: Double = 0
-    @State private var motionManager = MotionManager()
     
     
     var body: some View {
@@ -37,12 +36,6 @@ struct PrivacyPolicyView: View {
         .navigationTitle("Privacy Policy")
         .navigationBarTitleDisplayMode(.inline)
         .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
-        .onAppear {
-            motionManager.start()
-        }
-        .onDisappear {
-            motionManager.stop()
-        }
     }
     
     private var policyHeader: some View {

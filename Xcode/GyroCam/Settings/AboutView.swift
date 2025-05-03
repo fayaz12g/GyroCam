@@ -7,9 +7,6 @@ struct AboutView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var deviceRotation: Double = 0
     
-    // For motion effects
-    @State private var motionManager = MotionManager()
-    
     var appVersion: String {
         return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     }
@@ -83,12 +80,6 @@ struct AboutView: View {
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
         .gradientBackground(when: cameraManager.useBlurredBackground, accentColor: cameraManager.primaryColor)
-        .onAppear {
-            motionManager.start()
-        }
-        .onDisappear {
-            motionManager.stop()
-        }
     }
     
     // MARK: - Components
@@ -418,7 +409,6 @@ struct AboutView: View {
 
 struct GlassCard<Content: View>: View {
     @Environment(\.colorScheme) var colorScheme
-    @State private var motionManager = MotionManager()
     let content: Content
     
     init(@ViewBuilder content: () -> Content) {
@@ -438,25 +428,6 @@ struct GlassCard<Content: View>: View {
                             RoundedRectangle(cornerRadius: 25)
                                 .fill(Material.ultraThinMaterial)
                         )
-                    
-//                    // Reflective highlight
-//                    RoundedRectangle(cornerRadius: 25)
-//                        .fill(
-//                            LinearGradient(
-//                                gradient: Gradient(colors: [
-//                                    Color.white.opacity(colorScheme == .dark ? 0.2 : 0.5),
-//                                    Color.white.opacity(0.0)
-//                                ]),
-//                                startPoint: UnitPoint(
-//                                    x: 0.5 + (motionManager.roll / 6),
-//                                    y: 0.0 + (motionManager.pitch / 6)
-//                                ),
-//                                endPoint: UnitPoint(
-//                                    x: 0.5 - (motionManager.roll / 6),
-//                                    y: 1.0 - (motionManager.pitch / 6)
-//                                )
-//                            )
-//                        )
                 }
             )
             .overlay(
@@ -477,20 +448,6 @@ struct GlassCard<Content: View>: View {
             )
             .cornerRadius(25)
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 10)
-//            .rotation3DEffect(
-//                .degrees(motionManager.roll * 2),
-//                axis: (x: 0, y: 1, z: 0)
-//            )
-//            .rotation3DEffect(
-//                .degrees(motionManager.pitch * 2),
-//                axis: (x: 1, y: 0, z: 0)
-//            )
-//            .onAppear {
-//                motionManager.start()
-//            }
-//            .onDisappear {
-//                motionManager.stop()
-//            }
     }
 }
 

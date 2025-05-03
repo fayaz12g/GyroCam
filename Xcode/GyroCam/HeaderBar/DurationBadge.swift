@@ -5,7 +5,6 @@ struct DurationBadge: View {
     @Binding var currentOrientation: String
     @Binding var showDurationBadge: Bool
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var motionManager = MotionManager()
     
     private var rotationAngle: Angle {
         switch cameraManager.realOrientation {
@@ -64,10 +63,6 @@ struct DurationBadge: View {
                             .stroke(Color.white.opacity(0.35), lineWidth: 0.5)
                     )
                     .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-                    .offset(
-                        x: motionManager.roll * 1.5,
-                        y: motionManager.pitch * 1.5
-                    )
                 
                 // Time components container that rotates as a unit
                 Group {

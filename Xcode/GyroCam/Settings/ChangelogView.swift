@@ -22,19 +22,22 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.1.11",
                             date: "May 1, 2025",
-                            type: .beta(version: 4),
+                            type: .beta(version: 11),
                             changes: [
                                 .init(type: .added, description: "Added WishKit integration for a custom feature wish list."),
                                 .init(type: .added, description: "New profile view to manage a set name and email to be shared with WishKit."),
                                 .init(type: .changed, description: "Adjusted naming of 'Upcoming Features' to 'GitHub Roadmap' to better differentiate the new Wish List View."),
+                                .init(type: .fixed, description: "Fixed haptics not working on rotation after accessing a sheet."),
+                                .init(type: .fixed, description: "Fixed changelog entries all saying beta 4"),
+                                .init(type: .changed, description: "Removed the motion manager"),
                             ],
-                            fixedIssues: []
+                            fixedIssues: [51]
                         )
                         
                         VersionEntry(
                             version: "0.1.10",
                             date: "April 30, 2025",
-                            type: .beta(version: 4),
+                            type: .beta(version: 10),
                             changes: [
                                 .init(type: .added, description: "The camera and microphone no longer remain in use with the settings menu and photo library views open."),
                                 .init(type: .fixed, description: "Addressed a bug where the new permissions page in settings used the wrong user color."),
@@ -62,7 +65,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.1.9",
                             date: "April 28, 2025",
-                            type: .beta(version: 4),
+                            type: .beta(version: 9),
                             changes: [
                                 .init(type: .fixed, description: "Concurrent exports now support the proper orientation handling."),
                                 .init(type: .added, description: "Failed exports can now be restarted."),
@@ -89,7 +92,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.1.8",
                             date: "April 23, 2025",
-                            type: .beta(version: 4),
+                            type: .beta(version: 8),
                             changes: [
                                 .init(type: .added, description: "Implemented a customizable haptic on orientation change."),
                                 .init(type: .fixed, description: "Fixed an issue in the capture tab causing the reset defaults button to become inaccessible."),
@@ -109,7 +112,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.1.7",
                             date: "March 31, 2025",
-                            type: .beta(version: 4),
+                            type: .beta(version: 7),
                             changes: [
                                 .init(type: .changed, description: "Restored badge fonts and settings circle"),
                                 .init(type: .changed, description: "Updated bars to have the new glassy circles"),
@@ -128,7 +131,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.1.6",
                             date: "March 31, 2025",
-                            type: .beta(version: 4),
+                            type: .beta(version: 6),
                             changes: [
                                 .init(type: .fixed, description: "Restored accent color customization"),
                                 .init(type: .fixed, description: "Fixed a bug where the last clip is alwasys upside down"),
@@ -192,6 +195,22 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "Implemented basic video recording functionality"),
                                 .init(type: .added, description: "Added camera controls and settings"),
                                 .init(type: .added, description: "Introduced user interface elements")
+                            ]
+                        )
+                        
+                        VersionEntry(
+                            version: "0.1.2",
+                            date: "IDK",
+                            type: .beta(version: 2),
+                            changes: [
+                            ]
+                        )
+                        
+                        VersionEntry(
+                            version: "0.1.1",
+                            date: "IDK",
+                            type: .beta(version: 1),
+                            changes: [
                             ]
                         )
                     }

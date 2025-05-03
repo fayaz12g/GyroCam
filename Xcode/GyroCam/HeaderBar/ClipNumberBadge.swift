@@ -6,7 +6,6 @@ struct ClipNumberBadge: View {
     @Binding var realOrientation: String
     @Binding var showClipBadge: Bool
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var motionManager = MotionManager()
     
     private var rotationAngle: Angle {
         switch realOrientation {
@@ -44,20 +43,12 @@ struct ClipNumberBadge: View {
                                 .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
                         )
                         .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-                        .offset(
-                            x: motionManager.roll * 1.5,
-                            y: motionManager.pitch * 1.5
-                        )
                     
                     // Text layer - moves slightly more to create parallax
                     Text("Clip #\(number)")
                         .font(.title3.bold())
 //                        .fontWidth(.condensed)
                         .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .offset(
-                            x: motionManager.roll * 1.6,
-                            y: motionManager.pitch * 1.6
-                        )
                         .shadow(color: colorScheme == .dark ? Color.white.opacity(0.2) : Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
                 }
                 .frame(width: rotationAngle != .zero ? 75 : 75, height: rotationAngle != .zero ? 35 : 35)
@@ -76,12 +67,6 @@ struct ClipNumberBadge: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: realOrientation)
-        .onAppear {
-            motionManager.start()
-        }
-        .onDisappear {
-            motionManager.stop()
-        }
     }
 }
 
