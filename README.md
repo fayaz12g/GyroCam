@@ -1,7 +1,7 @@
 <div align="center">
   <img src="images/main_dark.png" width="200" height="200" alt="GyroCam Logo">
   <img src="images/main_light.png" width="200" height="200" alt="GyroCam Logo">
-  <div>GyroCam</div>
+  <div style="font-size: 2em; font-weight: bold; color: #333; font-family: sans-serif; margin-top: 10px;">GyroCam</div>
   <br />
 </div>
 
