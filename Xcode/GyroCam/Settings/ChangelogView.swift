@@ -25,7 +25,8 @@ struct ChangelogView: View {
                             date: "May 5, 2025",
                             type: .beta(version: 12),
                             changes: [
-                                .init(type: .added, description: "Updated the app icon."),
+                                .init(type: .improved, description: "Updated the app icon."),
+                                .init(type: .improved, description: "Updated the versioning information and names for initial betas (matched on the webpage too)."),
                             ],
                             fixedIssues: []
                         )
@@ -37,7 +38,7 @@ struct ChangelogView: View {
                             changes: [
                                 .init(type: .added, description: "Added WishKit integration for a custom feature wish list."),
                                 .init(type: .added, description: "New profile view to manage a set name and email to be shared with WishKit."),
-                                .init(type: .changed, description: "Adjusted naming of 'Upcoming Features' to 'GitHub Roadmap' to better differentiate the new Wish List View."),
+                                .init(type: .improved, description: "Adjusted naming of 'Upcoming Features' to 'GitHub Roadmap' to better differentiate the new Wish List View."),
                                 .init(type: .fixed, description: "Fixed haptics not working on rotation after accessing a sheet."),
                                 .init(type: .fixed, description: "Fixed changelog entries all saying beta 4"),
                                 .init(type: .changed, description: "Removed the motion manager"),
@@ -49,7 +50,7 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Fixed non stitched clips saving in the incorrect orientation"),
                                 .init(type: .added, description: "Added triggering for stopping and starting recording with volume up or down (optional)"),
                                 .init(type: .added, description: "The entire permissions row is now clickable and has a background to match other ui elements."),
-                                .init(type: .changed, description: "The GitHub roadmap page has been revamped"),
+                                .init(type: .improved, description: "The GitHub roadmap page has been revamped"),
                             ],
                             fixedIssues: [46, 49, 50, 51, 53, 55, 56]
                         )
@@ -61,8 +62,8 @@ struct ChangelogView: View {
                             changes: [
                                 .init(type: .added, description: "The camera and microphone no longer remain in use with the settings menu and photo library views open."),
                                 .init(type: .fixed, description: "Addressed a bug where the new permissions page in settings used the wrong user color."),
-                                .init(type: .changed, description: "Adjusted badges in the privacy policy view to use the primary color."),
-                                .init(type: .changed, description: "Added notification usage descriptions to the privacy policy."),
+                                .init(type: .improved, description: "Adjusted badges in the privacy policy view to use the primary color."),
+                                .init(type: .improved, description: "Added notification usage descriptions to the privacy policy."),
                                 .init(type: .changed, description: "Settings Contrast renamed to Settings Backgrounds."),
                                 .init(type: .added, description: "Settings can now be toggled between a sheet and full screen cover."),
                                 .init(type: .added, description: "Added a new developer mode, which shows more settings"),
@@ -71,7 +72,7 @@ struct ChangelogView: View {
                                 .init(type: .changed, description: "Reordered the pulsing recording effect to be behind the stop button (now that they're different colors)."),
                                 .init(type: .added, description: "Added an option to disable the recording pulse"),
                                 .init(type: .fixed, description: "Removed old code for focal adjustments."),
-                                .init(type: .fixed, description: "The quick lens switcher now orients properly based on real orientation."),
+                                .init(type: .improved, description: "The quick lens switcher now orients properly based on real orientation."),
                                 .init(type: .changed, description: "The ISO bar has been updated to have the new UI of the focus bar, including tap to switch to auto exposure, and moving the ISO thumb with value changes."),
                                 .init(type: .changed, description: "Manual ISO in settings is now more obvious with a header and uses the new GyroScroll"),
                                 .init(type: .fixed, description: "Removed all warnings (again)"),
@@ -90,7 +91,7 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Concurrent exports now support the proper orientation handling."),
                                 .init(type: .added, description: "Failed exports can now be restarted."),
                                 .init(type: .fixed, description: "Junk from failed exports can now be purged."),
-                                .init(type: .changed, description: "The exports sheet now remains showing exports across force quitting the app."),
+                                .init(type: .improved, description: "The exports sheet now remains showing exports across force quitting the app."),
                                 .init(type: .changed, description: "Many internal overhauls to the system that handles mapping orientation changes to URLs."),
                                 .init(type: .added, description: "Notifications are now delivered upon successful exports."),
                                 .init(type: .added, description: "Notifications can be allowed or skipped in onboarding, and configured later in settings."),
@@ -103,8 +104,8 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Fixed an incorrect SF Symbol in the Privacy Policy."),
                                 .init(type: .added, description: "Introduced a new color option: Primary Color"),
                                 .init(type: .fixed, description: "The focus bar updates position correctly in auto focus now, and has a better ring."),
-                                .init(type: .changed, description: "Privacy policy now conforms to accent color."),
-                                .init(type: .changed, description: "Settings backgrounds now conforms to primary color."),
+                                .init(type: .improved, description: "Privacy policy now conforms to accent color."),
+                                .init(type: .improved, description: "Settings backgrounds now conforms to primary color."),
                             ],
                             fixedIssues: [45, 47]
                         )
@@ -200,10 +201,10 @@ struct ChangelogView: View {
                             date: "March 2, 2025",
                             type: .beta(version: 4),
                             changes: [
-                                .init(type: .added, description: "Added support for multiple video orientations"),
-                                .init(type: .improved, description: "Enhanced video stitching process"),
-                                .init(type: .fixed, description: "Resolved issues with segment recording"),
-                                .init(type: .added, description: "Introduced orientation badges and controls")
+                                .init(type: .added, description: "A new Duration badge shows how long you've been recording for."),
+                                .init(type: .improved, description: "The duration badge changes the text color based on the backing accent color brightness."),
+                                .init(type: .changed, description: "Orientation Header renamed to 'orientation badge' in the code."),
+                                .init(type: .added, description: "The record saving button shows clip duration as a percentage increasing. It hangs add 100% till complete.")
                             ]
                         )
                         
@@ -212,37 +213,35 @@ struct ChangelogView: View {
                             date: "February 25, 2025",
                             type: .beta(version: 3),
                             changes: [
-                                .init(type: .added, description: "Implemented basic video recording functionality"),
-                                .init(type: .added, description: "Added camera controls and settings"),
-                                .init(type: .added, description: "Introduced user interface elements")
+                                .init(type: .added, description: "New feature selection for export quality, though I always recommend the highest for HDR or 60FPS. This significantly increases export speed though."),
+                                .init(type: .added, description: "Updated versioning naming conventions to match the new one throughout the changelog."),
+                                .init(type: .added, description: "Added ISO control, and toggling auto exposure off works now."),
+                                .init(type: .added, description: "Stitching can now take place in the background, including if you lock your phone!"),
+                                .init(type: .added, description: "In Lock Landscape, badges now rotate to show you everything upright."),
+                                .init(type: .added, description: "The above change also applies to the photo thumbnail and bar circles."),
+                                .init(type: .added, description: "A new ISO bar exists that works when auto exposure is off."),
                             ]
                         )
                         
                         VersionEntry(
                             version: "0.1.2",
-                            date: "IDK",
+                            date: "February 23, 2025",
                             type: .beta(version: 2),
                             changes: [
+                                .init(type: .added, description: "Added a new looping sound when saving stitched video."),
+                                .init(type: .added, description: "A new double timer counts down while saving to show progress."),
+                                .init(type: .added, description: "Added haptics to record button, settings button, toggles, photo library button, and saving loop."),
+                                .init(type: .added, description: "For now haptics require you to interact with the record button first. A better solution will be implemented later."),
+                                .init(type: .added, description: "Added a setting to turn haptics off."),
+                                .init(type: .added, description: "Added a setting to turn sounds off."),
+                                .init(type: .added, description: "Brought the app into Beta releases."),
                             ]
                         )
                         
                         VersionEntry(
                             version: "0.1.1",
-                            date: "IDK",
-                            type: .beta(version: 1),
-                            changes: [
-                            ]
-                        )
-                    }
-                    
-                    // Alpha Releases Section
-                    SectionHeader(title: "Alpha Releases")
-                    
-                    VStack(spacing: 20) {
-                        VersionEntry(
-                            version: "0.1.0",
                             date: "February 22, 2025",
-                            type: .alpha(version: 16),
+                            type: .beta(version: 1),
                             changes: [
                                 .init(type: .added, description: "Videos now save with appropriate GRC filenames"),
                                 .init(type: .added, description: "Saved videos now contain location metadata"),
@@ -250,11 +249,17 @@ struct ChangelogView: View {
                                 .init(type: .improved, description: "Adjusted badge locations")
                             ]
                         )
-                        
+                    }
+                    
+                    
+                    // Alpha Releases Section
+                    SectionHeader(title: "Alpha Releases")
+                
+                    VStack(spacing: 20) {
                         VersionEntry(
                             version: "0.0.16",
                             date: "February 21, 2025",
-                            type: .alpha(version: 15),
+                            type: .alpha(version: 16),
                             changes: [
                                 .init(type: .improved, description: "Restructured onboarding with titles and sub bullets"),
                                 .init(type: .fixed, description: "Fixed finish button not working after reinstating privileges"),
@@ -267,7 +272,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.15",
                             date: "February 21, 2025",
-                            type: .alpha(version: 14),
+                            type: .alpha(version: 15),
                             changes: [
                                 .init(type: .added, description: "Focus bar with tappable circle handle for auto focus"),
                                 .init(type: .added, description: "Stabilization options in settings"),
@@ -280,7 +285,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.14",
                             date: "February 20, 2025",
-                            type: .alpha(version: 13),
+                            type: .alpha(version: 14),
                             changes: [
                                 .init(type: .improved, description: "Major restructure of settings view"),
                                 .init(type: .added, description: "New 'about' submenu with version info"),
@@ -293,7 +298,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.13",
                             date: "February 20, 2025",
-                            type: .alpha(version: 12),
+                            type: .alpha(version: 13),
                             changes: [
                                 .init(type: .added, description: "New camera gestures for focus and lens switching"),
                                 .init(type: .improved, description: "Enhanced recording pulse effect"),
@@ -306,7 +311,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.12",
                             date: "February 20, 2025",
-                            type: .alpha(version: 11),
+                            type: .alpha(version: 12),
                             changes: [
                                 .init(type: .improved, description: "Updated app logo design"),
                                 .init(type: .added, description: "Context menu for orientation badge"),
@@ -319,7 +324,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.11",
                             date: "February 20, 2025",
-                            type: .alpha(version: 10),
+                            type: .alpha(version: 11),
                             changes: [
                                 .init(type: .added, description: "Onboarding screen with centralized permissions"),
                                 .init(type: .added, description: "Landscape Lock feature"),
@@ -332,7 +337,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.10",
                             date: "February 19, 2025",
-                            type: .alpha(version: 9),
+                            type: .alpha(version: 10),
                             changes: [
                                 .init(type: .added, description: "Zoom Bar beta feature"),
                                 .init(type: .added, description: "Auto stitch beta feature"),
@@ -344,7 +349,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.9",
                             date: "February 4, 2025",
-                            type: .alpha(version: 8),
+                            type: .alpha(version: 9),
                             changes: [
                                 .init(type: .added, description: "New settings for aspect ratio and badges"),
                                 .init(type: .improved, description: "Re-centered quick settings"),
@@ -356,7 +361,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.8",
                             date: "February 3, 2025",
-                            type: .alpha(version: 7),
+                            type: .alpha(version: 8),
                             changes: [
                                 .init(type: .improved, description: "Enhanced settings accessibility"),
                                 .init(type: .added, description: "Stock recording sound effect"),
@@ -369,7 +374,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.7",
                             date: "February 1, 2025",
-                            type: .alpha(version: 6),
+                            type: .alpha(version: 7),
                             changes: [
                                 .init(type: .changed, description: "Replaced settings gear with ellipsis"),
                                 .init(type: .added, description: "iPad compatibility"),
@@ -381,7 +386,7 @@ struct ChangelogView: View {
                         VersionEntry(
                             version: "0.0.6",
                             date: "Janruary 31, 2025",
-                            type: .alpha(version: 5),
+                            type: .alpha(version: 6),
                             changes: [
                                 .init(type: .added, description: "Custom accent color theming"),
                                 .init(type: .added, description: "Preview controls and zoom slider"),
@@ -458,6 +463,7 @@ struct ChangelogView: View {
                         )
                     }
                 }
+        
                 
                 .padding()
             }
