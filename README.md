@@ -1,7 +1,7 @@
 # GyroCam
 
 <div align="center">
-  <img src="favicon/web-app-manifest-512x512.png" width="200" height="200" alt="GyroCam Logo">
+  <img src="images/main_dark.png" width="200" height="200" alt="GyroCam Logo">
 </div>
 
 **The Smart Orientation-Conscious Camera App**  
