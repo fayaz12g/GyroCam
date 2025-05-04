@@ -19,6 +19,17 @@ struct ChangelogView: View {
                     
                     VStack(spacing: 20) {
                         
+                        
+                        VersionEntry(
+                            version: "0.1.12",
+                            date: "May 5, 2025",
+                            type: .beta(version: 12),
+                            changes: [
+                                .init(type: .added, description: "Updated the app icon."),
+                            ],
+                            fixedIssues: []
+                        )
+                        
                         VersionEntry(
                             version: "0.1.11",
                             date: "May 4, 2025",
@@ -37,7 +48,7 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Lock landscape no longer starts with portrait"),
                                 .init(type: .fixed, description: "Fixed non stitched clips saving in the incorrect orientation"),
                                 .init(type: .added, description: "Added triggering for stopping and starting recording with volume up or down (optional)"),
-                                .init(type: .added, description: "The entire permissions row is now cllickable and has a background to match other ui elements."),
+                                .init(type: .added, description: "The entire permissions row is now clickable and has a background to match other ui elements."),
                                 .init(type: .changed, description: "The GitHub roadmap page has been revamped"),
                             ],
                             fixedIssues: [46, 49, 50, 51, 53, 55, 56]
