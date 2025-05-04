@@ -2,6 +2,160 @@
 
 ## Beta Releases
 
+### Beta 12 (0.1.12)
+
+- **What's New**
+  - Updated the app icon.
+
+- **Fixed GitHub Issues**
+  - *(None)*
+
+### Beta 11 (0.1.11)
+
+- **What's New**
+  - Added WishKit integration for a custom feature wish list.
+  - New profile view to manage a set name and email to be shared with WishKit.
+  - Adjusted naming of "Upcoming Features" to "GitHub Roadmap" to better differentiate the new Wish List View.
+  - Fixed haptics not working on rotation after accessing a sheet.
+  - Fixed changelog entries all saying beta 4.
+  - Removed the motion manager.
+  - The app no longer crashes on startup due to async calls.
+  - Camera, motion, and haptics are now killed when the app is not in focus (and restarted when back in focus).
+  - Added an option to disable real orientation display of UI.
+  - Segmented picker now uses correct text color.
+  - Lock landscape no longer starts with portrait.
+  - Fixed non-stitched clips saving in the incorrect orientation.
+  - Added triggering for stopping and starting recording with volume up or down (optional).
+  - The entire permissions row is now clickable and has a background to match other UI elements.
+  - The GitHub roadmap page has been revamped.
+
+- **Fixed GitHub Issues**
+  - [46](https://github.com/fayaz12g/GyroCam/issues/46)
+  - [49](https://github.com/fayaz12g/GyroCam/issues/49)
+  - [50](https://github.com/fayaz12g/GyroCam/issues/50)
+  - [51](https://github.com/fayaz12g/GyroCam/issues/51)
+  - [53](https://github.com/fayaz12g/GyroCam/issues/53)
+  - [55](https://github.com/fayaz12g/GyroCam/issues/55)
+  - [56](https://github.com/fayaz12g/GyroCam/issues/56)
+
+### Beta 10 (0.1.10)
+
+- **What's New**
+  - The camera and microphone no longer remain in use with the settings menu and photo library views open.
+  - Addressed a bug where the new permissions page in settings used the wrong user color.
+  - Adjusted badges in the privacy policy view to use the primary color.
+  - Added notification usage descriptions to the privacy policy.
+  - Settings Contrast renamed to Settings Backgrounds.
+  - Settings can now be toggled between a sheet and full screen cover.
+  - Added a new developer mode, which shows more settings.
+  - Moved the settings sheet toggle, hide export sheet duration, and allow recording while saving options behind developer mode.
+  - Updated the saving dots view to use an accurate export percentage.
+  - Reordered the pulsing recording effect to be behind the stop button (now that they're different colors).
+  - Added an option to disable the recording pulse.
+  - Removed old code for focal adjustments.
+  - The quick lens switcher now orients properly based on real orientation.
+  - The ISO bar has been updated to have the new UI of the focus bar, including tap to switch to auto exposure, and moving the ISO thumb with value changes.
+  - Manual ISO in settings is now more obvious with a header and uses the new GyroScroll.
+  - Removed all warnings (again).
+  - Renamed hardcoded 3x in quick lens switcher to "tele". May change to real number later.
+  - Fixed an issue where returning from onboarding made the background show the camera.
+  - Having settings backgrounds off now results in a whiter white or blacker black regardless of sheet or full screen cover.
+
+- **Fixed GitHub Issues**
+  - [32](https://github.com/fayaz12g/GyroCam/issues/32)
+  - [33](https://github.com/fayaz12g/GyroCam/issues/33)
+  - [38](https://github.com/fayaz12g/GyroCam/issues/38)
+  - [44](https://github.com/fayaz12g/GyroCam/issues/44)
+  - [48](https://github.com/fayaz12g/GyroCam/issues/48)
+
+### Beta 9 (0.1.9)
+
+- **What's New**
+  - Concurrent exports now support the proper orientation handling.
+  - Failed exports can now be restarted.
+  - Junk from failed exports can now be purged.
+  - The exports sheet now remains showing exports across force quitting the app.
+  - Many internal overhauls to the system that handles mapping orientation changes to URLs.
+  - Notifications are now delivered upon successful exports.
+  - Notifications can be allowed or skipped in onboarding, and configured later in settings.
+  - Animations have been added to the export sheet, with a pulsing progress bar and spinning hourglass.
+  - Slightly updated the about view to have more conformant sizing.
+  - Location privileges are now optional.
+  - Background colors across navigation views are now consistent and conform to in-app contrast settings.
+  - A new misc navigation page for permissions is visible. Accent color only appears when navigated to from settings, with the correct background too.
+  - The background gradient is now a single custom view extension that can be used anywhere. This background indicates subsections of settings.
+  - Fixed an incorrect SF Symbol in the Privacy Policy.
+  - Introduced a new color option: Primary Color.
+  - The focus bar updates position correctly in auto focus now, and has a better ring.
+  - Privacy policy now conforms to accent color.
+  - Settings backgrounds now conform to primary color.
+
+- **Fixed GitHub Issues**
+  - [45](https://github.com/fayaz12g/GyroCam/issues/45)
+  - [47](https://github.com/fayaz12g/GyroCam/issues/47)
+
+### Beta 8 (0.1.8)
+
+- **What's New**
+  - Implemented a customizable haptic on orientation change.
+  - Fixed an issue in the capture tab causing the reset defaults button to become inaccessible.
+  - The duration badge now matches the new glassy UI.
+  - The duration badge is now split into sections with subheadings.
+  - New double dictating how long to close the export sheet after queueing.
+  - The export sheet now animates in and out properly.
+
+- **Fixed GitHub Issues**
+  - *(Add any relevant issues if needed)*
+
+## Version 0.1.7 (Beta 7) — March 31, 2025
+
+**Changed**
+- Restored badge fonts and settings circle
+- Updated bars to have the new glassy circles
+- Restored settings button shape, bigger bolder icon
+- Made the badges have rounded rectangular edges
+- Updated the bars to fit the number better and have descriptors in line with ISO bar
+- Updated the bars to all be the same length
+- Revamped the privacy policy view to match the new about view
+- Updated the gyrocam icon in the about view to match onboarding
+- Reduced animation timings in settings
+
+---
+
+## Version 0.1.6 (Beta 6) — March 31, 2025
+
+**Added**
+- Added a motion manager to create depth with badges
+- New toggle type replacing the old one
+- New control bars category in settings
+- New custom segmented pickers with headings
+
+**Changed**
+- Made the export stack button more modern and moved to a better place
+- Updated the UI of the badges and settings button to have symmetry and match the visionOS-like iOS 19 leaks
+- Update the belt to match this new UI
+- Adjusted the sizing of the clip badge to match the orientation badge
+- Reordered some settings to better fit the new system
+- Reinvented the accent color picker with default presets included
+- Updated the background in the About and Privacy Policy Views
+- Completely revamped the about view to closely resemble the readme
+- Internal name for pickers and toggles are prefixed with `Gyro`
+
+**Fixed**
+- Restored accent color customization
+- Fixed a bug where the last clip is always upside down
+- Fixed a bug making the new QuickSettingsView subtext hard to read
+- Fixed a light mode issue of inconsistent backgrounds in settings
+- Fixed the clipping of toggles on the far right (build 319)
+- Adjusted font color of toggles based on accent color darkness
+- Fixed lock landscape duration badge being blocked by orientation badge in portrait
+
+**Fixed Issues**
+- #41
+- #42
+
+
+
 ### Beta 5 (0.1.5)
 
 - **What's New**
