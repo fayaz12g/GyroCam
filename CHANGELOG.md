@@ -105,9 +105,9 @@
   - The export sheet now animates in and out properly.
 
 - **Fixed GitHub Issues**
-  - *(Add any relevant issues if needed)*
+  - *(None)*
 
-## Version 0.1.7 (Beta 7) — March 31, 2025
+## Beta 7 (0.1.7) =
 
 **Changed**
 - Restored badge fonts and settings circle
@@ -122,7 +122,7 @@
 
 ---
 
-## Version 0.1.6 (Beta 6) — March 31, 2025
+## Beta 6 (0.1.6) 
 
 **Added**
 - Added a motion manager to create depth with badges
@@ -245,7 +245,7 @@
 
 
 
-### Beta 1
+### Beta 1 (0.1.1)
 
 **Sounds**
 - Added a new looping sound when saving stitched video.
@@ -266,7 +266,7 @@
 
 ## Alpha Releases
 
-### Alpha 016
+### Alpha 016 (0.0.16)
 
 **Video Saving**
 - Videos now save with appropriate GRC filenames.
@@ -278,7 +278,7 @@
 **Other**
 - "Adjusted badge locations
 
-### Alpha 015 
+### Alpha 015 (0.0.15)
 
 ### Onboarding
 - Restructure with titles, sub bullets, and more symbols.
@@ -296,7 +296,7 @@
 - A new saving indicator displays on the recording button.
 
 
-### Alpha 014 
+### Alpha 014 (0.0.14)
 
 **Focus**
 - The focus bar now has a tappable circle handle that turns on auto focus
@@ -317,7 +317,7 @@
 - Updated permissions handling to navigate to settings and open onboarding on revoke
 
   
-### Alpha 013
+### Alpha 013 (0.0.13)
 
 **Changelog**
 - Renamed headers to be more aligned with proper descriptions
@@ -342,7 +342,8 @@
 - Load Latest thumbnail is now called on Photo Library Button after recording is saved
 
 
-### Alpha 012
+### Alpha 012 (0.0.12)
+
 **Added new camera gestures**
 - Drag across the screen to adjust focus while auto focus is off
 - Hold down to switch lenses in a new picker, now in a square format with rotation and device theme conformity
@@ -361,7 +362,8 @@
 - Added animations for the focal bar, zoom bar, and quick settings menu disappearing
 
 
-### Alpha 011
+### Alpha 011 (0.0.11)
+
 - **Logo Update:** Updated the app logo, removing the camera icon for a cleaner look.
 - **Orientation Badge:** Added context menu parity to hide the orientation badge for better UI customization.
 - **Onboarding View:** Refined the onboarding experience with new content describing camera controls to help users understand their functionality.
@@ -373,7 +375,8 @@
 - **Continuous Auto Focus:** Introduced a continuous auto focus system that tracks and adjusts focus automatically.
 - **Auto Exposure Controls:** Added auto exposure control, with manual shutter speed and ISO options available for future functionality (shells only, no active functionality yet).
 
-### Alpha 010
+### Alpha 010 (0.0.10)
+
 **Onboarding**  
 - Unified permissions screen  
 - Adaptive color theming  
@@ -387,7 +390,8 @@
 - iOS 18 minimum requirement  
 - New device-specific app icons  
 
-### Alpha 009
+### Alpha 009 (0.0.9)
+
 **Beta Features**  
 - Zoom Bar (beta release)  
 - Auto-stitch clips (experimental)  
@@ -396,7 +400,8 @@
 - Added privacy policy section  
 - Consolidated camera options  
 
-### Alpha 008
+### Alpha 008 (0.0.8)
+
 **UI Customization**  
 - Preserve Aspect Ratio toggle  
 - Clip/Orientation badge controls  
@@ -407,7 +412,8 @@
 - Settings button direct access  
 - Face up/down orientation support  
 
-### Alpha 007
+### Alpha 007 (0.0.7)
+
 **Audio/Visual**  
 - Added recording sound effects  
 - New rainbow app icon  
@@ -425,7 +431,8 @@
 - iOS 17 support baseline  
 - Device-based lens detection  
 
-### Alpha 005
+### Alpha 005 (0.0.5)
+
 **Customization**  
 - Dynamic accent color theming  
 - Preview size toggle  
@@ -434,7 +441,8 @@
 - Background video processing  
 - Redesigned record button  
 
-### Alpha 004
+### Alpha 004 (0.0.4)
+
 **Feature Foundation**  
 - Complete Quick Settings panel  
 - Photo library integration  
@@ -446,17 +454,20 @@
 
 ## Internal Builds
 
-### Alpha 003
+### Alpha 003 (0.0.3)
+
 - Double-tap lens switching  
 - Dynamic UI color schemes  
 - Recording status indicators  
 
-### Alpha 002
+### Alpha 002 (0.0.2)
+
 - Animated iOS-style record button  
 - System-wide dark/light mode  
 - Persistent orientation headers  
 
-### Alpha 001
+### Alpha 001 (0.0.1)
+
 - 4K/1080p resolution support  
 - Front camera implementation  
 - 60FPS default recording  
