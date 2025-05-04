@@ -11,14 +11,74 @@ struct GitHubIssueDetails: Identifiable, Decodable {
     let id: Int
     let number: Int
     let title: String
+    let body: String?
     let labels: [GitHubLabel]
     let state: String
     let html_url: String
+    let created_at: String
+    let updated_at: String
+    let user: GitHubUser
+    let comments: Int
+    
+    var sanitizedBody: String? {
+        guard let raw = body else { return "" }
+
+        var text = raw
+
+        // 1) Remove any block starting with ### up to the next blank line (or end-of-string)
+        //    This uses a DOT-ALL, MULTILINE regex to capture the header and following lines.
+        text = text.replacingOccurrences(
+          of: #"(?ms)^### .*?(?=\n\s*\n|$)"#,
+          with: "",
+          options: .regularExpression
+        )
+
+        // 2) Remove any italicized “No response” (e.g. *No response* or _No response_)
+        text = text.replacingOccurrences(
+          of: #"[_*]No response[_*]"#,
+          with: "",
+          options: .regularExpression
+        )
+
+        // 3) Collapse any double-newlines left behind, and trim whitespace
+        text = text
+          .replacingOccurrences(of: #"\n{2,}"#, with: "\n\n", options: .regularExpression)
+          .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return text
+      }
     
     var cleanTitle: String {
         title.replacingOccurrences(of: "\\[Feature Request\\]\\s*", with: "", options: .regularExpression)
              .replacingOccurrences(of: "\\[BUG\\]\\s*", with: "", options: .regularExpression)
              .trimmingCharacters(in: .whitespaces)
+    }
+    
+    var formattedCreatedDate: String {
+        formatDate(created_at)
+    }
+    
+    var formattedUpdatedDate: String {
+        formatDate(updated_at)
+    }
+    
+    var issueType: FeatureType {
+        labels.contains { $0.name == "bug" } ? .bug : .enhancement
+    }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        
+        guard let date = formatter.date(from: dateString) else {
+            return dateString
+        }
+        
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateStyle = .medium
+        displayFormatter.timeStyle = .short
+        
+        return displayFormatter.string(from: date)
     }
 }
 
@@ -154,10 +214,14 @@ struct FeatureGroup: View {
                             .font(.subheadline)
                             .foregroundColor(color)
                         
-                        Text(issue.cleanTitle)
-                            .font(.subheadline)
+                        VStack(alignment: .leading, spacing: 4) {
+                          Text(issue.cleanTitle)
+                            .font(.headline)
                             .foregroundColor(.primary)
-                            .lineLimit(1)
+                            .lineLimit(isExpanded ? nil : 2)
+
+                        }
+
                     }
                 }
                 .padding(.leading, 4)
@@ -184,7 +248,11 @@ struct FeatureGroup: View {
             }
         } catch {
             await MainActor.run {
-                self.error = "Failed to load issues: \(error.localizedDescription)"
+                let nsError = error as NSError
+                self.error = """
+                Decoding failed: \(nsError.localizedDescription)
+                – CodingPath: \(nsError.userInfo[NSDebugDescriptionErrorKey] ?? "")
+                """
                 self.isLoading = false
             }
         }
