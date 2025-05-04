@@ -24,6 +24,8 @@ struct CameraPreview: UIViewRepresentable {
         previewLayer.connection?.videoRotationAngle = 0
         previewLayer.frame = view.bounds
         view.layer.addSublayer(previewLayer)
+        previewLayer.wantsExtendedDynamicRangeContent = cameraManager.isHDREnabled
+        
         
         if let connection = previewLayer.connection, connection.isVideoStabilizationSupported {
             switch cameraManager.stabilizeVideo {
@@ -382,12 +384,12 @@ struct CameraPreview: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         context.coordinator.colorScheme = colorScheme
         
-        // Always operate on main thread
         DispatchQueue.main.async {
             guard let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer else { return }
             
             previewLayer.videoGravity = cameraManager.maximizePreview ? .resizeAspectFill : .resizeAspect
             previewLayer.frame = uiView.bounds
+            previewLayer.wantsExtendedDynamicRangeContent = cameraManager.isHDREnabled
             
             // Remove existing blur views
             uiView.subviews

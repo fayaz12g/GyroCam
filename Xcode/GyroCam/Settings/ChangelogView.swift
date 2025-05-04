@@ -36,8 +36,9 @@ struct ChangelogView: View {
                                 .init(type: .added, description: "Segmented picker now uses correct text color"),
                                 .init(type: .fixed, description: "Lock landscape no longer starts with portrait"),
                                 .init(type: .fixed, description: "Fixed non stitched clips saving in the incorrect orientation"),
+                                .init(type: .added, description: "Added triggering for stopping and starting recording with volume up or down (optional)"),
                             ],
-                            fixedIssues: [51]
+                            fixedIssues: [46, 51]
                         )
                         
                         VersionEntry(

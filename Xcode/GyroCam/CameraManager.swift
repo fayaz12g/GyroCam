@@ -110,6 +110,11 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.lockLandscape = newValue }
     }
     
+    @MainActor var volumeRecord: Bool {
+        get { settings.volumeRecord }
+        set { settings.volumeRecord = newValue }
+    }
+    
     @MainActor var useBlurredBackground: Bool {
         get { settings.useBlurredBackground }
         set { settings.useBlurredBackground = newValue }
@@ -1023,7 +1028,9 @@ class CameraManager: NSObject, ObservableObject {
     @MainActor
     public func startSession() {
         guard !session.isRunning else { return }
-        self.session.startRunning()
+        Task.detached { [session] in
+            session.startRunning()
+        }
         
     }
     
@@ -1138,6 +1145,10 @@ class CameraManager: NSObject, ObservableObject {
         
         let targetFormat = try findBestFormat(for: device)
         device.activeFormat = targetFormat
+        
+        if isHDREnabled && targetFormat.supportedColorSpaces.contains(.HLG_BT2020) {
+                device.activeColorSpace = .HLG_BT2020
+            }
         
         // Get supported frame rate ranges for the active format
         let supportedRanges = targetFormat.videoSupportedFrameRateRanges
@@ -1267,6 +1278,7 @@ class CameraManager: NSObject, ObservableObject {
                 var e = exp
                 if !e.isCompleted {
                     e.errorMessage = e.errorMessage ?? "Export interrupted"
+                    self.restartExport(e)
                 }
                 return e
             }

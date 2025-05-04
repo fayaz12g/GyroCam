@@ -3,7 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var permissionsManager = PermissionsManager()
     @StateObject private var cameraManager = CameraManager()
-    
+
     @State private var focusValue: Float = 0.5
     @State private var clipNumber = 1
     @State private var showOnboarding = !UserDefaults.standard.bool(forKey: "hasSeenOnboarding")

@@ -616,6 +616,40 @@ struct CaptureSettingsTab: View {
                 }
                 
                 ModernSettingRow(
+                    title: "Interactions",
+                    description: "Adjust quick settings and other interactions",
+                    icon: "hand.point.up",
+                    iconColor: .teal,
+                    isExpanded: .init(
+                        get: { expandedSection == "interaction" },
+                        set: { if $0 { expandedSection = "interaction" } else { expandedSection = nil } }
+                    )
+                ) {
+                    VStack(spacing: 16) {
+            
+                        GyroToggle(isOn: $cameraManager.volumeRecord,
+                                label: "Volume Button Triggers Recording",
+                                accentColor: cameraManager.accentColor)
+                        
+                        NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
+                            SettingsRow(
+                                title: "QuickSettingsBar",
+                                icon: "dock.rectangle",
+                                description: "Customize quick actions (coming soon)",
+                                iconColor: .mint
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(colorScheme == .dark ? Color.black.opacity(0.0) : Color.gray.opacity(0.00))
+                    .cornerRadius(12)
+                }
+                
+                ModernSettingRow(
                     title: "Output",
                     description: "Manage orientation and export settings",
                     icon: "list.and.film",

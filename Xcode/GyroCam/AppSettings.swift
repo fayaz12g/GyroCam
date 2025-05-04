@@ -26,6 +26,7 @@ struct AppSettings: Codable {
     var allowRecordingWhileSaving: Bool = true
     var showQuickExport: Bool = false
     var exportSheetDuration = 3.0
+    var volumeRecord: Bool = true
     
     // Camera Settings
     var cameraPosition: AVCaptureDevice.Position = .back

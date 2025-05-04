@@ -107,9 +107,9 @@ struct ControlsView: View {
         }
         .onChange(of: showingSettings) { _, newValue in
             if newValue {
-                cameraManager.stopSession()
+                cameraManager.killThemAll()
             } else {
-                cameraManager.startSession()
+                cameraManager.handleAppDidBecomeActive()
             }
         }
     }

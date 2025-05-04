@@ -49,11 +49,13 @@ struct RecordingButton: View {
                 if isRecording {
                     animate = true
                 }
-                volumeObserver.onVolumeButtonPressed = { pressed in
-                   if pressed {
-                       action()
-                   }
-               }
+                if cameraManager.volumeRecord {
+                    volumeObserver.onVolumeButtonPressed = { pressed in
+                        if pressed {
+                            action()
+                        }
+                    }
+                }
                        
             }
             .onChange(of: isRecording) { _, newValue in

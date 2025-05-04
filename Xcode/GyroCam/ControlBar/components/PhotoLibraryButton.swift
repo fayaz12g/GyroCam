@@ -72,9 +72,9 @@ struct PhotoLibraryButton: View {
         }
         .onChange(of: showingPhotoLibrary) { _, newValue in
             if newValue {
-                cameraManager.stopSession()
+                cameraManager.killThemAll()
             } else {
-                cameraManager.startSession()
+                cameraManager.handleAppDidBecomeActive()
             }
         }
         .onAppear(perform: loadLatestThumbnail)
