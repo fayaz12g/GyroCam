@@ -2,6 +2,7 @@
 
 <div align="center">
   <img src="images/main_dark.png" width="200" height="200" alt="GyroCam Logo">
+  <img src="images/main_light.png" width="200" height="200" alt="GyroCam Logo">
 </div>
 
 **The Smart Orientation-Conscious Camera App**  
