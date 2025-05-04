@@ -8,33 +8,44 @@
 import SwiftUI
 
 struct PermissionRow: View {
-        let title: String
-        let description: String
-        let granted: Bool
-        let action: () -> Void
-        @ObservedObject var cameraManager: CameraManager
-        var isFromSettings: Bool
-        
-        var body: some View {
-            HStack {
-                // Circular Checkbox
-                Button(action: {
-                    if !granted {
-                        action()
-                    }
-                }) {
+    let title: String
+    let description: String
+    let granted: Bool
+    let action: () -> Void
+    @ObservedObject var cameraManager: CameraManager
+    var isFromSettings: Bool
+    
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        Button(action: {
+            if !granted {
+                action()
+            }
+        }) {
+            ZStack {
+                // Background card style
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.5)
+                    )
+                    .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+                
+                HStack(spacing: 12) {
+                    // Circular Checkbox
                     ZStack {
                         Circle()
                             .stroke(granted ? LinearGradient(
                                 gradient: Gradient(colors: isFromSettings ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
-                            ) :  LinearGradient(
+                            ) : LinearGradient(
                                 gradient: Gradient(colors: [.gray]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ), lineWidth: 2)
-                        
                             .frame(width: 30, height: 30)
                         
                         if granted {
@@ -44,30 +55,42 @@ struct PermissionRow: View {
                                         gradient: Gradient(colors: isFromSettings ? [cameraManager.accentColor] : [.red, .orange, .yellow, .green, .blue, .indigo]),
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
-                                    ) :  LinearGradient(
+                                    ) : LinearGradient(
                                         gradient: Gradient(colors: [.clear]),
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
                                 .frame(width: 20, height: 20)
+                                .overlay(
+                                    Group {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .blendMode(.destinationOut) // Mask it out
+                                        }
+                                )
+                                .compositingGroup() 
                         }
                     }
                     
+                    // Permission Details
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .lineLimit(2)
+                    }
+                    
+                    Spacer()
                 }
-                
-                // Permission Details
-                VStack(alignment: .leading) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    Text(description)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .lineLimit(2)
-                }
-                Spacer()
+                .padding()
             }
-            .padding(.horizontal)
         }
+        .buttonStyle(PlainButtonStyle()) // Removes default button tap styling
+        .padding(.horizontal)
     }
+}

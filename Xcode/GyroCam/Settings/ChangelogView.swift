@@ -37,8 +37,9 @@ struct ChangelogView: View {
                                 .init(type: .fixed, description: "Lock landscape no longer starts with portrait"),
                                 .init(type: .fixed, description: "Fixed non stitched clips saving in the incorrect orientation"),
                                 .init(type: .added, description: "Added triggering for stopping and starting recording with volume up or down (optional)"),
+                                .init(type: .added, description: "The entire permissions row is now cllickable and has a background to match other ui elements."),
                             ],
-                            fixedIssues: [46, 51]
+                            fixedIssues: [46, 49, 50, 51, 53, 55]
                         )
                         
                         VersionEntry(
