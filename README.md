@@ -1,9 +1,13 @@
 <div align="center">
+
   <img src="images/main_dark.png" width="200" height="200" alt="GyroCam Logo">
   <img src="images/main_light.png" width="200" height="200" alt="GyroCam Logo">
-  <div style="font-size: 2em; font-weight: bold; color: #333; font-family: sans-serif; margin-top: 10px;">GyroCam</div>
+
+  <h2><strong>GyroCam</strong></h2>
+
   <br />
 </div>
+
 
 **The Smart Orientation-Conscious Camera App**  
 *Never suffer from sideways videos again!*
