@@ -27,6 +27,7 @@ struct ChangelogView: View {
                             changes: [
                                 .init(type: .improved, description: "Updated the app icon."),
                                 .init(type: .improved, description: "Updated the versioning information and names for initial betas (matched on the webpage too)."),
+                                .init(type: .fixed, description: "Fixed cropped descriptions in the permissions page."),
                             ],
                             fixedIssues: []
                         )

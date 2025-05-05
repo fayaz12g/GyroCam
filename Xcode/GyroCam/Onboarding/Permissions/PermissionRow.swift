@@ -67,7 +67,7 @@ struct PermissionRow: View {
                                         Image(systemName: "checkmark")
                                             .font(.system(size: 12, weight: .bold))
                                             .foregroundColor(.white)
-                                            .blendMode(.destinationOut) // Mask it out
+                                            .blendMode(.destinationOut)
                                         }
                                 )
                                 .compositingGroup() 
@@ -82,7 +82,6 @@ struct PermissionRow: View {
                         Text(description)
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                            .lineLimit(2)
                     }
                     
                     Spacer()
@@ -90,7 +89,7 @@ struct PermissionRow: View {
                 .padding()
             }
         }
-        .buttonStyle(PlainButtonStyle()) // Removes default button tap styling
+        .buttonStyle(PlainButtonStyle())
         .padding(.horizontal)
     }
 }
