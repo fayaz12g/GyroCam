@@ -320,15 +320,17 @@ struct InformationSettingsTab: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 
-                NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
-                    SettingsRow(
-                        title: "GitHub Roadmap",
-                        icon: "road.lanes.curved.right",
-                        description: "Preview what's coming next",
-                        iconColor: .mint
-                    )
+                if cameraManager.developerMode {
+                    NavigationLink(destination: UpcomingFeaturesView(cameraManager: cameraManager)) {
+                        SettingsRow(
+                            title: "GitHub Roadmap",
+                            icon: "road.lanes.curved.right",
+                            description: "Preview what's coming next",
+                            iconColor: .mint
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
                 
                 NavigationLink(destination: PermissionsPage(
                    permissionsManager: permissionsManager,
