@@ -1,7 +1,8 @@
 <div align="center">
 
-  <img src="images/main_dark.png" width="200" height="200" alt="GyroCam Logo">
-  <img src="images/main_light.png" width="200" height="200" alt="GyroCam Logo">
+  <img src="images/main_dark.png" width="200" height="200" alt="GyroCam Dark Logo">
+    <img src="images/gyro_trans.png" width="200" height="200" alt="GyroCam Transparent Logo">
+  <img src="images/main_light.png" width="200" height="200" alt="GyroCam Light Logo">
 
   <h2><strong>GyroCam</strong></h2>
 
