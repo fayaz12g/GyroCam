@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "gyro_icon.svg",
+      "filename" : "watermark 1.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "gyro_trans.png",
+      "filename" : "watermark.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "gyro_trans 1.png",
+      "filename" : "watermark 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

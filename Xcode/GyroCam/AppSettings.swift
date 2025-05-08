@@ -39,6 +39,8 @@ struct AppSettings: Codable {
     var sheetSettings: Bool = false
     var developerMode: Bool = false
     var recordingPulse: Bool = true
+    var watermarkVideo: Bool = false
+    var funkyInterface: Bool = false
     
     // Video Settings
     var isSavingVideo: Bool = false

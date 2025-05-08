@@ -100,8 +100,16 @@ struct CustomizationSettingsTab: View {
                                     label: "Settings Backgrounds",
                                     accentColor: cameraManager.accentColor)
                             
+                            GyroToggle(isOn: $cameraManager.funkyInterface,
+                                    label: "Funky Interface",
+                                    accentColor: cameraManager.accentColor)
+                            
                             GyroToggle(isOn: $cameraManager.recordingPulse,
                                     label: "Recording Pulse",
+                                    accentColor: cameraManager.accentColor)
+                            
+                            GyroToggle(isOn: $cameraManager.watermarkVideo,
+                                    label: "Video Watermark",
                                     accentColor: cameraManager.accentColor)
                             
                             

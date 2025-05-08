@@ -160,6 +160,16 @@ class CameraManager: NSObject, ObservableObject {
         set { settings.currentFormat = newValue }
     }
     
+    @MainActor var watermarkVideo: Bool {
+        get { settings.watermarkVideo }
+        set { settings.watermarkVideo = newValue }
+    }
+    
+    @MainActor var funkyInterface: Bool {
+        get { settings.funkyInterface }
+        set { settings.funkyInterface = newValue }
+    }
+    
     @MainActor var currentFPS: FrameRate {
         get { settings.currentFPS }
         set { settings.currentFPS = newValue }
@@ -710,6 +720,60 @@ class CameraManager: NSObject, ObservableObject {
             softwareMetadata.key = AVMetadataKey.commonKeySource as (NSCopying & NSObjectProtocol)?
             softwareMetadata.value = "GyroCam" as (NSCopying & NSObjectProtocol)?
 
+            // Apply watermark (will be for non paid members)
+            if self.watermarkVideo {
+                print("📌 Applying watermark in export function")
+                
+                // Get the first video track to determine size
+                if let firstVideoTrack = composition.tracks(withMediaType: .video).first,
+                   let trackSize = try? await firstVideoTrack.load(.naturalSize) {
+                    
+                    // Create a new layer for the watermark
+                    let watermarkLayer = CALayer()
+                    
+                    if let watermarkImage = UIImage(named: "watermark") {
+                        print("✅ Found watermark image with size: \(watermarkImage.size)")
+                        
+                        watermarkLayer.contents = watermarkImage.cgImage
+                        watermarkLayer.opacity = 0.5
+                        
+                        // Make watermark bigger for visibility
+                        let watermarkSize = CGSize(width: 700, height: 200)
+                        
+                        // Position in bottom right corner
+                        watermarkLayer.frame = CGRect(
+                            x: trackSize.width - watermarkSize.width - 50,
+                            y: 50,
+                            width: watermarkSize.width,
+                            height: watermarkSize.height
+                        )
+                        
+                        // Create parent layer
+                        let parentLayer = CALayer()
+                        parentLayer.frame = CGRect(origin: .zero, size: trackSize)
+                        
+                        // Create video layer
+                        let videoLayer = CALayer()
+                        videoLayer.frame = CGRect(origin: .zero, size: trackSize)
+                        
+                        // Add layers
+                        parentLayer.addSublayer(videoLayer)
+                        parentLayer.addSublayer(watermarkLayer)
+                        
+                        print("📏 Video size: \(trackSize)")
+                        print("📐 Watermark position: \(watermarkLayer.frame)")
+                        
+                        // Apply the watermark with Core Animation Tool
+                        videoComposition.animationTool = AVVideoCompositionCoreAnimationTool(
+                            postProcessingAsVideoLayer: videoLayer,
+                            in: parentLayer
+                        )
+                    } else {
+                        print("❌ Watermark image 'gyro_icon' not found")
+                    }
+                }
+            }
+        
             exporter.outputURL = outputURL
             exporter.outputFileType = .mov
             exporter.videoComposition = videoComposition

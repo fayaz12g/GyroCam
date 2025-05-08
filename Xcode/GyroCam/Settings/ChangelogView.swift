@@ -22,13 +22,15 @@ struct ChangelogView: View {
                         
                         VersionEntry(
                             version: "0.1.12",
-                            date: "May 7, 2025",
+                            date: "May 8, 2025",
                             type: .beta(version: 12),
                             changes: [
                                 .init(type: .improved, description: "Updated the app icon."),
                                 .init(type: .improved, description: "Updated the versioning information and names for initial betas (matched on the webpage too)."),
                                 .init(type: .fixed, description: "Fixed cropped descriptions in the permissions page."),
                                 .init(type: .changed, description: "The GitHub roadmap has been moved behind developer mode."),
+                                .init(type: .added, description: "The option to watermark videos is added. This in the future will require payment to disable."),
+                                .init(type: .added, description: "Funky UI mode is now toggleable in the settings. This will disable the new busy settigns elements."),
                             ],
                             fixedIssues: []
                         )
